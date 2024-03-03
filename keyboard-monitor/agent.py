@@ -31,12 +31,10 @@ class KeyboardMonitor:
 
     def __enter__(self):
         self.listener.__enter__()
-        self.connection.__enter__()
         return self
     
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.connection.__exit__(exc_type, exc_value, traceback)
         self.listener.__exit__(exc_type, exc_value, traceback)
 
 
@@ -64,4 +62,17 @@ class KeyboardMonitor:
 
 if __name__ == '__main__':
     with KeyboardMonitor() as monitor:
-        monitor.listener.join()
+        monitor.connection.execute(sqlalchemy.sql.text("""
+            CREATE TABLE IF NOT EXISTS keyboard_monitor (
+                hits STRING NULL,
+                ts TIMESTAMP(3) NOT NULL,
+                TIME INDEX ("ts")
+            ) ENGINE=mito WITH( regions = 1, ttl = '3months')
+        """))
+        monitor.connection.commit()
+
+        try:
+            monitor.listener.join()
+        except KeyboardInterrupt:
+            print("Exiting...")
+            pass
