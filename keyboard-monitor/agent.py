@@ -30,14 +30,14 @@ class KeyboardMonitor:
 
 
     def __enter__(self):
-        self.listener.__enter__()
-        self.connection.__enter__()
+        self.listener.start()
+        self.listener.wait()
         return self
     
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.connection.__exit__(exc_type, exc_value, traceback)
-        self.listener.__exit__(exc_type, exc_value, traceback)
+        self.listener.stop()
+        self.connection.close()
 
 
     def on_press(self, key):
