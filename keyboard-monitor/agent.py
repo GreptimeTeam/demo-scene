@@ -1,8 +1,11 @@
 from dotenv import load_dotenv
 from pynput import keyboard
 from pynput.keyboard import Key
+
+import logging
 import os
 import sqlalchemy
+import sys
 
 
 MODIFIERS = {
@@ -21,12 +24,15 @@ TABLE = sqlalchemy.Table(
 
 if __name__ == '__main__':
     load_dotenv()
+    logging.basicConfig(filename='agent.log', encoding='utf-8', level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     engine = sqlalchemy.create_engine(os.environ['DATABASE_URL'], echo_pool=True, isolation_level='AUTOCOMMIT')
     current_modifiers = set()
 
     def record_combos(keys):
-        hits = '+'.join(keys); print(hits)
+        hits = '+'.join(keys)
+        logging.info(f'recoding: {hits}')
         with engine.connect() as connection:
             connection.execute(sqlalchemy.insert(TABLE).values(hits=hits, ts=sqlalchemy.func.now()))
 
@@ -35,13 +41,15 @@ if __name__ == '__main__':
             current_modifiers.add(key)
         else:
             record_combos(sorted([ str(key) for key in current_modifiers ]) + [ str(key) ])
+        logging.debug(f'{key} pressed, current_modifiers: {current_modifiers}')
 
     def on_release(key):
         if key in MODIFIERS:
             try:
                 current_modifiers.remove(key)
             except KeyError:
-                print(f'Key {key} not in current_modifiers {current_modifiers}')
+                logging.warn(f'Key {key} not in current_modifiers {current_modifiers}')
+        logging.debug(f'{key} released, current_modifiers: {current_modifiers}')
 
     with engine.connect() as connection:
         connection.execute(sqlalchemy.sql.text("""
@@ -56,4 +64,4 @@ if __name__ == '__main__':
         try:
             listener.join()
         except KeyboardInterrupt:
-            print("Exiting...")
+            logging.info("Exiting...")
