@@ -62,6 +62,15 @@ class KeyboardMonitor:
 
 if __name__ == '__main__':
     with KeyboardMonitor() as monitor:
+        monitor.connection.execute(sqlalchemy.sql.text("""
+            CREATE TABLE IF NOT EXISTS keyboard_monitor (
+                hits STRING NULL,
+                ts TIMESTAMP(3) NOT NULL,
+                TIME INDEX ("ts")
+            ) ENGINE=mito WITH( regions = 1, ttl = '3months')
+        """))
+        monitor.connection.commit()
+
         try:
             monitor.listener.join()
         except KeyboardInterrupt:

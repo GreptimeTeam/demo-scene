@@ -10,12 +10,7 @@ pip3 install -r requirements.txt
 
 1. Obtain a free Greptime service from [GreptimeCloud](https://console.greptime.cloud/). 
 2. Go to the "Connect" tab and find the connection string.
-3. Connect to the service with MySQL client, and create the table:
-    ```sql
-    CREATE TABLE IF NOT EXISTS keyboard_monitor(hits STRING, ts TIMESTAMP TIME INDEX);
-    TRUNCATE TABLE keyboard_monitor;
-    ```
-4. Copy `.env.example` to `.env` and set the connection string.
+3. Copy `.env.example` to `.env` and set the connection string.
 
 ## Step 3: Start keyboard monitor
 
