@@ -4,8 +4,10 @@ from pynput.keyboard import Key
 
 import logging
 import os
+import queue
 import sqlalchemy
 import sys
+import threading
 
 
 MODIFIERS = {
@@ -29,12 +31,20 @@ if __name__ == '__main__':
 
     engine = sqlalchemy.create_engine(os.environ['DATABASE_URL'], echo_pool=True, isolation_level='AUTOCOMMIT')
     current_modifiers = set()
+    pending_hits = queue.Queue()
+
+    def send_hits():
+        while True:
+            with engine.connect() as connection:
+                hits = pending_hits.get()
+                connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
+
+    threading.Thread(target=send_hits, daemon=True).start()
 
     def record_combos(keys):
         hits = '+'.join(keys)
         logging.info(f'recoding: {hits}')
-        with engine.connect() as connection:
-            connection.execute(sqlalchemy.insert(TABLE).values(hits=hits, ts=sqlalchemy.func.now()))
+        pending_hits.put(hits)
 
     def on_press(key):
         if key in MODIFIERS:
