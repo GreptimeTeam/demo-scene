@@ -1,0 +1,4 @@
+mysqlclient
+pynput
+python-dotenv
+sqlalchemy

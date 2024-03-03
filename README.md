@@ -1,2 +1,3 @@
-# demo-scene
+# Demo Scene
+
 Scripts and samples to support Greptime Demos and Talks. Might be rough around the edges ;-)
