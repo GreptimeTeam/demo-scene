@@ -26,8 +26,18 @@ TABLE = sqlalchemy.Table(
 
 if __name__ == '__main__':
     load_dotenv()
-    logging.basicConfig(filename='agent.log', encoding='utf-8', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
+    log = logging.getLogger("agent")
+    log.setLevel(logging.DEBUG)
+
+    file_handler = logging.FileHandler('agent.log', encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)
+
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(logging.INFO)
+
+    log.addHandler(file_handler)
+    log.addHandler(stdout_handler)
 
     engine = sqlalchemy.create_engine(os.environ['DATABASE_URL'], echo_pool=True, isolation_level='AUTOCOMMIT')
     current_modifiers = set()
@@ -37,13 +47,14 @@ if __name__ == '__main__':
         while True:
             with engine.connect() as connection:
                 hits = pending_hits.get()
+                log.debug(f'sending: {hits}')
                 connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
 
     threading.Thread(target=send_hits, daemon=True).start()
 
     def record_combos(keys):
         hits = '+'.join(keys)
-        logging.info(f'recoding: {hits}')
+        log.info(f'recoding: {hits}')
         pending_hits.put(hits)
 
     def on_press(key):
@@ -51,15 +62,15 @@ if __name__ == '__main__':
             current_modifiers.add(key)
         else:
             record_combos(sorted([ str(key) for key in current_modifiers ]) + [ str(key) ])
-        logging.debug(f'{key} pressed, current_modifiers: {current_modifiers}')
+        log.debug(f'{key} pressed, current_modifiers: {current_modifiers}')
 
     def on_release(key):
         if key in MODIFIERS:
             try:
                 current_modifiers.remove(key)
             except KeyError:
-                logging.warn(f'Key {key} not in current_modifiers {current_modifiers}')
-        logging.debug(f'{key} released, current_modifiers: {current_modifiers}')
+                log.warn(f'Key {key} not in current_modifiers {current_modifiers}')
+        log.debug(f'{key} released, current_modifiers: {current_modifiers}')
 
     with engine.connect() as connection:
         connection.execute(sqlalchemy.sql.text("""
@@ -72,6 +83,7 @@ if __name__ == '__main__':
 
     with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
         try:
+            log.info("Listening...")
             listener.join()
         except KeyboardInterrupt:
-            logging.info("Exiting...")
+            log.info("Exiting...")
