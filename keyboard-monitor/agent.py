@@ -6,6 +6,7 @@ import logging
 import os
 import queue
 import sqlalchemy
+import sqlalchemy.exc
 import sys
 import threading
 
@@ -46,9 +47,17 @@ if __name__ == '__main__':
     def send_hits():
         while True:
             with engine.connect() as connection:
-                hits = pending_hits.get()
-                log.debug(f'sending: {hits}')
-                connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
+                try:
+                    hits = pending_hits.get()
+                    log.debug(f'sending: {hits}')
+                    connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
+                except sqlalchemy.exc.OperationalError as e:
+                    if e.connection_invalidated:
+                        log.error(f'Connection invalidated: {e}')
+                        pending_hits.put(hits)
+                    else:
+                        log.error(f'Operational error: {e}')
+                        os._exit(1)
 
     threading.Thread(target=send_hits, daemon=True).start()
 
@@ -69,7 +78,7 @@ if __name__ == '__main__':
             try:
                 current_modifiers.remove(key)
             except KeyError:
-                log.warn(f'Key {key} not in current_modifiers {current_modifiers}')
+                log.warning(f'Key {key} not in current_modifiers {current_modifiers}')
         log.debug(f'{key} released, current_modifiers: {current_modifiers}')
 
     with engine.connect() as connection:
