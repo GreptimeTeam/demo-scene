@@ -74,11 +74,12 @@ if __name__ == '__main__':
 
     def sender_thread():
         while True:
+            hits = pending_hits.get()
+            if hits is None:
+                log.info("Exiting...")
+                break
             with engine.connect() as connection:
                 try:
-                    hits = pending_hits.get()
-                    if hits is None:
-                        break
                     connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
                     log.info(f'sent: {hits}')
                 except sqlalchemy.exc.OperationalError as e:
@@ -94,6 +95,7 @@ if __name__ == '__main__':
             log.info("Listening...")
             cancel_signal.get()
             pending_hits.put(None)
+            log.info("Exiting...")
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         sender = executor.submit(sender_thread)
@@ -101,5 +103,5 @@ if __name__ == '__main__':
         try:
             concurrent.futures.wait([sender, listener], return_when=concurrent.futures.FIRST_EXCEPTION)
         except KeyboardInterrupt:
-            log.info("Exiting Main...")
+            log.info("Exiting...")
         cancel_signal.put(True)

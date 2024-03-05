@@ -20,6 +20,8 @@ python3 agent.py
 
 ## Step 4: Query keyboard inputs statistics
 
+
+
 ```sql
 SELECT hits, COUNT(*) as times
 FROM keyboard_monitor
