@@ -2,13 +2,13 @@ from dotenv import load_dotenv
 from pynput import keyboard
 from pynput.keyboard import Key
 
+import concurrent.futures
 import logging
 import os
 import queue
 import sqlalchemy
 import sqlalchemy.exc
 import sys
-import threading
 
 
 MODIFIERS = {
@@ -25,52 +25,34 @@ TABLE = sqlalchemy.Table(
     sqlalchemy.Column('ts', sqlalchemy.DateTime),
 )
 
+
 if __name__ == '__main__':
     load_dotenv()
-
+    
     log = logging.getLogger("agent")
     log.setLevel(logging.DEBUG)
-
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s %(message)s')
     file_handler = logging.FileHandler('agent.log', encoding='utf-8')
     file_handler.setLevel(logging.DEBUG)
-
+    file_handler.setFormatter(formatter)
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)
-
+    stdout_handler.setFormatter(formatter)
     log.addHandler(file_handler)
     log.addHandler(stdout_handler)
 
     engine = sqlalchemy.create_engine(os.environ['DATABASE_URL'], echo_pool=True, isolation_level='AUTOCOMMIT')
     current_modifiers = set()
     pending_hits = queue.Queue()
-
-    def send_hits():
-        while True:
-            with engine.connect() as connection:
-                try:
-                    hits = pending_hits.get()
-                    log.debug(f'sending: {hits}')
-                    connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
-                except sqlalchemy.exc.OperationalError as e:
-                    if e.connection_invalidated:
-                        log.error(f'Connection invalidated: {e}')
-                        pending_hits.put(hits)
-                    else:
-                        log.error(f'Operational error: {e}')
-                        os._exit(1)
-
-    threading.Thread(target=send_hits, daemon=True).start()
-
-    def record_combos(keys):
-        hits = '+'.join(keys)
-        log.info(f'recoding: {hits}')
-        pending_hits.put(hits)
+    cancel_signal = queue.Queue()
 
     def on_press(key):
         if key in MODIFIERS:
             current_modifiers.add(key)
         else:
-            record_combos(sorted([ str(key) for key in current_modifiers ]) + [ str(key) ])
+            hits = sorted([ str(key) for key in current_modifiers ]) + [ str(key) ]
+            hits = '+'.join(hits)
+            pending_hits.put(hits)
         log.debug(f'{key} pressed, current_modifiers: {current_modifiers}')
 
     def on_release(key):
@@ -90,9 +72,34 @@ if __name__ == '__main__':
             ) ENGINE=mito WITH( regions = 1, ttl = '3months')
         """))
 
-    with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
-        try:
+    def sender_thread():
+        while True:
+            with engine.connect() as connection:
+                try:
+                    hits = pending_hits.get()
+                    if hits is None:
+                        break
+                    connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
+                    log.info(f'sent: {hits}')
+                except sqlalchemy.exc.OperationalError as e:
+                    if e.connection_invalidated:
+                        log.error(f'Connection invalidated: {e}')
+                        pending_hits.put(hits)
+                    else:
+                        log.error(f'Operational error: {e}')
+                        raise
+
+    def listener_thread():
+        with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
             log.info("Listening...")
-            listener.join()
+            cancel_signal.get()
+            pending_hits.put(None)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        sender = executor.submit(sender_thread)
+        listener = executor.submit(listener_thread)
+        try:
+            concurrent.futures.wait([sender, listener], return_when=concurrent.futures.FIRST_EXCEPTION)
         except KeyboardInterrupt:
-            log.info("Exiting...")
+            log.info("Exiting Main...")
+        cancel_signal.put(True)
