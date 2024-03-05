@@ -75,11 +75,13 @@ if __name__ == '__main__':
     def sender_thread():
         while True:
             hits = pending_hits.get()
+            log.debug(f'got: {hits}')
             if hits is None:
                 log.info("Exiting...")
                 break
             with engine.connect() as connection:
                 try:
+                    log.debug(f'sending: {hits}')
                     connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
                     log.info(f'sent: {hits}')
                 except sqlalchemy.exc.OperationalError as e:
