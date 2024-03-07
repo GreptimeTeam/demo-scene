@@ -65,6 +65,8 @@ ORDER BY times DESC limit 10;
 
 ### Calculate hits per minute
 
+Read more about GreptimeDB's powerful [RANGE QUERY](https://docs.greptime.com/reference/sql/range).
+
 ```sql
 SELECT
     ts,
