@@ -28,7 +28,7 @@ TABLE = sqlalchemy.Table(
 
 if __name__ == '__main__':
     load_dotenv()
-    
+
     log = logging.getLogger("agent")
     log.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s %(message)s')
@@ -86,11 +86,21 @@ if __name__ == '__main__':
                     log.info(f'sent: {hits}')
                 except sqlalchemy.exc.OperationalError as e:
                     if e.connection_invalidated:
-                        log.error(f'Connection invalidated: {e}')
+                        log.warning(f'Connection invalidated: {e}')
                         pending_hits.put(hits)
-                    else:
-                        log.error(f'Operational error: {e}')
-                        raise
+                        continue
+
+                    # TODO 1815 - should not handle internal error;
+                    # see https://github.com/GreptimeTeam/greptimedb/issues/3447
+                    msg = str(e)
+                    if "(1815, 'Internal error: 1000')" in msg:
+                        log.warning(f'Known operational error: {e}')
+                        pending_hits.put(hits)
+                        continue
+
+                    log.error(f'Operational error: {e}')
+                    raise e
+
 
     def listener_thread():
         with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
