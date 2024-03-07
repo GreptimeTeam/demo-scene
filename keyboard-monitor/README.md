@@ -12,7 +12,7 @@ pip3 install -r requirements.txt
 2. Go to the "Connect" tab and find the connection string.
 3. Copy `.env.example` to `.env` and set the connection string.
 
-![Connection](connstr.png)
+![Connection](media/connstr.png)
 
 ## Step 3: Start keyboard monitor
 
@@ -39,9 +39,9 @@ You should see logs like:
 
 The following sample queries are executed from the Web Dashboard.
 
-![Portal](portal.png)
+![Portal](media/portal.png)
 
-![Dashboard](dashboard.png)
+![Dashboard](media/dashboard.png)
 
 ### Found the most frequent keys
 
