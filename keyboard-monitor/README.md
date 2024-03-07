@@ -70,7 +70,7 @@ Read more about GreptimeDB's powerful [RANGE QUERY](https://docs.greptime.com/re
 ```sql
 SELECT
     ts,
-    COUNT(1) RANGE '1h' FILL NULL as times
+    COUNT(1) RANGE '1h' as times
 FROM keyboard_monitor ALIGN '1h'
 ORDER BY ts DESC
 LIMIT 10;
