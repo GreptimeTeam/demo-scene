@@ -101,7 +101,6 @@ if __name__ == '__main__':
                     log.error(f'Operational error: {e}')
                     raise e
 
-
     def listener_thread():
         with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
             log.info("Listening...")
