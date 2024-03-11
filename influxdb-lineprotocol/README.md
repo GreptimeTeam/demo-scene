@@ -2,6 +2,10 @@
 
 ## Step 1: Install requirements
 
+```shell
+pip3 install -r requirements.txt
+```
+
 ## Step 2: Set up Greptime service
 
 1. Obtain a free Greptime service from [GreptimeCloud](https://console.greptime.cloud/). 
@@ -9,3 +13,9 @@
 3. Copy `.env.example` to `.env` and set the connection string.
 
 ![Connection](/media/connstr.png)
+
+## Step 3: Get sample data
+
+```shell
+curl https://s3.amazonaws.com/noaa.water-database/NOAA_data.txt -o NOAA_data.txt
+```
