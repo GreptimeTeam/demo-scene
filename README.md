@@ -18,6 +18,10 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 * [Keyboard Monitor](keyboard)
 
+### Data pipelines (Ingestion + Greptime + Analysis or Display)
+
+* [InfluxDB Line Protocol + GreptimeCloud + SQL/PromQL](influxdb-lineprotocol)
+
 ## Feedback & Questions
 
 * Bugs or issues with demo: raise an issue on this GitHub project
