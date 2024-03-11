@@ -1,4 +1,4 @@
-# Ingestion with InfluxDB Line Protocl, Analysis with SQL and PromQL
+# Ingestion with InfluxDB Line Protocol, Analysis with SQL and PromQL
 
 ## Step 1: Install requirements
 
@@ -14,8 +14,6 @@ pip3 install -r requirements.txt
 
 ![Connection](/media/connstr.png)
 
-## Step 3: Get sample data
+## Step 3: Write data via line protocol
 
-```shell
-curl https://s3.amazonaws.com/noaa.water-database/NOAA_data.txt -o NOAA_data.txt
-```
+
