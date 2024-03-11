@@ -78,6 +78,16 @@ LIMIT 10;
 
 ## Bonus: Visualization
 
-* [ ] GreptimeCloud Dashboard
-* [ ] Grafana
-* [ ] Preset
+It's easy to use [Streamlit] to display the input frequency.
+
+Run the following script:
+
+```shell
+streamlit run display.py
+```
+
+It'll open a window in your browser and shows the data frames:
+
+![Streamlit Display](media/streamlit-display.png)
+
+If the window is not opened, you can explicit view it via http://localhost:8501.

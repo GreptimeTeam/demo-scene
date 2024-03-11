@@ -1,6 +1,9 @@
+import datetime
 import os
 from dotenv import load_dotenv
+import pytz
 import streamlit as st
+import tzlocal
 
 
 st.title("Keyboard Monitor")
@@ -41,7 +44,7 @@ WHERE hits NOT LIKE '%+%'
 GROUP BY hits
 ORDER BY times DESC limit 10;
 """)
-top_frequent_keys.header("Top 10 keys")
+top_frequent_keys.subheader("Top 10 keys")
 top_frequent_keys.dataframe(df)
 df = conn.query("""
 SELECT hits, COUNT(*) as times
@@ -50,7 +53,34 @@ WHERE hits LIKE '%+%'
 GROUP BY hits
 ORDER BY times DESC limit 10;
 """)
-top_frequent_combos.header("Top 10 combos")
+top_frequent_combos.subheader("Top 10 combos")
 top_frequent_combos.dataframe(df)
 
-# 一个日期选择器展示当天每个小时的 hits 数量
+st.header("Find your inputs frequency of day")
+local_tz = tzlocal.get_localzone()
+hours = int(local_tz.utcoffset(datetime.datetime.now()).total_seconds() / 3600)
+if hours > 0:
+    offset = f" + INTERVAL '{hours} hours'"
+elif hours < 0:
+    offset = f" - INTERVAL '{hours} hours'"
+else:
+    offset = ''
+d = st.date_input("Pick a day:", value=datetime.date.today())
+query = f"""
+SELECT 
+    ts,
+    COUNT(1) RANGE '1h' as times
+FROM 
+    (
+        SELECT ts
+        FROM keyboard_monitor
+        WHERE date_trunc('day', ts{offset}) = '{d}'
+    )
+    ALIGN '1h'
+ORDER BY ts ASC
+LIMIT 10;
+"""
+print(f"query={query}")
+df = conn.query(query)
+df['ts'] = df['ts'].dt.tz_localize(pytz.utc).dt.tz_convert(local_tz)
+st.dataframe(df)
