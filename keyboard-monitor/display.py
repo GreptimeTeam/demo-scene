@@ -70,13 +70,9 @@ query = f"""
 SELECT 
     ts,
     COUNT(1) RANGE '1h' as times
-FROM 
-    (
-        SELECT ts
-        FROM keyboard_monitor
-        WHERE date_trunc('day', ts{offset}) = '{d}'
-    )
-    ALIGN '1h'
+FROM keyboard_monitor
+WHERE date_trunc('day', ts{offset}) = '{d}'
+ALIGN '1h'
 ORDER BY ts ASC
 LIMIT 10;
 """
