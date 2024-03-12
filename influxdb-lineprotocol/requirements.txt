@@ -1,0 +1,2 @@
+influxdb-client[ciso]==1.41.0
+python-dotenv==1.0.1

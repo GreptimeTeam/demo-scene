@@ -112,7 +112,11 @@ if __name__ == '__main__':
         sender = executor.submit(sender_thread)
         listener = executor.submit(listener_thread)
         try:
-            concurrent.futures.wait([sender, listener], return_when=concurrent.futures.FIRST_EXCEPTION)
-        except KeyboardInterrupt:
-            log.info("Exiting...")
+            f = concurrent.futures.wait([sender, listener], return_when=concurrent.futures.FIRST_EXCEPTION)
+        except KeyboardInterrupt as e:
+            log.info("KeyboardInterrupt. Exiting...")
+        except Exception as e:
+            log.error(f'Unhandled exception: {e}')
+        for fut in f.done:
+            log.error(f'Unhandled exception for futures: {fut.exception(timeout=0)}')
         cancel_signal.put(True)
