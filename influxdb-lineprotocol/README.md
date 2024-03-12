@@ -46,7 +46,7 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --precision PRECISION
-                        Precision of the data (default: s)
+                        Precision of the data (default: ns)
 ```
 
 ## Step 3: Query data with SQL and PromQL

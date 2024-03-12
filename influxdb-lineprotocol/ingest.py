@@ -8,7 +8,7 @@ import itertools
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('file', type=str, help='File to ingest')
-parser.add_argument('--precision', type=str, help='Precision of the data', default='s')
+parser.add_argument('--precision', type=str, help='Precision of the data', default='ns')
 args = parser.parse_args()
 
 with open(args.file) as f:
