@@ -2,6 +2,10 @@
 
 ## Prerequisites
 
+* [Python 3](https://www.python.org/downloads/)
+
+Other dependencies can be installed by:
+
 ```shell
 pip3 install -r requirements.txt
 ```
@@ -39,7 +43,7 @@ You should see logs like:
 
 The following sample queries are executed from the Web Dashboard.
 
-![Portal](media/portal.png)
+![Portal](/media/portal.png)
 
 ![Dashboard](media/dashboard.png)
 

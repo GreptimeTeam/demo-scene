@@ -2,7 +2,10 @@
 
 ## Prerequisites
 
-This demo requires Python 3.12 or later. And you should install packages with:
+* [Docker](https://docs.docker.com/get-docker/) or [OrbStack](https://orbstack.dev/)
+* [Python 3.12 or later](https://www.python.org/downloads/)
+
+Other dependencies can be installed by:
 
 ```shell
 pip3 install -r requirements.txt
@@ -51,4 +54,27 @@ options:
 
 ## Step 3: Query data with SQL and PromQL
 
+The following sample queries are executed from the Web Dashboard.
 
+![Portal](/media/portal.png)
+
+### Find the time range of data with SQL
+
+```sql
+SELECT MIN(ts), MAX(ts) FROM "airSensors";
+```
+
+![MinMax](media/minmax.png)
+
+### Add panels with PromQL
+
+1. Click the second icon in the sidebar; go to the workbench page.
+2. Click "+" to create a new panel file `airsensors.yml`.
+3. Start your dashboard by "+Add panel".
+4. Select time range and fill the fields.
+
+![Panels](media/panels.png)
+
+The final panels would be like:
+
+![Panels Show](media/panels-show.png)

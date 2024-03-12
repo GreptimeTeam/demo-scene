@@ -24,6 +24,7 @@ bucket = os.environ["GREPTIME_DATABASE"]
 client = InfluxDBClient(url=url, token=token, org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
+# TODO implement itertools.batched with a functionn to drop requirement of Python 3.12+
 for batch_lines in itertools.batched(lines, 1000):
     write_api.write(bucket=bucket, write_precision=args.precision, record=batch_lines)
     print(f'Wrote {len(batch_lines)} lines')
