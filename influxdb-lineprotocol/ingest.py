@@ -30,4 +30,11 @@ for batch_lines in itertools.batched(lines, 1000):
     print(f'Wrote {len(batch_lines)} lines')
     sleep(1) # sleep for 1 second avoid rate limit
 
+# NOTE - Write data points directly is possible:
+#
+# import time
+# from influxdb_client import Point, WritePrecision
+# p = Point("my_measurement").tag("location", "Prague").field("temperature", 25.3).time(time.time_ns(), WritePrecision.NS)
+# write_api.write(bucket=bucket, record=p)
+
 print('Done')
