@@ -18,13 +18,23 @@ pip3 install -r requirements.txt
 
 ## Step 2: Write data via line protocol
 
-Ingest the NOAA National Water Quality Data with:
+Download the sample data:
 
 ```shell
-python3 ingest.py NOAA_data.txt
+curl -O https://raw.githubusercontent.com/influxdata/influxdb2-sample-data/master/air-sensor-data/air-sensor-data.lp 
 ```
 
-The script supports ingesting any data in line protocol format. You can specify the data file and timestamp precision:
+> [!TIP]
+>
+> Use `https://mirror.ghproxy.com/https://raw.githubusercontent.com/influxdata/influxdb2-sample-data/master/air-sensor-data/air-sensor-data.lp` if you encounter network issues.
+
+Ingest the air sensors data with:
+
+```shell
+python3 ingest.py air-sensor-data.lp
+```
+
+The script supports ingesting any data in [line protocol format](https://docs.influxdata.com/influxdb/v2/reference/syntax/line-protocol/). You can specify the data file and timestamp precision:
 
 ```
 $ python3 ingest.py --help
