@@ -16,7 +16,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ### Applications
 
-* [Keyboard Monitor](keyboard)
+* [Keyboard Monitor](keyboard-monitor)
 
 ## Feedback & Questions
 
