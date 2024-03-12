@@ -1,12 +1,12 @@
 # Keyboard Monitor
 
-## Step 1: Install requirements
+## ## Prerequisites
 
 ```shell
 pip3 install -r requirements.txt
 ```
 
-## Step 2: Set up Greptime service
+## Step 1: Set up Greptime service
 
 1. Obtain a free Greptime service from [GreptimeCloud](https://console.greptime.cloud/). 
 2. Go to the "Connect" tab and find the connection string.
@@ -14,7 +14,7 @@ pip3 install -r requirements.txt
 
 ![Connection](/media/connstr.png)
 
-## Step 3: Start keyboard monitor
+## Step 2: Start keyboard monitor
 
 Run the agent script to listening keyboard inputs:
 
@@ -35,7 +35,7 @@ You should see logs like:
 ...
 ```
 
-## Step 4: Query keyboard inputs statistics
+## Step 3: Query keyboard inputs statistics
 
 The following sample queries are executed from the Web Dashboard.
 
