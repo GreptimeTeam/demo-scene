@@ -11,9 +11,6 @@ parser.add_argument('file', type=str, help='File to ingest')
 parser.add_argument('--precision', type=str, help='Precision of the data', default='ns')
 args = parser.parse_args()
 
-with open(args.file) as f:
-    lines = f.readlines()
-
 load_dotenv()
 url = os.environ["GREPTIME_HOST"].rstrip('/')
 url = f"{url}/v1/influxdb/"
@@ -24,11 +21,19 @@ bucket = os.environ["GREPTIME_DATABASE"]
 client = InfluxDBClient(url=url, token=token, org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
-# TODO implement itertools.batched with a functionn to drop requirement of Python 3.12+
-for batch_lines in itertools.batched(lines, 1000):
-    write_api.write(bucket=bucket, write_precision=args.precision, record=batch_lines)
-    print(f'Wrote {len(batch_lines)} lines')
-    sleep(1) # sleep for 1 second avoid rate limit
+def batched(iterable, n):
+    iter_ = iter(iterable)
+    while True:
+        batch = tuple(itertools.islice(iter_, n))
+        if not batch:
+            break
+        yield batch
+
+with open(args.file) as f:
+    for batch_lines in batched(f, 1000):
+        write_api.write(bucket=bucket, write_precision=args.precision, record=batch_lines)
+        print(f'Wrote {len(batch_lines)} lines')
+        sleep(1) # sleep for 1 second avoid rate limit
 
 # NOTE - Write data points directly is possible:
 #
