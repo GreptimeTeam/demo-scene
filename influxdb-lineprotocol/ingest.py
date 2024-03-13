@@ -1,10 +1,22 @@
 import argparse
 import os
+import sys
 from time import sleep
 from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 import itertools
+
+if sys.version_info >= (3, 12):
+    batched = itertools.batched
+else:
+    def batched(iterable, n):
+        iter_ = iter(iterable)
+        while True:
+            batch = tuple(itertools.islice(iter_, n))
+            if not batch:
+                break
+            yield batch
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('file', type=str, help='File to ingest')
@@ -20,14 +32,6 @@ bucket = os.environ["GREPTIME_DATABASE"]
 
 client = InfluxDBClient(url=url, token=token, org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
-
-def batched(iterable, n):
-    iter_ = iter(iterable)
-    while True:
-        batch = tuple(itertools.islice(iter_, n))
-        if not batch:
-            break
-        yield batch
 
 with open(args.file) as f:
     for batch_lines in batched(f, 1000):
