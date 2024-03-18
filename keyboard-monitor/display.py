@@ -76,7 +76,6 @@ ALIGN '1h'
 ORDER BY ts ASC
 LIMIT 10;
 """
-print(f"query={query}")
 df = conn.query(query)
 df['ts'] = df['ts'].dt.tz_localize(pytz.utc).dt.tz_convert(local_tz)
 st.dataframe(df)

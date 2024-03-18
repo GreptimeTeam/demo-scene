@@ -20,7 +20,7 @@ pip3 install -r requirements.txt
 
 ## Step 2: Start keyboard monitor
 
-Run the agent script to listening keyboard inputs:
+Run the agent script to listen to keyboard inputs:
 
 ```shell
 python3 agent.py
@@ -39,7 +39,7 @@ You should see logs like:
 ...
 ```
 
-## Step 3: Query keyboard inputs statistics
+## Step 3: Query keyboard input statistics
 
 The following sample queries are executed from the Web Dashboard.
 
@@ -82,7 +82,7 @@ LIMIT 10;
 
 ## Bonus: Visualization
 
-It's easy to use [Streamlit] to display the input frequency.
+It's easy to use [Streamlit](https://streamlit.io/) to display the input frequency.
 
 Run the following script:
 
