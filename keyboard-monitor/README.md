@@ -1,5 +1,7 @@
 # Keyboard Monitor
 
+Read the blog ["Decoding your Daily Typing Habits: A Simple Tutorial on Keyboard Monitoring"](https://greptime.com/blogs/2024-03-19-keyboard-monitoring) for a full explanation.
+
 ## Prerequisites
 
 * [Python 3](https://www.python.org/downloads/)

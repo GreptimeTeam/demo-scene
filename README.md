@@ -16,7 +16,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ### Applications
 
-* [Keyboard Monitor](keyboard-monitor)
+* [Keyboard Monitor](keyboard-monitor) ([✍️ blog](https://greptime.com/blogs/2024-03-19-keyboard-monitoring))
 
 ### Data pipelines (Ingestion + Greptime + Analysis or Display)
 
