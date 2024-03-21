@@ -9,6 +9,7 @@ import queue
 import sqlalchemy
 import sqlalchemy.exc
 import sys
+import time
 
 
 MODIFIERS = {
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     log = logging.getLogger("agent")
     log.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s %(message)s')
-    file_handler = logging.FileHandler('agent.log', encoding='utf-8')
+    file_handler = logging.FileHandler(f'agent-{time.time_ns()}.log', encoding='utf-8')
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     stdout_handler = logging.StreamHandler(sys.stdout)
@@ -73,6 +74,7 @@ if __name__ == '__main__':
         """))
 
     def sender_thread():
+        retries = 0
         while True:
             hits = pending_hits.get()
             log.debug(f'got: {hits}')
@@ -84,22 +86,33 @@ if __name__ == '__main__':
                     log.debug(f'sending: {hits}')
                     connection.execute(TABLE.insert().values(hits=hits, ts=sqlalchemy.func.now()))
                     log.info(f'sent: {hits}')
+                    retries = 0
                 except sqlalchemy.exc.OperationalError as e:
+                    if retries >= 10:
+                        log.error(f'Retry exceeds. Operational error: {e}')
+                        pending_hits.put(hits)
+                        continue
+
                     if e.connection_invalidated:
                         log.warning(f'Connection invalidated: {e}')
                         pending_hits.put(hits)
                         continue
 
-                    # TODO 1815 - should not handle internal error;
-                    # see https://github.com/GreptimeTeam/greptimedb/issues/3447
                     msg = str(e)
                     if "(1815, 'Internal error: 1000')" in msg:
+                        # TODO 1815 - should not handle internal error;
+                        # see https://github.com/GreptimeTeam/greptimedb/issues/3447
                         log.warning(f'Known operational error: {e}')
                         pending_hits.put(hits)
                         continue
+                    elif '2005' in msg and 'Unknown MySQL server host' in msg:
+                        log.warning(f'DNS temporary unresolved: {e}')
+                        pending_hits.put(hits)
+                        continue
 
-                    log.error(f'Operational error: {e}')
                     raise e
+                finally:
+                    retries += 1
 
     def listener_thread():
         with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
@@ -113,10 +126,11 @@ if __name__ == '__main__':
         listener = executor.submit(listener_thread)
         try:
             f = concurrent.futures.wait([sender, listener], return_when=concurrent.futures.FIRST_EXCEPTION)
+            for fut in f.done:
+                log.error(f'Unhandled exception for futures: {fut.exception(timeout=0)}')
         except KeyboardInterrupt as e:
             log.info("KeyboardInterrupt. Exiting...")
         except Exception as e:
             log.error(f'Unhandled exception: {e}')
-        for fut in f.done:
-            log.error(f'Unhandled exception for futures: {fut.exception(timeout=0)}')
-        cancel_signal.put(True)
+        finally:
+            cancel_signal.put(True)
