@@ -19,7 +19,7 @@ pip3 install -r requirements.txt
 
 ![Connection](/media/connstr.png)
 
-## Step 2: Write data via line protocol
+## Step 2A: Write data via line protocol
 
 Download the sample data:
 
@@ -52,11 +52,23 @@ options:
                         Precision of the data (default: ns)
 ```
 
+## Step 2B: Improt line protocol files via Web Dashboard
+
+Instead, you can import the line protofol file via Web Dashboard.
+
+![Portal](/media/portal.png)
+
+![Ingest UI](media/ingest-ui.png)
+
+Once file uploaded, click the "Write" button next to the precision box to ingest data. The line protocol file downloaded above is in nanoseconds (default), so we don't need to change the precision.
+
+The data should be written immediately. Then you can go to the "Tables" tab, reload tables, and find the `airSensors` table.
+
+![Show Tables](media/show-tables.png)
+
 ## Step 3: Query data with SQL and PromQL
 
 The following sample queries are executed from the Web Dashboard.
-
-![Portal](/media/portal.png)
 
 ### Find the time range of data with SQL
 
