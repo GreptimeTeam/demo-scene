@@ -52,7 +52,7 @@ options:
                         Precision of the data (default: ns)
 ```
 
-## Step 2B: Improt line protocol files via Web Dashboard
+## Step 2B: Import line protocol files via Web Dashboard
 
 Instead, you can import the line protofol file via Web Dashboard.
 
