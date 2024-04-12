@@ -22,6 +22,10 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 * [InfluxDB Line Protocol + GreptimeCloud + SQL/PromQL](influxdb-lineprotocol)
 
+### Data Migrations
+
+* [From InfluxDB v2 to GreptimeDB](influxdb-v2-to-greptime)
+
 ## Feedback & Questions
 
 * Bugs or issues with demo: raise an issue on this GitHub project
