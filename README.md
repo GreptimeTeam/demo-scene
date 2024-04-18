@@ -20,11 +20,11 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ### Data pipelines (Ingestion + Greptime + Analysis or Display)
 
-* [InfluxDB Line Protocol + GreptimeCloud + SQL/PromQL](influxdb-lineprotocol)
+* [InfluxDB Line Protocol + GreptimeCloud + SQL/PromQL](influxdb-lineprotocol) ([🎥 tutorial](https://www.youtube.com/watch?v=JZuq0inSO9Q))
 
 ### Data Migrations
 
-* [From InfluxDB v2 to GreptimeDB](influxdb-v2-to-greptime)
+* [From InfluxDB v2 to GreptimeDB](influxdb-v2-to-greptime) ([✍️ blog](https://greptime.com/blogs/2024-04-16-migrate-data-from-influxdbv2))
 
 ## Feedback & Questions
 

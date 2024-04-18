@@ -1,5 +1,9 @@
 # Migrate data from InfluxDB v2 to GreptimeDB
 
+> [!NOTE]
+>
+> Read the blog ["How to Quickly Migrate Data from InfluxDB v2 to GreptimeDB"](https://greptime.com/blogs/2024-04-16-migrate-data-from-influxdbv2) for a full explanation.
+
 ## Prerequisites
 
 You need to be able to access your InfluxDB engine path, which contains your data files. If you run a server with InfluxDB's official Docker Image, the engine path is `/var/lib/influxdb2/engine/`.

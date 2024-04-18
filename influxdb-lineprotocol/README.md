@@ -1,5 +1,9 @@
 # Ingestion with InfluxDB Line Protocol, Analysis with SQL and PromQL
 
+> [!NOTE]
+>
+> Watch the vedio ["Getting Started with GreptimeDB: Ingestion by InfluxDB line protocol, Analysis with SQL and PromQL"](https://www.youtube.com/watch?v=JZuq0inSO9Q&t=11s) for a living showcase.
+
 ## Prerequisites
 
 * [Docker](https://docs.docker.com/get-docker/) or [OrbStack](https://orbstack.dev/)
