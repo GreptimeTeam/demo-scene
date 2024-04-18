@@ -2,7 +2,7 @@
 
 > [!NOTE]
 >
-> Watch the vedio ["Getting Started with GreptimeDB: Ingestion by InfluxDB line protocol, Analysis with SQL and PromQL"](https://www.youtube.com/watch?v=JZuq0inSO9Q&t=11s) for a living showcase.
+> Watch the video ["Getting Started with GreptimeDB: Ingestion by InfluxDB line protocol, Analysis with SQL and PromQL"](https://www.youtube.com/watch?v=JZuq0inSO9Q) for a living showcase.
 
 ## Prerequisites
 
