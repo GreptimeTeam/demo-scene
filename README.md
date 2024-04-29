@@ -25,6 +25,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 ### Data Migrations
 
 * [From InfluxDB v2 to GreptimeDB](influxdb-v2-to-greptime) ([✍️ blog](https://greptime.com/blogs/2024-04-16-migrate-data-from-influxdbv2))
+* [From InfluxDB v1 to GreptimeDB](influxdb-v1-to-greptime)
 
 ## Feedback & Questions
 
