@@ -35,6 +35,10 @@ influx_inspect export \
     -out /tmp/influxdb_export.lp
 ```
 
+> [!TIP]
+>
+> You can specify more concrete data sets, like time range, to be exported. Please refer to the [`influx_inspect export`](https://docs.influxdata.com/influxdb/v1/tools/influx_inspect/#export) manual for details.
+
 ## Step 3: Import data to GreptimeDB
 
 Copy the `influxdb_export.lp` file to a working directory. Before import data to GreptimeDB, if the data file is too large, it's recommended to split the data file into multiple slices:
