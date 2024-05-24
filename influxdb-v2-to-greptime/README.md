@@ -2,7 +2,7 @@
 
 > [!NOTE]
 >
-> Read the blog ["How to Quickly Migrate Data from InfluxDB v2 to GreptimeDB"](https://greptime.com/blogs/2024-04-16-migrate-data-from-influxdbv2) for a full explanation.
+> Watch the video ["Getting Started with GreptimeDB: Migrating Data from InfluxDB v2 to GreptimeDB"](https://www.youtube.com/watch?v=jiwZoRMzYis) for a living showcase.
 
 ## Prerequisites
 
