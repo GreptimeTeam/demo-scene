@@ -48,7 +48,7 @@ skip_database_creation = true
 
 Now you're configured. Choose any [input plugin](https://docs.influxdata.com/telegraf/v1/plugins/) to start collecting statistics.
 
-A sample completed config can be found at [telegraf.conf](telegraf.conf). It ...
+A sample completed config can be found at [telegraf.conf](telegraf.conf). It configures the GreptimeDB service as if it's an InfluxDB V1 server, and configures default host input statistics (CPUs, processes, memories, disks, etc.).
 
 Let's start the telegraf instance with this config:
 
