@@ -59,3 +59,12 @@ telegraf --config telegraf.conf
 
 ## Step 3: Query input statistics
 
+You can make sample queries from the Web Dashboard:
+
+![Portal](/media/portal.png)
+
+![Dashboard](media/dashboard.png)
+
+You can also build charts from the statstics for visualization:
+
+![Workbench](media/panels.png)
