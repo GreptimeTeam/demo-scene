@@ -1,0 +1,107 @@
+services:
+  greptimedb:
+    image: docker.io/greptime/greptimedb:v0.9.0-nightly-20240701
+    container_name: greptimedb
+    command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+    ports:
+      - 4000:4000
+      - 4001:4001
+      - 4002:4002
+      - 4003:4003
+    networks:
+      - demo-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:4000/health" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  grafana:
+    image: docker.io/grafana/grafana:11.1.0
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+     - GF_INSTALL_PLUGINS=marcusolsson-treemap-panel, https://github.com/GreptimeTeam/greptimedb-grafana-datasource/releases/latest/download/info8fcc-greptimedb-datasource.zip;info8fcc
+    networks:
+      - demo-network
+    user: "$UID:$GID"
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+
+  init_pipeline:
+    image: docker.io/alpine/curl
+    container_name: init_pipeline
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    volumes:
+      - ./config_data:/config_data
+    command: curl -X "POST" "http://greptimedb:4000/v1/events/pipelines/demo_pipeline" -F "file=@/config_data/greptime_pipeline.yaml" -v
+
+  vector:
+    build:
+      context: ./build_vector
+      dockerfile: ./Dockerfile
+    container_name: vector
+    networks:
+      - demo-network
+    volumes:
+      - ./config_data:/config_data
+      - shared-content:/logs
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+      init_python_filesource:
+        condition: service_started
+    environment:
+      VECTOR_CONFIG_LOCATION: /config_data/vector.toml
+
+  nginx:
+    image: docker.io/nginx:1.27.0
+    container_name: nginx
+    ports:
+      - 8080:80
+      - 8081:8081
+    networks:
+      - demo-network
+    volumes:
+      - ./nginx_conf:/etc/nginx/templates
+      - shared-content:/var/log/nginx
+      - ./webcontent:/usr/share/nginx/html:ro
+    environment:
+      - NGINX_PORT=8080
+
+  prometheus:
+    image: docker.io/prom/prometheus:v2.45.6
+    container_name: prometheus_agent
+    ports:
+      - 9090:9090
+    networks:
+      - demo-network
+    volumes:
+      - ./config_data/prometheus-greptimedb.yml:/etc/prometheus/prometheus.yml:ro
+
+  nginx_exporter:
+    image: docker.io/nginx/nginx-prometheus-exporter:1.1
+    container_name: nginx_exporter
+    ports:
+      - 9113
+    command:
+      - '--nginx.scrape-uri=http://nginx:8081/nginx_status'
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+
+networks:
+  demo-network:
+
+volumes:
+  shared-content:

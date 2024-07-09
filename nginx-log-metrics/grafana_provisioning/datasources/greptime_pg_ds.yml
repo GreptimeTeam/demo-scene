@@ -1,0 +1,9 @@
+apiVersion: 1
+
+datasources:
+  - name: greptimedb_pg
+    type: postgres
+    url: greptimedb:4003
+    jsonData:
+      database: public
+      sslmode: 'disable' # disable/require/verify-ca/verify-full
