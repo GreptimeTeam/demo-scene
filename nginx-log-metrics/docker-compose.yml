@@ -99,19 +99,20 @@ services:
       - demo-network
     volumes:
       - ./config_data/prometheus-greptimedb.yml:/etc/prometheus/prometheus.yml:ro
-  # nginx_exporter:
-  #   image: docker.io/nginx/nginx-prometheus-exporter:1.1
-  #   ports:
-  #     - 9113
-  #   command:
-  #     - '--nginx.scrape-uri=http://nginx:8081/nginx_status'
-  #   networks:
-  #     - demo-network
-  #   depends_on:
-  #     greptimedb:
-  #       condition: service_healthy
-  #     nginx:
-  #       condition: service_started
+
+  nginx_exporter:
+    image: docker.io/nginx/nginx-prometheus-exporter:1.1
+    ports:
+      - 9113
+    command:
+      - '--nginx.scrape-uri=http://nginx/nginx_status'
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+      nginx:
+        condition: service_started
 
 networks:
   demo-network:
