@@ -1,21 +1,15 @@
 [sources.file_source]
 type = "file"
 data_dir = "/logs"
-include = [ "/logs/access.log" ]
+include = [ "/logs/the-access.log" ]
 # 512 mb
 max_read_bytes = 536870912
 
-[transforms.greptime_trans]
-type = "remap"
-inputs = ["file_source"]
-  source = '''
-  . = parse_json!(.message)
-'''
 
 [sinks.sink_greptime_logs]
 type = "greptimedb_logs"
 table = "demo_table"
 pipeline_name = "demo_pipeline"
 compression = "gzip"
-inputs = [ "greptime_trans" ]
+inputs = [ "file_source" ]
 endpoint = "http://greptimedb:4000"
