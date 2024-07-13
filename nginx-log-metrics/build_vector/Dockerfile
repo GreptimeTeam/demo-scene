@@ -12,7 +12,7 @@ WORKDIR /vector
 RUN git checkout chore/greptime_log_ingester
 
 # Build Vector
-RUN cargo build --release --no-default-features --features=default-greptimedb-custom
+RUN cargo build --release --no-default-features --features=default-greptimedb-custom,sinks-console,sources-prometheus-scrape,sources-prometheus-scrape
 
 # Use a minimal base image for the final image
 FROM debian:bookworm-slim

@@ -5,10 +5,21 @@ include = [ "/logs/the-access.log" ]
 # 512 mb
 max_read_bytes = 536870912
 
+[transforms.greptime_trans]
+type = "remap"
+inputs = ["file_source"]
+source = '''
+  . = parse_nginx_log!(.message, "combined")
+'''
+
+[sinks.console]
+type = "console"
+inputs = [ "greptime_trans" ]
+encoding = {codec = "json"}
 
 [sinks.sink_greptime_logs]
 type = "greptimedb_logs"
-table = "demo_table"
+table = "ngx_access_log"
 pipeline_name = "demo_pipeline"
 compression = "gzip"
 inputs = [ "file_source" ]
