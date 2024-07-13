@@ -22,5 +22,5 @@ type = "greptimedb_logs"
 table = "ngx_access_log"
 pipeline_name = "demo_pipeline"
 compression = "gzip"
-inputs = [ "file_source" ]
+inputs = [ "greptime_trans" ]
 endpoint = "http://greptimedb:4000"
