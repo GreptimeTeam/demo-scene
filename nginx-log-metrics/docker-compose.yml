@@ -29,14 +29,28 @@ services:
     depends_on:
       greptimedb:
         condition: service_healthy
+    restart: always
+
+  init_database:
+    image: docker.io/postgres
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    volumes:
+      - ./config_data:/config_data
+    command: psql -h greptimedb -p 4003 -d public -f /config_data/init_database.sql
+    environment:
+      PGSSLMODE: disable
 
   init_pipeline:
     image: docker.io/alpine/curl
     networks:
       - demo-network
     depends_on:
-      greptimedb:
-        condition: service_healthy
+      init_database:
+        condition: service_completed_successfully
     volumes:
       - ./config_data:/config_data
     command: curl -X "POST" "http://greptimedb:4000/v1/events/pipelines/demo_pipeline" -F "file=@/config_data/greptime_pipeline.yaml" -v
@@ -51,8 +65,8 @@ services:
       - ./config_data:/config_data
       - logs:/logs
     depends_on:
-      greptimedb:
-        condition: service_healthy
+      init_pipeline:
+        condition: service_completed_successfully
       nginx:
         condition: service_started
     environment:
