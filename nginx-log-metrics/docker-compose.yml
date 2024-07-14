@@ -16,11 +16,11 @@ services:
       retries: 5
 
   grafana:
-    image: docker.io/grafana/grafana:11.1.0
+    build:
+      context: ./grafana
+      dockerfile: ./Dockerfile
     ports:
       - 3000:3000
-    environment:
-      - GF_INSTALL_PLUGINS=marcusolsson-treemap-panel, https://github.com/GreptimeTeam/greptimedb-grafana-datasource/releases/latest/download/info8fcc-greptimedb-datasource.zip;info8fcc
     networks:
       - demo-network
     user: "$UID:$GID"
