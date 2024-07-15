@@ -241,7 +241,7 @@
                     }
                 }
             ],
-            "title": "Requests Over Time",
+            "title": "Requests Over Time (pre-aggregation with flow)",
             "type": "barchart"
         },
         {
@@ -281,7 +281,7 @@
             },
             "gridPos": {
                 "h": 13,
-                "w": 5,
+                "w": 6,
                 "x": 0,
                 "y": 6
             },
@@ -340,7 +340,7 @@
                     }
                 }
             ],
-            "title": "Status Code",
+            "title": "Status Code (partial aggregation on top of flow)",
             "type": "piechart"
         },
         {
@@ -412,8 +412,8 @@
             },
             "gridPos": {
                 "h": 13,
-                "w": 5,
-                "x": 5,
+                "w": 4,
+                "x": 6,
                 "y": 6
             },
             "id": 4,
@@ -569,7 +569,7 @@
                     }
                 }
             ],
-            "title": "User Agent",
+            "title": "User Agent (extract platform in pipeline)",
             "type": "marcusolsson-treemap-panel"
         },
         {
@@ -638,7 +638,7 @@
                     }
                 }
             ],
-            "title": "Raw Logs",
+            "title": "Raw Logs (full text search)",
             "type": "logs"
         },
         {
@@ -1054,62 +1054,6 @@
             ],
             "title": "GC object rate",
             "type": "timeseries"
-        },
-        {
-            "datasource": {
-                "type": "grafana-postgresql-datasource",
-                "uid": "PE59989CBDF1A001C"
-            },
-            "gridPos": {
-                "h": 9,
-                "w": 24,
-                "x": 0,
-                "y": 46
-            },
-            "id": 24,
-            "options": {
-                "dedupStrategy": "none",
-                "enableLogDetails": true,
-                "prettifyLogMessage": false,
-                "showCommonLabels": false,
-                "showLabels": false,
-                "showTime": true,
-                "sortOrder": "Descending",
-                "wrapLogMessage": false
-            },
-            "pluginVersion": "10.2.3",
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT\n  endpoint, method, protocol, ua_platform, referer, client, access_time, status, size, agent\nFROM ngx_access_log\nWHERE\n  $__timeFilter(access_time)\n  AND matches(endpoint, '$requestLike')\nORDER BY access_time\nLIMIT 50",
-                    "refId": "A",
-                    "sql": {
-                        "columns": [
-                            {
-                                "parameters": [],
-                                "type": "function"
-                            }
-                        ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
-                        "limit": 50
-                    }
-                }
-            ],
-            "title": "Raw Logs",
-            "type": "logs"
         }
     ],
     "refresh": "10s",

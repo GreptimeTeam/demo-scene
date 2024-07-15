@@ -54,7 +54,10 @@ In this system, we have configured the following observability components:
 
 All of those logs and metrics are stored in GreptimeDB, with:
 - a pipeline to fashioning the nginx access log. The config file is at [greptime_pipeline.yaml](./config_data/greptime_pipeline.yaml)
+  - string decomposition, field parsing or renaming etc can be defined in pipeline process the semi-structured log
 - a flow to continuous aggregate the metrics. The config file is at [init_database.sql](./config_data/init_database.sql)
+  - we can do other aggregation on top of partial-aggregated data to accelerate the query performance
+  - we can treat the aggregated data as down-sampled data and store it for longer retention
 
 And the data are visualized in Grafana, which is available at [http://localhost:3000](http://localhost:3000) with default username and password as `admin`.
 
