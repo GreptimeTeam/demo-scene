@@ -6,7 +6,7 @@ import sys
 import ua_generator
 
 BASE_URL = "http://nginx"
-INTERVAL_MS = 1000
+INTERVAL_MS = 100
 WRONG_REQ_RATE = 0.1
 
 

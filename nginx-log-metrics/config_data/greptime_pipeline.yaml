@@ -13,13 +13,19 @@ processors:
       field: agent
       patterns: 
         - "%{_prefix} (%{ua_platform}; %{_postfix}"
+  - dissect:
+      field: request
+      patterns: 
+        - "%{method} %{endpoint} %{protocol}"
 
 transform:
   - fields:
       - client
       - ua_platform
       - referer
-      - request
+      - method
+      - endpoint
+      - protocol
     type: string
   - fields:
       - status

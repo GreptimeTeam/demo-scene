@@ -254,208 +254,8 @@
             },
             "id": 3,
             "panels": [],
-            "title": "Error Treemaps",
+            "title": "Request Details",
             "type": "row"
-        },
-        {
-            "datasource": {
-                "type": "grafana-postgresql-datasource",
-                "uid": "PE59989CBDF1A001C"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "dark-green",
-                                "value": null
-                            },
-                            {
-                                "color": "semi-dark-green",
-                                "value": 1
-                            },
-                            {
-                                "color": "green",
-                                "value": 2
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 3
-                            },
-                            {
-                                "color": "semi-dark-yellow",
-                                "value": 4
-                            },
-                            {
-                                "color": "dark-yellow",
-                                "value": 5
-                            },
-                            {
-                                "color": "orange",
-                                "value": 6
-                            },
-                            {
-                                "color": "semi-dark-orange",
-                                "value": 7
-                            },
-                            {
-                                "color": "dark-orange",
-                                "value": 8
-                            },
-                            {
-                                "color": "red",
-                                "value": 9
-                            },
-                            {
-                                "color": "semi-dark-red",
-                                "value": 10
-                            },
-                            {
-                                "color": "dark-red",
-                                "value": 11
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 14,
-                "w": 24,
-                "x": 0,
-                "y": 6
-            },
-            "id": 5,
-            "options": {
-                "colorByField": "count",
-                "groupByField": "ua_platform",
-                "labelFields": [],
-                "sizeField": "count",
-                "textField": "agent",
-                "tiling": "treemapSquarify"
-            },
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT\n  agent,\n  ua_platform,\n  count(*) as count,\nFROM ngx_access_log\nWHERE $__timeFilter(access_time)\nGROUP BY agent, ua_platform\nORDER BY count desc\nLIMIT 100",
-                    "refId": "A",
-                    "sql": {
-                        "columns": [
-                            {
-                                "parameters": [],
-                                "type": "function"
-                            }
-                        ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
-                        "limit": 50
-                    }
-                }
-            ],
-            "title": "User Agent",
-            "type": "marcusolsson-treemap-panel"
-        },
-        {
-            "datasource": {
-                "type": "grafana-postgresql-datasource",
-                "uid": "PE59989CBDF1A001C"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 80
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 4,
-                "w": 6,
-                "x": 0,
-                "y": 20
-            },
-            "id": 8,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "percentChangeColorMode": "standard",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showPercentChange": false,
-                "textMode": "auto",
-                "wideLayout": true
-            },
-            "pluginVersion": "11.1.0",
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT count(distinct(req_path))\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nLIMIT 100",
-                    "refId": "A",
-                    "sql": {
-                        "columns": [
-                            {
-                                "parameters": [],
-                                "type": "function"
-                            }
-                        ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
-                        "limit": 50
-                    }
-                }
-            ],
-            "title": "Unique Resources",
-            "type": "stat"
         },
         {
             "datasource": {
@@ -480,10 +280,10 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 6,
-                "y": 20
+                "h": 13,
+                "w": 5,
+                "x": 0,
+                "y": 6
             },
             "id": 10,
             "options": {
@@ -611,10 +411,10 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 20
+                "h": 13,
+                "w": 5,
+                "x": 5,
+                "y": 6
             },
             "id": 4,
             "options": {
@@ -672,12 +472,52 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
+                                "color": "dark-green",
                                 "value": null
                             },
                             {
+                                "color": "semi-dark-green",
+                                "value": 1
+                            },
+                            {
+                                "color": "green",
+                                "value": 2
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 3
+                            },
+                            {
+                                "color": "semi-dark-yellow",
+                                "value": 4
+                            },
+                            {
+                                "color": "dark-yellow",
+                                "value": 5
+                            },
+                            {
+                                "color": "orange",
+                                "value": 6
+                            },
+                            {
+                                "color": "semi-dark-orange",
+                                "value": 7
+                            },
+                            {
+                                "color": "dark-orange",
+                                "value": 8
+                            },
+                            {
                                 "color": "red",
-                                "value": 80
+                                "value": 9
+                            },
+                            {
+                                "color": "semi-dark-red",
+                                "value": 10
+                            },
+                            {
+                                "color": "dark-red",
+                                "value": 11
                             }
                         ]
                     }
@@ -685,30 +525,20 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 4,
-                "w": 6,
-                "x": 0,
-                "y": 24
+                "h": 13,
+                "w": 14,
+                "x": 10,
+                "y": 6
             },
-            "id": 9,
+            "id": 5,
             "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "percentChangeColorMode": "standard",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showPercentChange": false,
-                "textMode": "auto",
-                "wideLayout": true
+                "colorByField": "count",
+                "groupByField": "ua_platform",
+                "labelFields": [],
+                "sizeField": "count",
+                "textField": "agent",
+                "tiling": "treemapSquarify"
             },
-            "pluginVersion": "11.1.0",
             "targets": [
                 {
                     "datasource": {
@@ -718,7 +548,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT count(distinct(cli_ip))\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nLIMIT 100",
+                    "rawSql": "SELECT\n  agent,\n  ua_platform,\n  count(*) as count,\nFROM ngx_access_log\nWHERE $__timeFilter(access_time)\nGROUP BY agent, ua_platform\nORDER BY count desc\nLIMIT 100",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -739,8 +569,8 @@
                     }
                 }
             ],
-            "title": "Unique IPs Overall",
-            "type": "stat"
+            "title": "User Agent",
+            "type": "marcusolsson-treemap-panel"
         },
         {
             "collapsed": false,
@@ -748,7 +578,7 @@
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 28
+                "y": 19
             },
             "id": 19,
             "panels": [],
@@ -764,7 +594,7 @@
                 "h": 9,
                 "w": 24,
                 "x": 0,
-                "y": 29
+                "y": 20
             },
             "id": 20,
             "options": {
@@ -787,7 +617,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n  request, ua_platform, referer, client, access_time, status, size, agent\nFROM ngx_access_log\nWHERE\n  $__timeFilter(access_time)\n  AND matches(request, '$requestLike')\nORDER BY access_time\nLIMIT 50",
+                    "rawSql": "SELECT\n  endpoint, method, protocol, ua_platform, referer, client, access_time, status, size, agent\nFROM ngx_access_log\nWHERE\n  $__timeFilter(access_time)\n  AND matches(endpoint, '$requestLike')\nORDER BY access_time\nLIMIT 50",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -812,659 +642,474 @@
             "type": "logs"
         },
         {
-            "collapsed": true,
+            "collapsed": false,
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 38
+                "y": 29
             },
             "id": 7,
-            "panels": [
-                {
-                    "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
-                    },
-                    "description": "Number of requests per streaming format",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                }
-                            },
-                            "mappings": []
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 0,
-                        "y": 29
-                    },
-                    "id": 12,
-                    "options": {
-                        "displayLabels": [
-                            "name",
-                            "value"
-                        ],
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "hidden",
-                            "placement": "right",
-                            "showLegend": false,
-                            "values": []
-                        },
-                        "pieType": "pie",
-                        "reduceOptions": {
-                            "calcs": [
-                                "lastNotNull"
-                            ],
-                            "fields": "",
-                            "values": true
-                        },
-                        "tooltip": {
-                            "mode": "single",
-                            "sort": "none"
-                        }
-                    },
-                    "pluginVersion": "10.2.3",
-                    "targets": [
-                        {
-                            "datasource": {
-                                "type": "grafana-postgresql-datasource",
-                                "uid": "PE59989CBDF1A001C"
-                            },
-                            "editorMode": "code",
-                            "format": "table",
-                            "rawQuery": true,
-                            "rawSql": "SELECT\n  country,\n  count(*) as count\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nGROUP BY country\nORDER BY count desc\nLIMIT 100",
-                            "refId": "A",
-                            "sql": {
-                                "columns": [
-                                    {
-                                        "parameters": [],
-                                        "type": "function"
-                                    }
-                                ],
-                                "groupBy": [
-                                    {
-                                        "property": {
-                                            "type": "string"
-                                        },
-                                        "type": "groupBy"
-                                    }
-                                ],
-                                "limit": 50
-                            }
-                        }
-                    ],
-                    "title": "Countries",
-                    "type": "piechart"
-                },
-                {
-                    "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
-                    },
-                    "description": "Number of requests per streaming format",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                }
-                            },
-                            "mappings": []
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 12,
-                        "y": 29
-                    },
-                    "id": 11,
-                    "options": {
-                        "displayLabels": [
-                            "name",
-                            "percent"
-                        ],
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "list",
-                            "placement": "right",
-                            "showLegend": true,
-                            "values": [
-                                "percent"
-                            ]
-                        },
-                        "pieType": "pie",
-                        "reduceOptions": {
-                            "calcs": [
-                                "lastNotNull"
-                            ],
-                            "fields": "",
-                            "values": true
-                        },
-                        "tooltip": {
-                            "mode": "multi",
-                            "sort": "none"
-                        }
-                    },
-                    "pluginVersion": "10.2.3",
-                    "targets": [
-                        {
-                            "datasource": {
-                                "type": "grafana-postgresql-datasource",
-                                "uid": "PE59989CBDF1A001C"
-                            },
-                            "editorMode": "code",
-                            "format": "table",
-                            "rawQuery": true,
-                            "rawSql": "SELECT\n  error_code,\n  count(*) as count\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nGROUP BY error_code\nORDER BY count desc\nLIMIT 100",
-                            "refId": "A",
-                            "sql": {
-                                "columns": [
-                                    {
-                                        "parameters": [],
-                                        "type": "function"
-                                    }
-                                ],
-                                "groupBy": [
-                                    {
-                                        "property": {
-                                            "type": "string"
-                                        },
-                                        "type": "groupBy"
-                                    }
-                                ],
-                                "limit": 50
-                            }
-                        }
-                    ],
-                    "title": "Error Codes",
-                    "type": "piechart"
-                },
-                {
-                    "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
-                    },
-                    "description": "Number of requests per streaming format",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                }
-                            },
-                            "mappings": []
-                        },
-                        "overrides": [
-                            {
-                                "matcher": {
-                                    "id": "byName",
-                                    "options": "count"
-                                },
-                                "properties": [
-                                    {
-                                        "id": "unit",
-                                        "value": "short"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 0,
-                        "y": 37
-                    },
-                    "id": 14,
-                    "options": {
-                        "displayLabels": [
-                            "name"
-                        ],
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "list",
-                            "placement": "right",
-                            "showLegend": true,
-                            "values": [
-                                "percent"
-                            ]
-                        },
-                        "pieType": "pie",
-                        "reduceOptions": {
-                            "calcs": [
-                                "lastNotNull"
-                            ],
-                            "fields": "",
-                            "values": true
-                        },
-                        "tooltip": {
-                            "mode": "multi",
-                            "sort": "none"
-                        }
-                    },
-                    "pluginVersion": "10.2.3",
-                    "targets": [
-                        {
-                            "datasource": {
-                                "type": "grafana-postgresql-datasource",
-                                "uid": "PE59989CBDF1A001C"
-                            },
-                            "editorMode": "code",
-                            "format": "table",
-                            "rawQuery": true,
-                            "rawSql": "SELECT\n  rsp_content_type,\n  count(*) as count\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nGROUP BY rsp_content_type\nORDER BY count desc\nLIMIT 100",
-                            "refId": "A",
-                            "sql": {
-                                "columns": [
-                                    {
-                                        "parameters": [],
-                                        "type": "function"
-                                    }
-                                ],
-                                "groupBy": [
-                                    {
-                                        "property": {
-                                            "type": "string"
-                                        },
-                                        "type": "groupBy"
-                                    }
-                                ],
-                                "limit": 50
-                            }
-                        }
-                    ],
-                    "title": "Content Types",
-                    "type": "piechart"
-                },
-                {
-                    "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
-                    },
-                    "description": "Number of requests per channel",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                }
-                            },
-                            "mappings": []
-                        },
-                        "overrides": [
-                            {
-                                "matcher": {
-                                    "id": "byName",
-                                    "options": "count"
-                                },
-                                "properties": [
-                                    {
-                                        "id": "unit",
-                                        "value": "short"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 12,
-                        "y": 37
-                    },
-                    "id": 13,
-                    "options": {
-                        "displayLabels": [
-                            "name"
-                        ],
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "list",
-                            "placement": "right",
-                            "showLegend": true,
-                            "values": [
-                                "percent"
-                            ]
-                        },
-                        "pieType": "pie",
-                        "reduceOptions": {
-                            "calcs": [
-                                "lastNotNull"
-                            ],
-                            "fields": "",
-                            "values": true
-                        },
-                        "tooltip": {
-                            "mode": "multi",
-                            "sort": "none"
-                        }
-                    },
-                    "pluginVersion": "10.2.3",
-                    "targets": [
-                        {
-                            "datasource": {
-                                "type": "grafana-postgresql-datasource",
-                                "uid": "PE59989CBDF1A001C"
-                            },
-                            "editorMode": "code",
-                            "format": "table",
-                            "rawQuery": true,
-                            "rawSql": "SELECT\n  req_path,\n  count(*) as count\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nGROUP BY req_path\nORDER BY count desc\nLIMIT 100",
-                            "refId": "A",
-                            "sql": {
-                                "columns": [
-                                    {
-                                        "parameters": [],
-                                        "type": "function"
-                                    }
-                                ],
-                                "groupBy": [
-                                    {
-                                        "property": {
-                                            "type": "string"
-                                        },
-                                        "type": "groupBy"
-                                    }
-                                ],
-                                "limit": 50
-                            }
-                        }
-                    ],
-                    "title": "Resources",
-                    "type": "piechart"
-                },
-                {
-                    "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
-                    },
-                    "description": "Number of requests per streaming format",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "thresholds"
-                            },
-                            "custom": {
-                                "align": "auto",
-                                "cellOptions": {
-                                    "type": "auto"
-                                },
-                                "inspect": false
-                            },
-                            "mappings": [],
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 80
-                                    }
-                                ]
-                            }
-                        },
-                        "overrides": [
-                            {
-                                "matcher": {
-                                    "id": "byName",
-                                    "options": "count"
-                                },
-                                "properties": [
-                                    {
-                                        "id": "unit",
-                                        "value": "short"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 12,
-                        "y": 45
-                    },
-                    "id": 15,
-                    "options": {
-                        "cellHeight": "sm",
-                        "footer": {
-                            "countRows": false,
-                            "fields": "",
-                            "reducer": [
-                                "sum"
-                            ],
-                            "show": false
-                        },
-                        "showHeader": true
-                    },
-                    "pluginVersion": "11.1.0",
-                    "targets": [
-                        {
-                            "datasource": {
-                                "type": "grafana-postgresql-datasource",
-                                "uid": "PE59989CBDF1A001C"
-                            },
-                            "editorMode": "code",
-                            "format": "table",
-                            "rawQuery": true,
-                            "rawSql": "SELECT\n  referer,\n  count(*) as count\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nGROUP BY referer\nORDER BY count desc\nLIMIT 100",
-                            "refId": "A",
-                            "sql": {
-                                "columns": [
-                                    {
-                                        "parameters": [],
-                                        "type": "function"
-                                    }
-                                ],
-                                "groupBy": [
-                                    {
-                                        "property": {
-                                            "type": "string"
-                                        },
-                                        "type": "groupBy"
-                                    }
-                                ],
-                                "limit": 50
-                            }
-                        }
-                    ],
-                    "title": "Referer",
-                    "type": "table"
-                }
-            ],
-            "title": "Pie Chart",
+            "panels": [],
+            "title": "Server Side Details",
             "type": "row"
         },
         {
-            "collapsed": true,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 39
+            "datasource": {
+                "type": "info8fcc-greptimedb-datasource",
+                "uid": "PC5A6C36A21FB9380"
             },
-            "id": 16,
-            "panels": [
+            "description": "Number of requests per streaming format",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 30
+            },
+            "id": 22,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "10.2.3",
+            "targets": [
                 {
                     "datasource": {
-                        "type": "grafana-postgresql-datasource",
-                        "uid": "PE59989CBDF1A001C"
+                        "type": "prometheus",
+                        "uid": "PC5A6C36A21FB9380"
                     },
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "thresholds"
-                            },
-                            "mappings": [],
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 80
-                                    }
-                                ]
-                            }
+                    "editorMode": "code",
+                    "expr": "rate(query_latency_count[30s])",
+                    "instant": false,
+                    "legendFormat": "generation-{{generation}}",
+                    "range": true,
+                    "refId": "A"
+                }
+            ],
+            "title": "QPS",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "info8fcc-greptimedb-datasource",
+                "uid": "PC5A6C36A21FB9380"
+            },
+            "description": "Number of requests per streaming format",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
                         },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 11,
-                        "w": 14,
-                        "x": 0,
-                        "y": 54
-                    },
-                    "id": 17,
-                    "options": {
-                        "sizeField": "percenterror",
-                        "textField": "item",
-                        "tiling": "treemapSquarify"
-                    },
-                    "targets": [
-                        {
-                            "datasource": {
-                                "type": "grafana-postgresql-datasource",
-                                "uid": "PE59989CBDF1A001C"
-                            },
-                            "editorMode": "code",
-                            "format": "table",
-                            "rawQuery": true,
-                            "rawSql": "SELECT\n  ${treeMapGroupBy} as item,\n  count(*) as count,\n  count(security_rules LIKE '${secRulesLike}' or NULL) / count (*) as PercentError\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nGROUP BY item\nORDER BY count desc\nLIMIT ${treemapCells}",
-                            "refId": "A",
-                            "sql": {
-                                "columns": [
-                                    {
-                                        "parameters": [],
-                                        "type": "function"
-                                    }
-                                ],
-                                "groupBy": [
-                                    {
-                                        "property": {
-                                            "type": "string"
-                                        },
-                                        "type": "groupBy"
-                                    }
-                                ],
-                                "limit": 50
-                            }
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
                         }
-                    ],
-                    "title": "Security Rate for top ${treemapCells} ${treeMapGroupBy} (Excludes error rates below ${minErrorRate})",
-                    "type": "marcusolsson-treemap-panel"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 30
+            },
+            "id": 12,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "10.2.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "PC5A6C36A21FB9380"
+                    },
+                    "editorMode": "code",
+                    "expr": "histogram_quantile(0.95, query_latency_bucket)",
+                    "instant": false,
+                    "legendFormat": "latency-p95",
+                    "range": true,
+                    "refId": "A"
                 },
                 {
                     "datasource": {
+                        "type": "info8fcc-greptimedb-datasource",
+                        "uid": "PC5A6C36A21FB9380"
+                    },
+                    "editorMode": "code",
+                    "expr": "histogram_quantile(0.99, query_latency_bucket)",
+                    "hide": false,
+                    "instant": false,
+                    "legendFormat": "latency-p99",
+                    "range": true,
+                    "refId": "B"
+                }
+            ],
+            "title": "Query Latency",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "info8fcc-greptimedb-datasource",
+                "uid": "PC5A6C36A21FB9380"
+            },
+            "description": "Number of requests per streaming format",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 38
+            },
+            "id": 21,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "10.2.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "PC5A6C36A21FB9380"
+                    },
+                    "editorMode": "code",
+                    "expr": "rate(python_gc_collections_total[30s])",
+                    "instant": false,
+                    "legendFormat": "generation-{{generation}}",
+                    "range": true,
+                    "refId": "A"
+                }
+            ],
+            "title": "GC collections",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "info8fcc-greptimedb-datasource",
+                "uid": "PC5A6C36A21FB9380"
+            },
+            "description": "Number of requests per streaming format",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 38
+            },
+            "id": 23,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "10.2.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "PC5A6C36A21FB9380"
+                    },
+                    "editorMode": "code",
+                    "expr": "rate(python_gc_objects_collected_total[30s])",
+                    "instant": false,
+                    "legendFormat": "generation-{{generation}}",
+                    "range": true,
+                    "refId": "A"
+                }
+            ],
+            "title": "GC object rate",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "PE59989CBDF1A001C"
+            },
+            "gridPos": {
+                "h": 9,
+                "w": 24,
+                "x": 0,
+                "y": 46
+            },
+            "id": 24,
+            "options": {
+                "dedupStrategy": "none",
+                "enableLogDetails": true,
+                "prettifyLogMessage": false,
+                "showCommonLabels": false,
+                "showLabels": false,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "wrapLogMessage": false
+            },
+            "pluginVersion": "10.2.3",
+            "targets": [
+                {
+                    "datasource": {
                         "type": "grafana-postgresql-datasource",
                         "uid": "PE59989CBDF1A001C"
                     },
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "thresholds"
-                            },
-                            "mappings": [],
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 80
-                                    }
-                                ]
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\n  endpoint, method, protocol, ua_platform, referer, client, access_time, status, size, agent\nFROM ngx_access_log\nWHERE\n  $__timeFilter(access_time)\n  AND matches(endpoint, '$requestLike')\nORDER BY access_time\nLIMIT 50",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
                             }
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 11,
-                        "w": 10,
-                        "x": 14,
-                        "y": 54
-                    },
-                    "id": 18,
-                    "options": {
-                        "sizeField": "count",
-                        "textField": "security_rules",
-                        "tiling": "treemapSquarify"
-                    },
-                    "targets": [
-                        {
-                            "datasource": {
-                                "type": "grafana-postgresql-datasource",
-                                "uid": "PE59989CBDF1A001C"
-                            },
-                            "editorMode": "code",
-                            "format": "table",
-                            "rawQuery": true,
-                            "rawSql": "SELECT\n  security_rules,\n  count(*) as count,\nFROM ${ds2}\nWHERE $__timeFilter(req_time_sec)\nGROUP BY security_rules\nORDER BY count desc\nLIMIT ${treemapCells}",
-                            "refId": "A",
-                            "sql": {
-                                "columns": [
-                                    {
-                                        "parameters": [],
-                                        "type": "function"
-                                    }
-                                ],
-                                "groupBy": [
-                                    {
-                                        "property": {
-                                            "type": "string"
-                                        },
-                                        "type": "groupBy"
-                                    }
-                                ],
-                                "limit": 50
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
                             }
-                        }
-                    ],
-                    "title": "Top Security Rules",
-                    "type": "marcusolsson-treemap-panel"
+                        ],
+                        "limit": 50
+                    }
                 }
             ],
-            "title": "Security Flags Treemap",
-            "type": "row"
+            "title": "Raw Logs",
+            "type": "logs"
         }
     ],
     "refresh": "10s",
@@ -1478,7 +1123,7 @@
         "list": [
             {
                 "current": {
-                    "selected": false,
+                    "selected": true,
                     "text": "/",
                     "value": "/"
                 },
