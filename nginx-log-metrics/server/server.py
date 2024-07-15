@@ -2,6 +2,8 @@ from flask import Flask
 import random
 import time
 
+ERROR_RATE = 0.1
+
 app = Flask(__name__)
 
 
@@ -19,7 +21,10 @@ def query(query: str):
     delay = random.uniform(0.1, 1.0)
     time.sleep(delay)
 
-    return random_bytes
+    if random.random() < ERROR_RATE:
+        return "ERROR", random.choice([400, 401, 408, 409, 500, 502, 503, 504])
+    else:
+        return random_bytes
 
 
 if __name__ == "__main__":

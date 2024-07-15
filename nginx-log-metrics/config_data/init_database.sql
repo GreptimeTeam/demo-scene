@@ -1,5 +1,6 @@
 CREATE TABLE `ngx_access_log` (
   `client` STRING NULL,
+  `ua_platform` STRING NULL,
   `referer` STRING NULL,
   `request` STRING NULL,
   `status` SMALLINT UNSIGNED NULL,

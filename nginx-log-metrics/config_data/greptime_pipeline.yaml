@@ -5,10 +5,19 @@ processors:
         - timestamp
       formats:
         - "%Y-%m-%dT%H:%M:%SZ"
+  - epoch:
+      field: timestamp
+      resolution: millisecond
+      ignore_missing: true
+  - dissect:
+      field: agent
+      patterns: 
+        - "%{_prefix} (%{ua_platform}; %{_postfix}"
 
 transform:
   - fields:
       - client
+      - ua_platform
       - referer
       - request
     type: string
@@ -23,5 +32,5 @@ transform:
     type: string
     # index: fulltext
   - field: timestamp, access_time
-    type: time
+    type: epoch, millisecond
     index: timestamp
