@@ -32,7 +32,7 @@ transform:
     type: uint16
   - fields:
       - size
-    type: uint32
+    type: float64
   - fields:
       - agent
     type: string
