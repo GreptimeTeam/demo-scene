@@ -4,6 +4,7 @@ CREATE TABLE `ngx_access_log` (
   `referer` STRING NULL,
   `method` STRING NULL,
   `endpoint` STRING NULL,
+  `trace_id` STRING NULL FULLTEXT,
   `protocol` STRING NULL,
   `status` SMALLINT UNSIGNED NULL,
   `size` DOUBLE NULL,
@@ -36,7 +37,7 @@ SELECT
     min(size) as min_size,
     max(size) as max_size,
     avg(size) as avg_size,
-    sum(case when `size` > 100::double then 1::double else 0::double end) as high_size_count,
+    sum(case when `size` > 550::double then 1::double else 0::double end) as high_size_count,
     date_bin(INTERVAL '1 minutes', access_time, '2024-01-01 00:00:00'::TimestampNanosecond) as time_window,
 FROM ngx_access_log 
 GROUP BY

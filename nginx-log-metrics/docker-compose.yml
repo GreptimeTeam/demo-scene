@@ -53,7 +53,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./config_data:/config_data
-    command: curl -X "POST" "http://greptimedb:4000/v1/events/pipelines/demo_pipeline" -F "file=@/config_data/greptime_pipeline.yaml" -v
+    command: sh -c "curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/greptime_pipeline.yaml' -v; curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/server_log' -F 'file=@/config_data/server_log_pipeline.yaml' -v"
 
   vector:
     build:

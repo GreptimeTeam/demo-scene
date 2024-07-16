@@ -16,7 +16,13 @@ processors:
   - dissect:
       field: request
       patterns: 
-        - "%{method} %{endpoint} %{protocol}"
+        - "%{method} %{uri} %{protocol}"
+  - regex:
+      fields:
+        - uri
+      patterns:
+        - '(?<endpoint>/[a-zA-Z]+)/?(?<trace_id>.*)'
+      ignore_missing: true
 
 transform:
   - fields:
@@ -24,7 +30,8 @@ transform:
       - ua_platform
       - referer
       - method
-      - endpoint
+      - uri_endpoint, endpoint
+      - uri_trace_id, trace_id
       - protocol
     type: string
   - fields:
@@ -36,7 +43,6 @@ transform:
   - fields:
       - agent
     type: string
-    # index: fulltext
   - field: timestamp, access_time
     type: epoch, millisecond
     index: timestamp

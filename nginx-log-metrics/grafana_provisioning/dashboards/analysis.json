@@ -220,7 +220,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n  window_start,\n  sum(col_1) as total_logs\nFROM ngx_statistics\nWHERE $__timeFilter(window_start)\nGROUP BY window_start\nORDER BY window_start",
+                    "rawSql": "SELECT\n  time_window,\n  sum(total_logs) as total_logs\nFROM ngx_statistics\nWHERE $__timeFilter(time_window)\nGROUP BY time_window\nORDER BY time_window",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -319,7 +319,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n  status::string,\n  sum(col_1) as count\nFROM ngx_statistics\nWHERE $__timeFilter(window_start)\nGROUP BY status\nORDER BY count desc\nLIMIT 100",
+                    "rawSql": "SELECT\n  status::string,\n  sum(total_logs) as count\nFROM ngx_statistics\nWHERE $__timeFilter(time_window)\nGROUP BY status\nORDER BY count desc\nLIMIT 100",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -573,39 +573,86 @@
             "type": "marcusolsson-treemap-panel"
         },
         {
-            "collapsed": false,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 19
-            },
-            "id": 19,
-            "panels": [],
-            "title": "Raw Logs",
-            "type": "row"
-        },
-        {
             "datasource": {
                 "type": "grafana-postgresql-datasource",
                 "uid": "PE59989CBDF1A001C"
             },
-            "gridPos": {
-                "h": 9,
-                "w": 24,
-                "x": 0,
-                "y": 20
+            "description": "Number of requests per streaming format",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 19,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "smooth",
+                        "lineStyle": {
+                            "fill": "solid"
+                        },
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
             },
-            "id": 20,
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 19
+            },
+            "id": 26,
             "options": {
-                "dedupStrategy": "none",
-                "enableLogDetails": true,
-                "prettifyLogMessage": false,
-                "showCommonLabels": false,
-                "showLabels": false,
-                "showTime": true,
-                "sortOrder": "Descending",
-                "wrapLogMessage": false
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
             },
             "pluginVersion": "10.2.3",
             "targets": [
@@ -617,7 +664,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n  endpoint, method, protocol, ua_platform, referer, client, access_time, status, size, agent\nFROM ngx_access_log\nWHERE\n  $__timeFilter(access_time)\n  AND matches(endpoint, '$requestLike')\nORDER BY access_time\nLIMIT 50",
+                    "rawSql": "select \n  min_size,\n  max_size,\n  avg_size,\n  time_window\nfrom ngx_statistics\nwhere $__timeFilter(time_window) \n  AND status = 200;",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -638,8 +685,93 @@
                     }
                 }
             ],
-            "title": "Raw Logs (full text search)",
-            "type": "logs"
+            "title": "Payload size (flow aggregation) ",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "PE59989CBDF1A001C"
+            },
+            "description": "",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 19
+            },
+            "id": 27,
+            "options": {
+                "displayMode": "lcd",
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "values": true
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "11.1.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "PE59989CBDF1A001C"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "select \n  status::string,\n  sum(high_size_count) as count\nfrom ngx_statistics\nwhere $__timeFilter(time_window)\ngroup by status\norder by status;",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Number of large payload (flow conditional aggregation) ",
+            "type": "bargauge"
         },
         {
             "collapsed": false,
@@ -647,7 +779,7 @@
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 29
+                "y": 27
             },
             "id": 7,
             "panels": [],
@@ -718,7 +850,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 30
+                "y": 28
             },
             "id": 22,
             "options": {
@@ -743,7 +875,7 @@
                     "editorMode": "code",
                     "expr": "rate(query_latency_count[30s])",
                     "instant": false,
-                    "legendFormat": "generation-{{generation}}",
+                    "legendFormat": "QPS",
                     "range": true,
                     "refId": "A"
                 }
@@ -815,7 +947,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 30
+                "y": 28
             },
             "id": 12,
             "options": {
@@ -863,46 +995,20 @@
         },
         {
             "datasource": {
-                "type": "info8fcc-greptimedb-datasource",
-                "uid": "PC5A6C36A21FB9380"
+                "type": "grafana-postgresql-datasource",
+                "uid": "PE59989CBDF1A001C"
             },
-            "description": "Number of requests per streaming format",
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "palette-classic"
+                        "mode": "thresholds"
                     },
                     "custom": {
-                        "axisBorderShow": false,
-                        "axisCenteredZero": false,
-                        "axisColorMode": "text",
-                        "axisLabel": "",
-                        "axisPlacement": "auto",
-                        "barAlignment": 0,
-                        "drawStyle": "line",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "hideFrom": {
-                            "legend": false,
-                            "tooltip": false,
-                            "viz": false
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
                         },
-                        "insertNulls": false,
-                        "lineInterpolation": "linear",
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "scaleDistribution": {
-                            "type": "linear"
-                        },
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -919,44 +1025,98 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "delay"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 86
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "timestamp"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 185
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "trace_id"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 570
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 38
+                "y": 36
             },
-            "id": 21,
+            "id": 25,
             "options": {
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
                 },
-                "tooltip": {
-                    "mode": "single",
-                    "sort": "none"
-                }
+                "showHeader": true,
+                "sortBy": []
             },
-            "pluginVersion": "10.2.3",
+            "pluginVersion": "11.1.0",
             "targets": [
                 {
                     "datasource": {
-                        "type": "prometheus",
-                        "uid": "PC5A6C36A21FB9380"
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "PE59989CBDF1A001C"
                     },
                     "editorMode": "code",
-                    "expr": "rate(python_gc_collections_total[30s])",
-                    "instant": false,
-                    "legendFormat": "generation-{{generation}}",
-                    "range": true,
-                    "refId": "A"
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "select timestamp, delay, trace_id\nfrom server_log\nwhere $__timeFilter(timestamp)\norder by delay desc\nlimit 10",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
                 }
             ],
-            "title": "GC collections",
-            "type": "timeseries"
+            "title": "Latency top 10",
+            "type": "table"
         },
         {
             "datasource": {
@@ -1022,7 +1182,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 38
+                "y": 36
             },
             "id": 23,
             "options": {
@@ -1054,6 +1214,131 @@
             ],
             "title": "GC object rate",
             "type": "timeseries"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 44
+            },
+            "id": 19,
+            "panels": [],
+            "title": "Raw Logs",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "PE59989CBDF1A001C"
+            },
+            "gridPos": {
+                "h": 9,
+                "w": 12,
+                "x": 0,
+                "y": 45
+            },
+            "id": 20,
+            "options": {
+                "dedupStrategy": "none",
+                "enableLogDetails": true,
+                "prettifyLogMessage": false,
+                "showCommonLabels": false,
+                "showLabels": false,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "wrapLogMessage": false
+            },
+            "pluginVersion": "10.2.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "PE59989CBDF1A001C"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\n  concat(endpoint, ' ', method, ' ', trace_id), protocol, ua_platform, referer, client, access_time, status, size, agent\nFROM ngx_access_log\nWHERE\n  $__timeFilter(access_time)\nORDER BY access_time\nLIMIT 50",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Newest 50 raw logs",
+            "type": "logs"
+        },
+        {
+            "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "PE59989CBDF1A001C"
+            },
+            "gridPos": {
+                "h": 9,
+                "w": 12,
+                "x": 12,
+                "y": 45
+            },
+            "id": 24,
+            "options": {
+                "dedupStrategy": "none",
+                "enableLogDetails": true,
+                "prettifyLogMessage": false,
+                "showCommonLabels": false,
+                "showLabels": false,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "wrapLogMessage": false
+            },
+            "pluginVersion": "10.2.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "PE59989CBDF1A001C"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "with top10 as (\n    select *\n    from server_log\n    where $__timeFilter(timestamp)\n      AND matches(trace_id, '$requestLike')\n    order by delay desc\n    limit 10\n)\nselect access_time, top10.trace_id, client, ua_platform, referer, method, endpoint, protocol, status, size, agent, payload_size, delay\nfrom ngx_access_log\n    right join top10\n    on ngx_access_log.trace_id = top10.trace_id\norder by top10.delay desc;",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Global view of top 10 latency by user namespace (full text search)",
+            "type": "logs"
         }
     ],
     "refresh": "10s",
@@ -1067,7 +1352,7 @@
         "list": [
             {
                 "current": {
-                    "selected": true,
+                    "selected": false,
                     "text": "/",
                     "value": "/"
                 },
@@ -1077,9 +1362,9 @@
                 "name": "requestLike",
                 "options": [
                     {
-                        "selected": true,
-                        "text": "/",
-                        "value": "/"
+                        "selected": false,
+                        "text": "sleepify",
+                        "value": "sleepify"
                     }
                 ],
                 "query": "/",

@@ -4,6 +4,7 @@ import random
 import time
 import sys
 import ua_generator
+import uuid
 
 BASE_URL = "http://nginx"
 INTERVAL_MS = 100
@@ -17,6 +18,10 @@ with open("random-words.txt", "r") as f:
     for line in f:
         random_words.append(line.strip())
 words_count = len(random_words)
+words_per = words_count // 6
+namespace_1 = random_words[:words_per]
+namespace_2 = random_words[words_per : words_per * 3]
+namespace_3 = random_words[words_per * 3 : words_per * 6]
 
 
 print("Load random words from file, total", words_count, "words")
@@ -51,9 +56,15 @@ def request_other():
 
 
 def request_query():
-    query_length = random.randint(5, 10)
-    random_query = "-".join(random.choices(random_words, k=query_length))
-    url = f"{BASE_URL}/query/{random_query}"
+    trace_id = "-".join(
+        [
+            random.choices(namespace_1)[0],
+            random.choices(namespace_2)[0],
+            random.choices(namespace_3)[0],
+            str(uuid.uuid4()),
+        ]
+    )
+    url = f"{BASE_URL}/query/{trace_id}"
     print("query requesting ", url)
     _response = requests.get(url, headers=random_header())
 
