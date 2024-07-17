@@ -1,0 +1,24 @@
+---
+processors:
+  - date:
+      fields:
+        - timestamp
+      formats:
+        - "%Y-%m-%d %H:%M:%S%.6f"
+  - epoch:
+      field: timestamp
+      resolution: millisecond
+      ignore_missing: true
+
+transform:
+  - fields:
+      - trace_id
+    type: string
+    index: fulltext
+  - fields:
+      - payload_size
+      - delay
+    type: float64
+  - field: timestamp
+    type: epoch, millisecond
+    index: timestamp

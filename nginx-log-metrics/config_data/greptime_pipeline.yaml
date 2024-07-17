@@ -1,0 +1,48 @@
+---
+processors:
+  - date:
+      fields:
+        - timestamp
+      formats:
+        - "%Y-%m-%dT%H:%M:%SZ"
+  - epoch:
+      field: timestamp
+      resolution: millisecond
+      ignore_missing: true
+  - dissect:
+      field: agent
+      patterns: 
+        - "%{_prefix} (%{ua_platform}; %{_postfix}"
+  - dissect:
+      field: request
+      patterns: 
+        - "%{method} %{uri} %{protocol}"
+  - regex:
+      fields:
+        - uri
+      patterns:
+        - '(?<endpoint>/[a-zA-Z]+)/?(?<trace_id>.*)'
+      ignore_missing: true
+
+transform:
+  - fields:
+      - client
+      - ua_platform
+      - referer
+      - method
+      - uri_endpoint, endpoint
+      - uri_trace_id, trace_id
+      - protocol
+    type: string
+  - fields:
+      - status
+    type: uint16
+  - fields:
+      - size
+    type: float64
+  - fields:
+      - agent
+    type: string
+  - field: timestamp, access_time
+    type: epoch, millisecond
+    index: timestamp

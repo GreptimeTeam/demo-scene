@@ -1,0 +1,136 @@
+services:
+  greptimedb:
+    image: docker.io/greptime/greptimedb:v0.9.0-b2c5f8eef-20240716-1721102282
+    command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+    ports:
+      - 4000:4000
+      - 4001:4001
+      - 4002:4002
+      - 4003:4003
+    networks:
+      - demo-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:4000/health" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  grafana:
+    build:
+      context: ./grafana
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    networks:
+      - demo-network
+    user: "$UID:$GID"
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    restart: always
+
+  init_database:
+    image: docker.io/postgres
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    volumes:
+      - ./config_data:/config_data
+    command: psql -h greptimedb -p 4003 -d public -f /config_data/init_database.sql
+    environment:
+      PGSSLMODE: disable
+
+  init_pipeline:
+    image: docker.io/alpine/curl
+    networks:
+      - demo-network
+    depends_on:
+      init_database:
+        condition: service_completed_successfully
+    volumes:
+      - ./config_data:/config_data
+    command: sh -c "curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/greptime_pipeline.yaml' -v; curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/server_log' -F 'file=@/config_data/server_log_pipeline.yaml' -v"
+
+  vector:
+    build:
+      context: ./build_vector
+      dockerfile: ./Dockerfile
+    networks:
+      - demo-network
+    volumes:
+      - ./config_data:/config_data
+      - logs:/logs
+    depends_on:
+      init_pipeline:
+        condition: service_completed_successfully
+      nginx:
+        condition: service_started
+    environment:
+      VECTOR_CONFIG_LOCATION: /config_data/vector.toml
+
+  nginx:
+    image: docker.io/nginx:1.27.0
+    networks:
+      - demo-network
+    volumes:
+      - ./nginx_conf/nginx.conf:/etc/nginx/nginx.conf
+      - logs:/var/log/nginx
+    environment:
+      - NGINX_PORT=8081
+    depends_on:
+      server:
+        condition: service_healthy
+
+  server:
+    build:
+      context: ./server
+      dockerfile: ./Dockerfile
+    networks:
+      - demo-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:5678/" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  py-client:
+    build:
+      context: ./client
+      dockerfile: ./Dockerfile
+    networks:
+      - demo-network
+    depends_on:
+      nginx:
+        condition: service_started
+
+  prometheus:
+    image: docker.io/prom/prometheus:v2.45.6
+    networks:
+      - demo-network
+    volumes:
+      - ./config_data/prometheus-greptimedb.yml:/etc/prometheus/prometheus.yml:ro
+
+  nginx_exporter:
+    image: docker.io/nginx/nginx-prometheus-exporter:1.1
+    ports:
+      - 9113
+    command:
+      - '--nginx.scrape-uri=http://nginx/nginx_status'
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+
+networks:
+  demo-network:
+
+
+volumes:
+  logs:
