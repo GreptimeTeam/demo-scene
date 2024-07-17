@@ -30,8 +30,8 @@ CREATE TABLE `ngx_statistics` (
 
 CREATE FLOW ngx_aggregation
 SINK TO ngx_statistics
-AS 
-SELECT 
+AS
+SELECT
     status,
     count(client) AS total_logs,
     min(size) as min_size,
@@ -39,7 +39,7 @@ SELECT
     avg(size) as avg_size,
     sum(case when `size` > 550::double then 1::double else 0::double end) as high_size_count,
     date_bin(INTERVAL '1 minutes', access_time, '2024-01-01 00:00:00'::TimestampNanosecond) as time_window,
-FROM ngx_access_log 
+FROM ngx_access_log
 GROUP BY
     status,
     time_window;

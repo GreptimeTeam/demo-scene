@@ -5,7 +5,7 @@ FROM rust:1.79 as builder
 RUN apt-get update && apt-get install -y cmake pkg-config libssl-dev protobuf-compiler libsasl2-dev
 
 # Clone the Vector source code
-RUN git clone https://github.com/shuiyisong/vector.git /vector
+RUN git clone --depth 1 https://github.com/shuiyisong/vector.git /vector
 WORKDIR /vector
 
 # Switch to your custom branch
@@ -16,8 +16,6 @@ RUN cargo build --release --no-default-features --features=default-greptimedb-cu
 
 # Use a minimal base image for the final image
 FROM debian:bookworm-slim
-
-# RUN apt-get update && apt-get install -y libc-bin=2.13-38+deb7u4 libc6=2.13-38+deb7u4
 
 # Copy the Vector binary from the builder stage
 COPY --from=builder /vector/target/release/vector /usr/local/bin/vector
