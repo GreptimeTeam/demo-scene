@@ -19,7 +19,7 @@ takes Nginx Observability as an example. We have following features covered:
   - Joined log details shows top 10 slow logs based on provided search strings
     to trace ID. Both Nginx and server sides details are included.
 
-![screenshot](https://raw.githubusercontent.com/GreptimeTeam/demo-scene/blob/main/nginx-log-metrics/screenshot.png)
+![screenshot](screenshot.png)
 
 ## How to run this demo
 
