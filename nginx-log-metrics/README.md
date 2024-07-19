@@ -5,25 +5,25 @@ takes Nginx Observability as an example. We have following features covered:
 
 - Using GreptimeDB as **a scalable Prometheus backend** for Nginx metrics
 - Using GreptimeDB to **parse and store structured events** from Nginx access
-  logs and python server logs
-- Generating metrics from Nginx access log using GreptimeDB's **continuous
+  logs and Python server logs
+- Generating metrics from the Nginx access log using GreptimeDB's **continuous
   aggregation**
 - Running **a single joined query** from both metrics and events
 - Visualizing everything above from Grafana
-  - Tree map to show the user-agent corresponding platform that is extracted
+  - Treemap to show the user-agent corresponding platform that is extracted
     in pipeline
-  - Log details of newest 50 nginx access log
-  - Two time-series panels shows flow continuous aggregation and conditional
+  - Log details of the newest 50 nginx access log
+  - Two time-series panels show flow continuous aggregation and conditional
     aggregation
-  - Table shows top 10 slow trace IDs
-  - Joined log details shows top 10 slow logs based on provided search strings
-    to trace ID. Both Nginx and server sides details are included.
+  - Table shows the top 10 slow trace IDs
+  - Joined log details show top 10 slow logs based on provided search strings
+    to trace ID. Both Nginx and server-side details are included.
 
-![screenshot](https://raw.githubusercontent.com/GreptimeTeam/demo-scene/blob/main/nginx-log-metrics/screenshot.png)
+![screenshot](screenshot.png)
 
 ## How to run this demo
 
-Make sure you have `git`, `docker` and `docker-compose` installed. To run this
+Ensure you have `git`, `docker` and `docker-compose` installed. To run this
 demo:
 
 ```shell
@@ -35,27 +35,27 @@ docker compose up
 It can take a while for the first run to pull down images and also build
 necessary components.
 
-Once it's up and running , open your browser at `http://localhost:3000` and
-login with username/password `admin`/`admin`. Check the pre-built dashboards.
+Once it's up and running, open your browser at `http://localhost:3000` and
+log in with the default username and password (both `admin`). Check the pre-built dashboards.
 
-You can also access GreptimeDB if you have `mysql` installed. Just run `mysql -h
-127.0.0.1 -P 4002` to connect to the database and using SQL query like `SHOW
-TABLES` as a start.
+You can also access GreptimeDB if you have `mysql` installed. Just run
+`mysql -h 127.0.0.1 -P 4002` to connect to the database and use SQL query
+like `SHOW TABLES` as a start.
 
 ## How it works
 
-This demo is to simulate a typical setup of a python based web application.
+This demo simulates a typical setup of a python based web application.
 
 The data plane includes:
 
-- A python web application
+- A Python web application
 - Nginx
 - A web client generates random traffic
 
 The observability plane includes:
 
 - GreptimeDB, of course, as the storage of all data
-- Vector, Prometheus and its exporter for moving logs and metrics to
+- Vector, Prometheus, and its exporter for moving logs and metrics to
   GreptimeDB
 - Grafana for dashboarding
 - Some one-shot containers for initialization
@@ -87,11 +87,11 @@ flowchart LR
   class greptimedb,grafana,nginx_exporter,prometheus,vector o11yplane
 ```
 
-All of those logs and metrics are stored in GreptimeDB, with:
+All of those logs and metrics are stored in GreptimeDB, with the following:
 
 - A pipeline to fashioning the Nginx access log. The config file is at
   [greptime_pipeline.yaml](./config_data/greptime_pipeline.yaml)
-  - string decomposition, field parsing or renaming etc can be defined in
+  - string decomposition, field parsing or renaming, etc. can be defined in
     pipeline process the semi-structured log
   - regex match and remapping
 - A continuous aggregation over metrics. The config file is at
@@ -104,9 +104,9 @@ All of those logs and metrics are stored in GreptimeDB, with:
 
 ## Help
 
-1. If you modified component like `vector` in this setup, remember to add
+1. If you modified a component like `vector` in this setup, remember to add
    `--build <container_name>` to your `docker compose up` to trigger a rebuild.
-2. If you are behind a proxy, add `--build-args <proxy-url>` to `docker compose
-   build` for a full build.
+2. If you are behind a proxy, add `--build-args <proxy-url>` to `docker compose build`
+   for a complete build.
 
-Feel free to add an issue if you have any question with this demo.
+Feel free to add an issue if you have any questions about this demo.
