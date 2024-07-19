@@ -17,12 +17,12 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 ### Applications
 
 * [Keyboard Monitor](keyboard-monitor) ([✍️ blog](https://greptime.com/blogs/2024-03-19-keyboard-monitoring))
+* [Observability for Nginx on Logs & Metrics](nginx-log-metrics)
 
 ### Data pipelines (Ingestion + Greptime + Analysis or Display)
 
 * [InfluxDB Line Protocol + GreptimeDB + Web UI](influxdb-lineprotocol) ([🎥 tutorial](https://www.youtube.com/watch?v=JZuq0inSO9Q))
 * [Telegraf + GreptimeDB + Web UI](telegraf-ingestion)
-* [Observability for Nginx, Logs and Metrics](nginx-log-metrics)
 
 ### Data Migrations
 
