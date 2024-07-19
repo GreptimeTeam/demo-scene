@@ -22,6 +22,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 * [InfluxDB Line Protocol + GreptimeDB + Web UI](influxdb-lineprotocol) ([🎥 tutorial](https://www.youtube.com/watch?v=JZuq0inSO9Q))
 * [Telegraf + GreptimeDB + Web UI](telegraf-ingestion)
+* [Observability for Nginx, Logs and Metrics](nginx-log-metrics)
 
 ### Data Migrations
 
