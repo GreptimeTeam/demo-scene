@@ -2,7 +2,7 @@
 
 ## Rationales
 
-GreptimeDB implmenets APIs for both Prometheus remote read and remote write. You can [use GreptimeDB as a Prometheus backend](https://docs.greptime.com/user-guide/write-data/prometheus).
+GreptimeDB implements APIs for both Prometheus remote read and remote write. You can [use GreptimeDB as a Prometheus backend](https://docs.greptime.com/user-guide/write-data/prometheus).
 
 Meanwhile, GreptimeDB [supports PromQL](https://docs.greptime.com/user-guide/query-data/promql) as its query interface, so that you can use GreptimeDB as a drop-in replacement for Prometheus.
 
@@ -140,7 +140,7 @@ Choose "Prometheus" and add the necessary configuration:
 
 ![Grafana Connection Info](media/grafana-connection-info.png)
 
-Click "Save & Test" at the buttom to ensure the connection is correctly set up.
+Click "Save & Test" at the button to ensure the connection is correctly set up.
 
 Then, go the "Dashboard" page and click "Create Dashboard":
 
