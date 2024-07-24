@@ -18,8 +18,17 @@ First of all, let's get a free GreptimeDB service:
 
 ```shell
 export GREPTIME_HOST="<host>"
+```
+
+```shell
 export GREPTIME_DATABASE="<dbname>"
+```
+
+```shell
 export GREPTIME_USERNAME="<username>"
+```
+
+```shell
 export GREPTIME_PASSWORD="<password>"
 ```
 
@@ -85,6 +94,10 @@ cd prometheus-2.53.1.darwin-arm64
 ```
 
 Modify the `prometheus.yml` file with:
+
+> [!TIP]
+>
+> If you switch to a new session, you need to re-export the environment variables as in [Step 1](#step-1-set-up-greptimedb-service).
 
 ```bash
 cat <<END > prometheus.yml

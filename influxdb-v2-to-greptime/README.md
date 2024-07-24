@@ -15,9 +15,18 @@ You need to be able to access your InfluxDB engine path, which contains your dat
 3. Export the necessary environment variables:
 
 ```shell
-export GREPTIME_DB="<dbname>"
 export GREPTIME_HOST="<host>"
+```
+
+```shell
+export GREPTIME_DATABASE="<dbname>"
+```
+
+```shell
 export GREPTIME_USERNAME="<username>"
+```
+
+```shell
 export GREPTIME_PASSWORD="<password>"
 ```
 
