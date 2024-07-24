@@ -14,8 +14,17 @@ GreptimeDB supports both InfluxDB V1 and V2 ingestion APIs. To simplify the conf
 
 ```shell
 export GREPTIME_HOST="<host>"
+```
+
+```shell
 export GREPTIME_DATABASE="<dbname>"
+```
+
+```shell
 export GREPTIME_USERNAME="<username>"
+```
+
+```shell
 export GREPTIME_PASSWORD="<password>"
 ```
 
