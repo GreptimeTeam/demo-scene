@@ -1,5 +1,5 @@
 # Use Rust as the base image
-FROM rust:1.79 as builder
+FROM rust:1.79 AS builder
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y cmake pkg-config libssl-dev protobuf-compiler libsasl2-dev

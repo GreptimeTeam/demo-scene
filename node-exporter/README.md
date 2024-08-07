@@ -12,7 +12,7 @@ This demo showcases how to run the famous Node Exporter integrations with Grepti
 
 First of all, let's get a free GreptimeDB service:
 
-1. Obtain a free GreptimeDB service from [GreptimeCloud](https://console.greptime.cloud/). 
+1. Obtain a free GreptimeDB service from [GreptimeCloud](https://console.greptime.cloud/).
 2. Click the "Connection Information" button and find the connection string.
 3. Export the necessary environment variables:
 
@@ -171,8 +171,10 @@ Use the data source you just registered, and click "Import". You will be redirec
 
 This demo also provides a [docker-compose.yml](docker-compose.yml) file so that you can set up the whole Node Exporter integration in one line:
 
+Create your own `prometheus.yml` from `prometheus.yml.tpl` by replacing
+placeholders with your GreptimeDB connection information. Start Prometheus/Node
+Exporter/Grafana with docker compose:
+
 ```bash
 docker compose up
 ```
-
-Ensure the `prometheus.yml` file in the current working directory is configured as described in Step 3, and then the rest would work well.
