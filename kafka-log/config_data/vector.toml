@@ -1,0 +1,16 @@
+[sources.mq]
+type = "kafka"
+group_id = "vector0"
+topic = "test-topic"
+
+[sinks.console]
+type = "console"
+inputs = [ "mq" ]
+
+[sinks.sink_greptime_logs]
+type = "greptimedb_logs"
+table = "ngx_access_log"
+pipeline_name = "demo_pipeline"
+compression = "gzip"
+inputs = [ "mq" ]
+endpoint = "http://greptimedb:4000"
