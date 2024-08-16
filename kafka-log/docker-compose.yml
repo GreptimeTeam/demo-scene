@@ -3,7 +3,7 @@ services:
     image: docker.io/bitnami/kafka:3.6.0
     container_name: kafka
     ports:
-      - 9092:9092
+      - 9092
     networks:
       - demo-network
     environment:
@@ -21,6 +21,16 @@ services:
       ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_BROKER_ID: "1"
 
+  msg_gen:
+    build:
+      context: ./producer
+      dockerfile: ./Dockerfile
+    networks:
+      - demo-network
+    depends_on:
+      kafka:
+        condition: service_started
+
   vector:
     build:
       context: ./build_vector
@@ -30,9 +40,7 @@ services:
     volumes:
       - ./config_data:/config_data
     depends_on:
-      init_pipeline:
-        condition: service_completed_successfully
-      nginx:
+      kafka:
         condition: service_started
     environment:
       VECTOR_CONFIG_LOCATION: /config_data/vector.toml
