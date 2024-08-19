@@ -2,7 +2,7 @@
 
 ## Rationales
 
-GreptimeDB implements APIs for both Prometheus remote read and remote write. You can [use GreptimeDB as a Prometheus backend](https://docs.greptime.com/user-guide/write-data/prometheus).
+GreptimeDB implements APIs for both Prometheus remote read and remote write. You can [use GreptimeDB as a Prometheus backend](https://docs.greptime.com/user-guide/ingest-data/for-observerbility/prometheus).
 
 Meanwhile, GreptimeDB [supports PromQL](https://docs.greptime.com/user-guide/query-data/promql) as its query interface, so that you can use GreptimeDB as a drop-in replacement for Prometheus.
 
