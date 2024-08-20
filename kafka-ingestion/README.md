@@ -12,7 +12,7 @@ Ensure you have `git`, `docker`, `docker-compose` and `mysql` client
 installed. To run this demo:
 
 ```shell
-git clone git@github.com:GreptimeTeam/demo-scene.git
+git clone https://github.com/GreptimeTeam/demo-scene.git
 cd demo-scene/kafka-ingestion
 docker compose up
 ```
