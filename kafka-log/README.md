@@ -8,12 +8,12 @@ for Kafka as source and GreptimeDB as sinks.
 
 ## How to run this demo
 
-Ensure you have `git`, `docker` and `docker-compose` installed. To run this
-demo:
+Ensure you have `git`, `docker`, `docker-compose` and `mysql` client
+installed. To run this demo:
 
 ```shell
 git clone git@github.com:GreptimeTeam/demo-scene.git
-cd demo-scene/nginx-log-metrics
+cd demo-scene/kafka-log
 docker compose up
 ```
 
@@ -79,6 +79,6 @@ flowchart LR
 ```
 
 All the generated logs are stored in GreptimeDB using a pipeline definition at
-[greptime_pipeline.yaml](./config_data/pipeline.yaml). Basically, it extracts
-timestamp and message fields from the data Vector sents to GreptimeDB and stores
-them as table columns.
+[pipeline.yaml](./config_data/pipeline.yaml). Basically, it extracts timestamp
+and message fields from the data Vector sents to GreptimeDB and stores them as
+table columns.
