@@ -11,7 +11,7 @@ encoding.codec = "text"
 
 [sinks.sink_greptime_logs]
 type = "greptimedb_logs"
-table = "ngx_access_log"
+table = "demo_logs"
 pipeline_name = "demo_pipeline"
 compression = "gzip"
 inputs = [ "mq" ]
