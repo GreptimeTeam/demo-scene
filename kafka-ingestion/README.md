@@ -65,7 +65,8 @@ MySQL [(none)]> select * from demo_logs order by timestamp desc limit 10;
 MySQL [(none)]> Bye
 ```
 
-You can also open your browser at http://localhost:4000/dashboard for the Web UI.
+You can also open your browser at http://localhost:4000/dashboard for the Web
+UI.
 
 ## How it works
 
@@ -84,6 +85,15 @@ All the generated logs are stored in GreptimeDB using a pipeline definition at
 [pipeline.yaml](./config_data/pipeline.yaml). Basically, it extracts timestamp
 and message fields from the data Vector sents to GreptimeDB and stores them as
 table columns.
+
+Once greptimedb starts, we use an init container `init_pipeline` to send a http
+post call to store the pipeline definition named as `demo_pipeline`.
+
+In the [vector configuration](./config_data/vector.toml), we specify the
+pipeline name `demo_pipeline` and table name `demo_logs` (you can customize it).
+
+To learn more about logs and pipeline definition, [see our
+docs](https://docs.greptime.com/user-guide/logs/overview).
 
 ## Note
 
