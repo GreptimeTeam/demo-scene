@@ -1,0 +1,88 @@
+services:
+  kafka:
+    image: docker.io/bitnami/kafka:3.6.0
+    container_name: kafka
+    ports:
+      - 9092
+    networks:
+      - demo-network
+    environment:
+      # KRaft settings
+      KAFKA_KRAFT_CLUSTER_ID: Kmp-xkTnSf-WWXhWmiorDg
+      KAFKA_ENABLE_KRAFT: "yes"
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@127.0.0.1:2181
+      # Listeners
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_BROKER_ID: "1"
+
+  kafka-init:
+    image: docker.io/bitnami/kafka:3.6.0
+    networks:
+      - demo-network
+    command: ["/opt/bitnami/kafka/bin/kafka-topics.sh", "--create", "--topic", "test_topic", "--bootstrap-server", "kafka:9092"]
+    depends_on:
+      kafka:
+        condition: service_started
+    init: true
+
+  msg_gen:
+    build:
+      context: ./producer
+      dockerfile: ./Dockerfile
+    networks:
+      - demo-network
+    environment:
+      - KAFKA_TOPIC_NAME=test_topic
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  init_pipeline:
+    image: docker.io/alpine/curl
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_started
+    volumes:
+      - ./config_data:/config_data
+    command: sh -c "curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/pipeline.yaml' -v"
+
+  vector:
+    build:
+      context: ./build_vector
+      dockerfile: ./Dockerfile
+    networks:
+      - demo-network
+    volumes:
+      - ./config_data:/config_data
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      VECTOR_CONFIG_LOCATION: /config_data/vector.toml
+
+  greptimedb:
+    image: docker.io/greptime/greptimedb:v0.9.2
+    command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+    ports:
+      - 4000:4000
+      - 4001:4001
+      - 4002:4002
+      - 4003:4003
+    networks:
+      - demo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:4000/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+networks:
+  demo-network:
