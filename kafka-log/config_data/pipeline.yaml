@@ -1,0 +1,15 @@
+processors:
+  - date:
+      fields:
+        - timestamp
+      formats:
+        - "%Y-%m-%dT%H:%M:%S%.3fZ"
+
+transform:
+  - fields:
+      - message
+    type: string
+  - fields:
+      - timestamp
+    type: timestamp
+    index: timestamp
