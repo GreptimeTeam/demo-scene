@@ -14,12 +14,24 @@ services:
       KAFKA_CFG_PROCESS_ROLES: broker,controller
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@127.0.0.1:2181
       # Listeners
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://:9092
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:2181
       ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_BROKER_ID: "1"
+
+  kafka-init:
+    image: docker.io/bitnami/kafka:3.6.0
+    networks:
+      - demo-network
+    command: ["/opt/bitnami/kafka/bin/kafka-topics.sh", "--create", "--topic", "$KAFKA_TOPIC_NAME", "--bootstrap-server", "kafka:9092"]
+    environment:
+      - KAFKA_TOPIC_NAME=test_topic
+    depends_on:
+      kafka:
+        condition: service_started
+    init: true
 
   msg_gen:
     build:
@@ -27,9 +39,11 @@ services:
       dockerfile: ./Dockerfile
     networks:
       - demo-network
+    environment:
+      - KAFKA_TOPIC_NAME=test_topic
     depends_on:
-      kafka:
-        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
 
   vector:
     build:
@@ -40,8 +54,8 @@ services:
     volumes:
       - ./config_data:/config_data
     depends_on:
-      kafka:
-        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
     environment:
       VECTOR_CONFIG_LOCATION: /config_data/vector.toml
 
