@@ -65,6 +65,8 @@ MySQL [(none)]> select * from demo_logs order by timestamp desc limit 10;
 MySQL [(none)]> Bye
 ```
 
+You can also open your browser at http://localhost:4000/dashboard for the Web UI.
+
 ## How it works
 
 The topology is illustrated in this diagram. One-shot containers are ignored.
