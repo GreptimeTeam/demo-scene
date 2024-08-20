@@ -24,7 +24,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 * [InfluxDB Line Protocol + GreptimeDB + Web UI](influxdb-lineprotocol) ([🎥 tutorial](https://www.youtube.com/watch?v=JZuq0inSO9Q))
 * [Prometheus Node Exporter + GreptimeDB + Web Dashboard or Grafana Dashboard](node-exporter)
 * [Telegraf + GreptimeDB + Web UI](telegraf-ingestion)
-* [Kafka + Vector + GreptimeDB + Web UI](kafka-log)
+* [Kafka + Vector + GreptimeDB + Web UI](kafka-ingestion)
 
 ### Data Migrations
 

@@ -13,7 +13,7 @@ installed. To run this demo:
 
 ```shell
 git clone git@github.com:GreptimeTeam/demo-scene.git
-cd demo-scene/kafka-log
+cd demo-scene/kafka-ingestion
 docker compose up
 ```
 
@@ -84,3 +84,9 @@ All the generated logs are stored in GreptimeDB using a pipeline definition at
 [pipeline.yaml](./config_data/pipeline.yaml). Basically, it extracts timestamp
 and message fields from the data Vector sents to GreptimeDB and stores them as
 table columns.
+
+## Note
+
+If you are going to restart this demo, press `Ctrl-C` and remember to call
+`docker compose down` to clean up the data before you run `docker compose up`
+again.
