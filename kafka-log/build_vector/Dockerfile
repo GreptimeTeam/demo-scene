@@ -5,11 +5,11 @@ FROM rust:1.79 AS builder
 RUN apt-get update && apt-get install -y cmake pkg-config libssl-dev protobuf-compiler libsasl2-dev
 
 # Clone the Vector source code
-RUN git clone --depth 1 -b chore/greptime_log_ingester https://github.com/shuiyisong/vector.git /vector
+RUN git clone --depth 1 -b chore/greptime_log https://github.com/paomian/vector.git /vector
 WORKDIR /vector
 
 # Build Vector
-RUN cargo build --release --no-default-features --features=default-greptimedb-custom,sinks-console,sources-prometheus-scrape,sources-prometheus-scrape
+RUN cargo build --release --no-default-features --features=sinks-greptimedb_logs,sinks-greptimedb_metrics,sinks-console,sources-kafka
 
 # Use a minimal base image for the final image
 FROM debian:bookworm-slim
