@@ -43,6 +43,17 @@ services:
       kafka-init:
         condition: service_completed_successfully
 
+  init_pipeline:
+    image: docker.io/alpine/curl
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_completed_successfully
+    volumes:
+      - ./config_data:/config_data
+    command: sh -c "curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/pipeline.yaml' -v"
+
   vector:
     build:
       context: ./build_vector
@@ -68,7 +79,7 @@ services:
     networks:
       - demo-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:4000/health" ]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:4000/health"]
       interval: 3s
       timeout: 3s
       retries: 5
