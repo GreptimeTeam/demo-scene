@@ -27,7 +27,7 @@ Ensure you have `git`, `docker` and `docker-compose` installed. To run this
 demo:
 
 ```shell
-git clone git@github.com:GreptimeTeam/demo-scene.git
+git clone https://github.com/GreptimeTeam/demo-scene.git
 cd demo-scene/nginx-log-metrics
 docker compose up
 ```
