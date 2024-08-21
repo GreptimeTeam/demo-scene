@@ -18,7 +18,7 @@ We use vector to generate random log data and send inserts to databases.
 Please refer to [structured config](./structured_vector.toml) and [unstructured config](./unstructured_vector.toml) for detailed configuration.
 
 ## SQLs and payloads
-Please refer to [SQL query](./create_table.sql) for GreptimeDB and Clickhouse, and [query payload](./query.md) for Elastic search.
+Please refer to [SQL query](./query.sql) for GreptimeDB and Clickhouse, and [query payload](./query.md) for Elastic search.
 
 ## Steps to reproduce
 0. Decide whether to run structured model test or unstructured mode test.
