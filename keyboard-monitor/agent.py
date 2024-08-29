@@ -70,7 +70,7 @@ if __name__ == '__main__':
                 hits STRING NULL,
                 ts TIMESTAMP(3) NOT NULL,
                 TIME INDEX ("ts")
-            ) ENGINE=mito WITH( regions = 1, ttl = '3months')
+            ) ENGINE=mito WITH( ttl = '3months')
         """))
 
     def sender_thread():
