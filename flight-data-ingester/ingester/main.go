@@ -92,8 +92,13 @@ func GetFlightState(flight []Flight) (*StateResponse, error) {
 	icaoCsv = strings.Join(icaos, ",")
 	url := fmt.Sprintf("https://opensky-network.org/api/states/all?icao24=%s", icaoCsv)
 
+	req, err := OpenSkyReq(url)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %v", err)
+	}
+
 	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Get(url)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error making request: %v", err)
 	}
@@ -133,8 +138,13 @@ func SelectLiveFlights(airportCode string, num int) ([]Flight, error) {
 
 	url := fmt.Sprintf("https://opensky-network.org/api/flights/departure?begin=%d&end=%d&airport=%s", startTime, endTime, airportCode)
 
+	req, err := OpenSkyReq(url)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %v", err)
+	}
+
 	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Get(url)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error making request: %v", err)
 	}
@@ -165,4 +175,19 @@ func SelectLiveFlights(airportCode string, num int) ([]Flight, error) {
 
 	return flights[:num], nil
 
+}
+
+func OpenSkyReq(url string) (*http.Request, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	// Add basic auth if credentials are present
+	username := os.Getenv("OPENSKY_USERNAME")
+	password := os.Getenv("OPENSKY_PASSWORD")
+	if username != "" && password != "" {
+		req.SetBasicAuth(username, password)
+	}
+	return req, nil
 }

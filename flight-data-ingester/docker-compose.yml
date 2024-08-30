@@ -23,6 +23,8 @@ services:
       - demo-network
     environment:
       - ICAO_AIRPORT_CODE=${ICAO_AIRPORT_CODE:-KSFO}
+      - OPENSKY_USERNAME=${OPENSKY_USERNAME}
+      - OPENSKY_PASSWORD=${OPENSKY_PASSWORD}
     depends_on:
       greptimedb:
         condition: service_started
