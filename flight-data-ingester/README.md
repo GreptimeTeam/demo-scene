@@ -36,6 +36,10 @@ running the demo in to ensure there is data in the set. This can be done by
 setting the ``ICAO_AIRPORT_CODE` environment variable when running `docker
 compose up`.
 
+The anonymous user can only make 400 requests per day.
+Set the OPENSKY_USERNAME and OPENSKY_PASSWORD env variables with
+your credentials to use basic authentication in the open sky requests for higher limits.
+
 If you are going to restart this demo, press `Ctrl-C` and remember to call
 `docker compose down` to clean up the data before you run `docker compose up`
 again.
