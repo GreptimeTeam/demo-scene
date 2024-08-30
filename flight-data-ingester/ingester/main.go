@@ -35,7 +35,7 @@ func init() {
 func main() {
 	
 	fmt.Printf("📌 starting flight-data-ingester demo" , %+v\n )
-	
+
 	flight, err := SelectLiveFlight()
 	if err != nil {
 		log.Fatalf("❌ could not select live flight %+v\n", err)
@@ -64,7 +64,6 @@ func main() {
 			}
 			log.Printf("affected rows: %d\n", resp.GetAffectedRows().GetValue())
 
-			fmt.Printf("📌 State Data: %+v\n", stateData)
 		case <-done:
 			fmt.Println("Received termination signal. Shutting down...")
 			return
@@ -95,7 +94,6 @@ func GetFlightState(flight *Flight) (*StateData, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
-	fmt.Printf("📌 Response body %s\n", string(bodyBytes))
 
 	var stateResponse StateResponse
 	err = json.Unmarshal(bodyBytes, &stateResponse)
