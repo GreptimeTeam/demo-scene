@@ -22,7 +22,7 @@ services:
     networks:
       - demo-network
     environment:
-      - ICAO_AIRPORT_CODE=KSFO
+      - ICAO_AIRPORT_CODE=${ICAO_AIRPORT_CODE:-KSFO}
     depends_on:
       greptimedb:
         condition: service_started

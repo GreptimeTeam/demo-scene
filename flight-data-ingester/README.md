@@ -31,7 +31,10 @@ after GreptimeDB starts, we use the `ingester` script which uses the go client's
 
 ## Note
 
-please update the ICAO flight code for your local airport of the city you are running the demo in to ensure there is data in the set. This can be done by updating the ICAO_AIRPORT_CODE environment variable in your docker compose file
+please update the ICAO flight code for your local airport of the city you are
+running the demo in to ensure there is data in the set. This can be done by
+setting the ``ICAO_AIRPORT_CODE` environment variable when running `docker
+compose up`.
 
 If you are going to restart this demo, press `Ctrl-C` and remember to call
 `docker compose down` to clean up the data before you run `docker compose up`
