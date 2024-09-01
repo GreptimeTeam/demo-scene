@@ -63,7 +63,7 @@
         "basemap": {
           "config": {},
           "name": "Layer 0",
-          "opacity": 0.5,
+          "opacity": 0.4,
           "tooltip": false,
           "type": "osm-standard"
         },
@@ -84,7 +84,7 @@
                   "field": "velocity",
                   "fixed": "dark-green"
                 },
-                "opacity": 0.8,
+                "opacity": 1,
                 "rotation": {
                   "fixed": 0,
                   "max": 360,
@@ -104,10 +104,15 @@
                   "horizontal": "center",
                   "vertical": "center"
                 },
+                "text": {
+                  "field": "baro_altitude",
+                  "fixed": "",
+                  "mode": "field"
+                },
                 "textConfig": {
-                  "fontSize": 12,
+                  "fontSize": 11,
                   "offsetX": 0,
-                  "offsetY": 0,
+                  "offsetY": 20,
                   "textAlign": "center",
                   "textBaseline": "middle"
                 }
@@ -118,9 +123,7 @@
               "options": "A"
             },
             "location": {
-              "latitude": "latitude",
-              "longitude": "longitude",
-              "mode": "coords"
+              "mode": "auto"
             },
             "name": "Flight Velocity",
             "tooltip": true,
@@ -133,7 +136,9 @@
         "view": {
           "allLayers": true,
           "id": "fit",
+          "lastOnly": false,
           "lat": 0,
+          "layer": "Flight Velocity",
           "lon": 0,
           "padding": 10,
           "zoom": 13
@@ -182,8 +187,12 @@
       {
         "current": {
           "selected": false,
-          "text": "4cad49",
-          "value": "4cad49"
+          "text": "aac87b",
+          "value": "aac87b"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "edwaq5vjcr668c"
         },
         "definition": "SELECT DISTINCT icao24 FROM icao24_state where $__timeFilter(ts);",
         "hide": 0,
@@ -209,6 +218,6 @@
   "timezone": "browser",
   "title": "Flight Map",
   "uid": "bdwetcv3dtssge",
-  "version": 3,
+  "version": 1,
   "weekStart": ""
 }
