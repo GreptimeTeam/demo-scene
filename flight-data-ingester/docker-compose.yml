@@ -30,7 +30,7 @@ services:
         condition: service_started
 
   grafana:
-    image: docker.io/grafana/grafana:11.1.0
+    image: docker.io/grafana/grafana:11.2.0
     ports:
       - 3000:3000
     networks:

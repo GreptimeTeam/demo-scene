@@ -13,7 +13,11 @@ cd demo-scene/flight-data-ingester
 docker compose up
 ```
 
-It can take a while for the first run to pull down images and also build necessary components.
+It can take a while for the first run to pull down images and also build
+necessary components.
+
+Open your browser at `http://localhost:3000` and find our preconfigured grafnaa
+dashboard.
 
 ## How it works
 
@@ -22,9 +26,11 @@ The topology is illustrated in this diagram.
 ```mermaid
 flowchart LR
   greptimedb[(GreptimeDB)]
+  grafana
 
   api{Open Sky Data} --> go-ingester
   go-ingester --> greptimedb
+  greptimedb --> grafana
 ```
 
 after GreptimeDB starts, we use the `ingester` script which uses the go client's [high level api](https://docs.greptime.com/user-guide/ingest-data/for-iot/grpc-sdks/go/#installation) to create the table and insert data. It's dead-simple to perform transformations and data munging on your struct and insert into target GreptimeDB columns by tagging your metric struct accordingly as seen in the `./ingester/dto.go` file .
