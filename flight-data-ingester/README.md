@@ -1,6 +1,12 @@
 # GreptimeDB Flight
 
-This project demonstrates GreptimeDB's ingesting geo-spatial data using the the `greptimedb-ingester-go` client. It selects the last 10 flights that departed in the last 30 minutes from the configured icao airport code. The ingester script utilizes the [OpenSky Network API](https://opensky-network.org/apidoc/) to fetch flight state data and inserts the flight metrics into GreptimeDB
+This project demonstrates GreptimeDB's ingesting geo-spatial data using the the
+`greptimedb-ingester-go` client. It selects the last 10 flights that departed in
+the last 30 minutes from the configured icao airport code. The ingester script
+utilizes the [OpenSky Network API](https://opensky-network.org/apidoc/) to fetch
+flight state data and inserts the flight metrics into GreptimeDB
+
+![screenshot](screenshot.png)
 
 ## How to run this demo
 
