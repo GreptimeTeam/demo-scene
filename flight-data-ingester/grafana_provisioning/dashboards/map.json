@@ -30,7 +30,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "continuous-GrYlRd"
           },
           "custom": {
             "hideFrom": {
@@ -46,10 +46,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -57,7 +53,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 22,
+        "h": 21,
         "w": 24,
         "x": 0,
         "y": 0
@@ -67,7 +63,9 @@
         "basemap": {
           "config": {},
           "name": "Layer 0",
-          "type": "default"
+          "opacity": 0.5,
+          "tooltip": false,
+          "type": "osm-standard"
         },
         "controls": {
           "mouseWheelZoom": true,
@@ -83,9 +81,10 @@
               "showLegend": true,
               "style": {
                 "color": {
+                  "field": "velocity",
                   "fixed": "dark-green"
                 },
-                "opacity": 0.4,
+                "opacity": 0.8,
                 "rotation": {
                   "fixed": 0,
                   "max": 360,
@@ -93,7 +92,7 @@
                   "mode": "mod"
                 },
                 "size": {
-                  "fixed": 5,
+                  "fixed": 15,
                   "max": 15,
                   "min": 2
                 },
@@ -123,7 +122,7 @@
               "longitude": "longitude",
               "mode": "coords"
             },
-            "name": "Layer 1",
+            "name": "Flight Velocity",
             "tooltip": true,
             "type": "markers"
           }
@@ -150,7 +149,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select icao24, longitude, latitude, baro_altitude, geo_altitude, velocity, geohash(latitude, longitude, 7) as geohash from icao24_state where $__timeFilter(ts) order by ts desc limit 500;",
+          "rawSql": "select icao24, longitude, latitude, baro_altitude, geo_altitude, velocity, geohash(latitude, longitude, 7) as geohash from icao24_state where icao24 = '$icao24' and $__timeFilter(ts) order by ts desc limit 500;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -179,7 +178,28 @@
   "schemaVersion": 39,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "4cad49",
+          "value": "4cad49"
+        },
+        "definition": "SELECT DISTINCT icao24 FROM icao24_state where $__timeFilter(ts);",
+        "hide": 0,
+        "includeAll": false,
+        "label": "icao24",
+        "multi": false,
+        "name": "icao24",
+        "options": [],
+        "query": "SELECT DISTINCT icao24 FROM icao24_state where $__timeFilter(ts);",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-1h",
@@ -189,6 +209,6 @@
   "timezone": "browser",
   "title": "Flight Map",
   "uid": "bdwetcv3dtssge",
-  "version": 7,
+  "version": 3,
   "weekStart": ""
 }
