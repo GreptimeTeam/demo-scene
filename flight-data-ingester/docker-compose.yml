@@ -29,5 +29,14 @@ services:
       greptimedb:
         condition: service_started
 
+  grafana:
+    image: docker.io/grafana/grafana:11.1.0
+    ports:
+      - 3000:3000
+    networks:
+      - demo-network
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
+
 networks:
   demo-network:
