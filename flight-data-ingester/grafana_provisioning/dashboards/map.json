@@ -276,6 +276,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "edwaq5vjcr668c"
       },
+      "description": "This chart is controlled by variables: latitude, longitude and h3 resolution. \n\nIt displays data within the h3 hexagon.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -389,6 +390,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "edwaq5vjcr668c"
       },
+      "description": "This chart is controlled by variables: latitude, longitude and h3 resolution. \n\nIt displays data within the h3 hexagon.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -529,8 +531,8 @@
       {
         "current": {
           "selected": false,
-          "text": "39.6668",
-          "value": "39.6668"
+          "text": "40.5139",
+          "value": "40.5139"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -553,8 +555,8 @@
       {
         "current": {
           "selected": false,
-          "text": "-119.0129",
-          "value": "-119.0129"
+          "text": "-115.6167",
+          "value": "-115.6167"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -577,8 +579,8 @@
       {
         "current": {
           "selected": true,
-          "text": "2",
-          "value": "2"
+          "text": "3",
+          "value": "3"
         },
         "hide": 0,
         "includeAll": false,
@@ -597,12 +599,12 @@
             "value": "1"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "2",
             "value": "2"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "3",
             "value": "3"
           },
