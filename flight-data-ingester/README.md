@@ -1,6 +1,6 @@
 # GreptimeDB Flight
 
-This project demonstrates GreptimeDB's ingesting geo-spatial data using the the
+This project demonstrates GreptimeDB's ability to ingest geo-spatial data using the
 `greptimedb-ingester-go` client. It selects the last 10 flights that departed in
 the last 30 minutes from the configured icao airport code. The ingester script
 utilizes the [OpenSky Network API](https://opensky-network.org/apidoc/) to fetch
@@ -39,7 +39,10 @@ flowchart LR
   greptimedb --> grafana
 ```
 
-after GreptimeDB starts, we use the `ingester` script which uses the go client's [high level api](https://docs.greptime.com/user-guide/ingest-data/for-iot/grpc-sdks/go/#installation) to create the table and insert data. It's dead-simple to perform transformations and data munging on your struct and insert into target GreptimeDB columns by tagging your metric struct accordingly as seen in the `./ingester/dto.go` file .
+after GreptimeDB starts, we use the `ingester` script which uses the go client's 
+[high level api](https://docs.greptime.com/user-guide/ingest-data/for-iot/grpc-sdks/go/#installation) 
+to create the table and insert data. It's dead-simple to perform transformations and data munging for insertion into target GretimeDB tables. 
+Create and tag your metric struct accordingly as seen in the `./ingester/dto.go` file.
 
 ## Note
 
