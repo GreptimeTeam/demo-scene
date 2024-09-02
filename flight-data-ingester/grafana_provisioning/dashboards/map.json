@@ -267,7 +267,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select\n  ts,\n  velocity as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, 3) = h3($lat, $lon, 3)\norder by ts desc;",
+          "rawSql": "select\n  ts,\n  velocity as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, $h3_resolution) = h3($lat, $lon, $h3_resolution)\norder by ts desc;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -380,7 +380,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select\n  ts,\n  baro_altitude as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, 3) = h3($lat, $lon, 3)\norder by\n  ts desc;",
+          "rawSql": "select\n  ts,\n  baro_altitude as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, $h3_resolution) = h3($lat, $lon, $h3_resolution)\norder by\n  ts desc;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -405,7 +405,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "",
+  "refresh": "30s",
   "schemaVersion": 39,
   "tags": [],
   "templating": {
@@ -413,8 +413,8 @@
       {
         "current": {
           "selected": false,
-          "text": "78075d",
-          "value": "78075d"
+          "text": "a76f67",
+          "value": "a76f67"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -436,9 +436,13 @@
       },
       {
         "current": {
-          "selected": true,
-          "text": "40.0871",
-          "value": "40.0871"
+          "selected": false,
+          "text": "39.451",
+          "value": "39.451"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "edwaq5vjcr668c"
         },
         "definition": "select latitude from icao24_state where $__timeFilter(ts) and icao24 = '$icao24' order by ts desc;",
         "hide": 0,
@@ -456,9 +460,13 @@
       },
       {
         "current": {
-          "selected": true,
-          "text": "113.6061",
-          "value": "113.6061"
+          "selected": false,
+          "text": "-119.415",
+          "value": "-119.415"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "edwaq5vjcr668c"
         },
         "definition": "select longitude from icao24_state where $__timeFilter(ts) and icao24 = '$icao24' order by ts desc;",
         "hide": 0,
@@ -473,12 +481,110 @@
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "5",
+          "value": "5"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "H3 Resolution",
+        "multi": false,
+        "name": "h3_resolution",
+        "options": [
+          {
+            "selected": false,
+            "text": "0",
+            "value": "0"
+          },
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "selected": false,
+            "text": "2",
+            "value": "2"
+          },
+          {
+            "selected": false,
+            "text": "3",
+            "value": "3"
+          },
+          {
+            "selected": false,
+            "text": "4",
+            "value": "4"
+          },
+          {
+            "selected": true,
+            "text": "5",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "6",
+            "value": "6"
+          },
+          {
+            "selected": false,
+            "text": "7",
+            "value": "7"
+          },
+          {
+            "selected": false,
+            "text": "8",
+            "value": "8"
+          },
+          {
+            "selected": false,
+            "text": "9",
+            "value": "9"
+          },
+          {
+            "selected": false,
+            "text": "10",
+            "value": "10"
+          },
+          {
+            "selected": false,
+            "text": "11",
+            "value": "11"
+          },
+          {
+            "selected": false,
+            "text": "12",
+            "value": "12"
+          },
+          {
+            "selected": false,
+            "text": "13",
+            "value": "13"
+          },
+          {
+            "selected": false,
+            "text": "14",
+            "value": "14"
+          },
+          {
+            "selected": false,
+            "text": "15",
+            "value": "15"
+          }
+        ],
+        "query": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "2024-09-02T00:00:09.502Z",
-    "to": "2024-09-02T00:56:20.954Z"
+    "from": "now-30m",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
