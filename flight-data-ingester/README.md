@@ -23,7 +23,7 @@ It can take a while for the first run to pull down images and also build
 necessary components.
 
 Open your browser at `http://localhost:3000` and find our preconfigured grafnaa
-dashboard.
+dashboard. The default user/pw is admin/admin
 
 ## How it works
 
