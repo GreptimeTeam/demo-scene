@@ -105,12 +105,12 @@
                   "vertical": "center"
                 },
                 "text": {
-                  "field": "baro_altitude",
+                  "field": "icao24",
                   "fixed": "",
                   "mode": "field"
                 },
                 "textConfig": {
-                  "fontSize": 11,
+                  "fontSize": 12,
                   "offsetX": 0,
                   "offsetY": 20,
                   "textAlign": "center",
@@ -154,7 +154,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select icao24, longitude, latitude, baro_altitude, geo_altitude, velocity, geohash(latitude, longitude, 7) as geohash from icao24_state where icao24 = '$icao24' and $__timeFilter(ts) order by ts desc limit 500;",
+          "rawSql": "select icao24, longitude, latitude, baro_altitude, geo_altitude, velocity, geohash(latitude, longitude, 7) as geohash, h3(latitude, longitude, 7) as h3 from icao24_state where icao24 = '$icao24' and $__timeFilter(ts) order by ts desc limit 500;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -437,8 +437,8 @@
       {
         "current": {
           "selected": false,
-          "text": "39.451",
-          "value": "39.451"
+          "text": "39.6668",
+          "value": "39.6668"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -461,8 +461,8 @@
       {
         "current": {
           "selected": false,
-          "text": "-119.415",
-          "value": "-119.415"
+          "text": "-119.0129",
+          "value": "-119.0129"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -485,8 +485,8 @@
       {
         "current": {
           "selected": true,
-          "text": "5",
-          "value": "5"
+          "text": "4",
+          "value": "4"
         },
         "hide": 0,
         "includeAll": false,
@@ -515,12 +515,12 @@
             "value": "3"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "4",
             "value": "4"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "5",
             "value": "5"
           },
