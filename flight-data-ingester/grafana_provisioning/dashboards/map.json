@@ -53,8 +53,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 21,
-        "w": 24,
+        "h": 13,
+        "w": 21,
         "x": 0,
         "y": 0
       },
@@ -105,12 +105,12 @@
                   "vertical": "center"
                 },
                 "text": {
-                  "field": "baro_altitude",
+                  "field": "icao24",
                   "fixed": "",
                   "mode": "field"
                 },
                 "textConfig": {
-                  "fontSize": 11,
+                  "fontSize": 12,
                   "offsetX": 0,
                   "offsetY": 20,
                   "textAlign": "center",
@@ -154,7 +154,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select icao24, longitude, latitude, baro_altitude, geo_altitude, velocity, geohash(latitude, longitude, 7) as geohash from icao24_state where icao24 = '$icao24' and $__timeFilter(ts) order by ts desc limit 500;",
+          "rawSql": "select icao24, longitude, latitude, baro_altitude, geo_altitude, velocity, geohash(latitude, longitude, 7) as geohash, h3(latitude, longitude, 7) as h3 from icao24_state where icao24 = '$icao24' and $__timeFilter(ts) order by ts desc limit 500;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -177,6 +177,331 @@
       ],
       "title": "Flight Map",
       "type": "geomap"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "grafana-postgresql-datasource",
+        "uid": "edwaq5vjcr668c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {},
+          "mappings": [],
+          "max": 500,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "velocityms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "baro_altitude"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "lengthm"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 3,
+        "x": 21,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "firstNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "edwaq5vjcr668c"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select velocity,baro_altitude from icao24_state where icao24 = '$icao24' and $__timeFilter(ts) order by ts desc;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Latest Data",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "grafana-postgresql-datasource",
+        "uid": "edwaq5vjcr668c"
+      },
+      "description": "This chart is controlled by variables: latitude, longitude and h3 resolution. \n\nIt displays data within the h3 hexagon.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "edwaq5vjcr668c"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select\n  ts,\n  velocity as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, $h3_resolution) = h3($lat, $lon, $h3_resolution)\norder by ts desc;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Velocity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "grafana-postgresql-datasource",
+        "uid": "edwaq5vjcr668c"
+      },
+      "description": "This chart is controlled by variables: latitude, longitude and h3 resolution. \n\nIt displays data within the h3 hexagon.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "edwaq5vjcr668c"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select\n  ts,\n  baro_altitude as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, $h3_resolution) = h3($lat, $lon, $h3_resolution)\norder by\n  ts desc;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Altitude",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
@@ -187,8 +512,8 @@
       {
         "current": {
           "selected": false,
-          "text": "aac87b",
-          "value": "aac87b"
+          "text": "a76f67",
+          "value": "a76f67"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -197,7 +522,7 @@
         "definition": "SELECT DISTINCT icao24 FROM icao24_state where $__timeFilter(ts);",
         "hide": 0,
         "includeAll": false,
-        "label": "icao24",
+        "label": "ICAO24",
         "multi": false,
         "name": "icao24",
         "options": [],
@@ -207,6 +532,152 @@
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "40.5139",
+          "value": "40.5139"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "edwaq5vjcr668c"
+        },
+        "definition": "select latitude from icao24_state where $__timeFilter(ts) and icao24 = '$icao24' order by ts desc;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Latitude",
+        "multi": false,
+        "name": "lat",
+        "options": [],
+        "query": "select latitude from icao24_state where $__timeFilter(ts) and icao24 = '$icao24' order by ts desc;",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "-115.6167",
+          "value": "-115.6167"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "edwaq5vjcr668c"
+        },
+        "definition": "select longitude from icao24_state where $__timeFilter(ts) and icao24 = '$icao24' order by ts desc;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Longitude",
+        "multi": false,
+        "name": "lon",
+        "options": [],
+        "query": "select longitude from icao24_state where $__timeFilter(ts) and icao24 = '$icao24' order by ts desc;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "3",
+          "value": "3"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "H3 Resolution",
+        "multi": false,
+        "name": "h3_resolution",
+        "options": [
+          {
+            "selected": false,
+            "text": "0",
+            "value": "0"
+          },
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "selected": false,
+            "text": "2",
+            "value": "2"
+          },
+          {
+            "selected": true,
+            "text": "3",
+            "value": "3"
+          },
+          {
+            "selected": false,
+            "text": "4",
+            "value": "4"
+          },
+          {
+            "selected": false,
+            "text": "5",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "6",
+            "value": "6"
+          },
+          {
+            "selected": false,
+            "text": "7",
+            "value": "7"
+          },
+          {
+            "selected": false,
+            "text": "8",
+            "value": "8"
+          },
+          {
+            "selected": false,
+            "text": "9",
+            "value": "9"
+          },
+          {
+            "selected": false,
+            "text": "10",
+            "value": "10"
+          },
+          {
+            "selected": false,
+            "text": "11",
+            "value": "11"
+          },
+          {
+            "selected": false,
+            "text": "12",
+            "value": "12"
+          },
+          {
+            "selected": false,
+            "text": "13",
+            "value": "13"
+          },
+          {
+            "selected": false,
+            "text": "14",
+            "value": "14"
+          },
+          {
+            "selected": false,
+            "text": "15",
+            "value": "15"
+          }
+        ],
+        "query": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
