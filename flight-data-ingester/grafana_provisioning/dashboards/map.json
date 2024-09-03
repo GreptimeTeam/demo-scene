@@ -189,7 +189,10 @@
           "color": {
             "mode": "continuous-GrYlRd"
           },
+          "custom": {},
           "mappings": [],
+          "max": 500,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -228,7 +231,9 @@
         "minVizWidth": 75,
         "orientation": "horizontal",
         "reduceOptions": {
-          "calcs": ["firstNotNull"],
+          "calcs": [
+            "firstNotNull"
+          ],
           "fields": "",
           "values": false
         },
