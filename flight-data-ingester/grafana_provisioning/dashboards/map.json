@@ -189,7 +189,6 @@
           "color": {
             "mode": "continuous-GrYlRd"
           },
-          "custom": {},
           "mappings": [],
           "max": 500,
           "min": 0,
@@ -231,9 +230,7 @@
         "minVizWidth": 75,
         "orientation": "horizontal",
         "reduceOptions": {
-          "calcs": [
-            "firstNotNull"
-          ],
+          "calcs": ["firstNotNull"],
           "fields": "",
           "values": false
         },
@@ -335,7 +332,20 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 5
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -367,6 +377,35 @@
           "rawQuery": true,
           "rawSql": "select\n  ts,\n  velocity as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, $h3_resolution) = h3($lat, $lon, $h3_resolution)\norder by ts desc;",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "edwaq5vjcr668c"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "select\n  ts,\n  velocity as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\norder by ts desc;",
+          "refId": "B",
           "sql": {
             "columns": [
               {
@@ -449,7 +488,20 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 5
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -498,6 +550,35 @@
             ],
             "limit": 50
           }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "edwaq5vjcr668c"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "select\n  ts,\n  baro_altitude as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\norder by\n  ts desc;",
+          "refId": "B",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
       "title": "Altitude",
@@ -512,8 +593,8 @@
       {
         "current": {
           "selected": false,
-          "text": "a76f67",
-          "value": "a76f67"
+          "text": "aa9600",
+          "value": "aa9600"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -536,8 +617,8 @@
       {
         "current": {
           "selected": false,
-          "text": "40.5139",
-          "value": "40.5139"
+          "text": "38.4632",
+          "value": "38.4632"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -560,8 +641,8 @@
       {
         "current": {
           "selected": false,
-          "text": "-115.6167",
-          "value": "-115.6167"
+          "text": "-119.3152",
+          "value": "-119.3152"
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
