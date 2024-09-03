@@ -39,20 +39,20 @@ flowchart LR
   greptimedb --> grafana
 ```
 
-after GreptimeDB starts, we use the `ingester` script which uses the go client's 
-[high level api](https://docs.greptime.com/user-guide/ingest-data/for-iot/grpc-sdks/go/#installation) 
-to create the table and insert data. It's dead-simple to perform transformations and data munging for insertion into target GretimeDB tables. 
+after GreptimeDB starts, we use the `ingester` script which uses the go client's
+[high level api](https://docs.greptime.com/user-guide/ingest-data/for-iot/grpc-sdks/go/#installation)
+to create the table and insert data. It's dead-simple to perform transformations and data munging for insertion into target GretimeDB tables.
 Create and tag your metric struct accordingly as seen in the `./ingester/dto.go` file.
 
 ## Note
 
 please update the ICAO flight code for your local airport of the city you are
 running the demo in to ensure there is data in the set. This can be done by
-setting the ``ICAO_AIRPORT_CODE` environment variable when running `docker
+setting the `ICAO_AIRPORT_CODE` environment variable when running `docker
 compose up`.
 
 The anonymous user can only make 400 requests per day.
-Set the OPENSKY_USERNAME and OPENSKY_PASSWORD env variables with
+Set the `OPENSKY_USERNAME` and `OPENSKY_PASSWORD` env variables with
 your credentials to use basic authentication in the open sky requests for higher limits.
 
 If you are going to restart this demo, press `Ctrl-C` and remember to call
