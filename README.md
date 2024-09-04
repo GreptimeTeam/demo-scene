@@ -25,6 +25,8 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 * [Prometheus Node Exporter + GreptimeDB + Web Dashboard or Grafana Dashboard](node-exporter)
 * [Telegraf + GreptimeDB + Web UI](telegraf-ingestion)
 * [Kafka + Vector + GreptimeDB + Web UI](kafka-ingestion)
+* [Flight data ingestion and visualization](flight-data-ingester), including
+  geospatial index with H3
 
 ### Data Migrations
 
