@@ -25,7 +25,9 @@ services:
     image: docker.io/bitnami/kafka:3.6.0
     networks:
       - demo-network
-    command: ["/opt/bitnami/kafka/bin/kafka-topics.sh", "--create", "--topic", "test_topic", "--bootstrap-server", "kafka:9092"]
+    command: >
+      /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic test_log_topic --bootstrap-server kafka:9092
+      && /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic test_metric_topic --bootstrap-server kafka:9092
     depends_on:
       kafka:
         condition: service_started
@@ -38,7 +40,8 @@ services:
     networks:
       - demo-network
     environment:
-      - KAFKA_TOPIC_NAME=test_topic
+      - KAFKA_LOG_TOPIC_NAME=test_log_topic
+      - KAFKA_METRIC_TOPIC_NAME=test_metric_topic
     depends_on:
       kafka-init:
         condition: service_completed_successfully

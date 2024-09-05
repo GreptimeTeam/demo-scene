@@ -5,7 +5,7 @@ FROM rust:1.79 AS builder
 RUN apt-get update && apt-get install -y cmake pkg-config libssl-dev protobuf-compiler libsasl2-dev
 
 # Clone the Vector source code
-RUN git clone --depth 1 -b chore/greptime_log https://github.com/paomian/vector.git /vector
+RUN git clone --depth 1 https://github.com/vectordotdev/vector.git /vector
 WORKDIR /vector
 
 # Build Vector

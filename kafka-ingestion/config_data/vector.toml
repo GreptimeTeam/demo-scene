@@ -1,12 +1,19 @@
-[sources.mq]
+[sources.log_mq]
 type = "kafka"
 group_id = "vector0"
-topics = ["test_topic"]
+topics = ["test_log_topic"]
 bootstrap_servers = "kafka:9092"
+
+[sources.metric_mq]
+type = "kafka"
+group_id = "vector0"
+topics = ["test_metric_topic"]
+bootstrap_servers = "kafka:9092"
+decoding.codec = "influxdb"
 
 [sinks.console]
 type = "console"
-inputs = [ "mq" ]
+inputs = [ "log_mq", "metric_mq" ]
 encoding.codec = "text"
 
 [sinks.sink_greptime_logs]
@@ -14,5 +21,10 @@ type = "greptimedb_logs"
 table = "demo_logs"
 pipeline_name = "demo_pipeline"
 compression = "gzip"
-inputs = [ "mq" ]
+inputs = [ "log_mq" ]
 endpoint = "http://greptimedb:4000"
+
+[sinks.sink_greptime_metrics]
+type = "greptimedb"
+inputs = [ "metric_mq" ]
+endpoint = "greptimedb:4001"
