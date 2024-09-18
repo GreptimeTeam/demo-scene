@@ -1,4 +1,14 @@
 processors:
+  - dissect:
+      fields:
+        - message
+      patterns:
+        - '%{ip} - - [%{datetime}] "%{method} %{path} %{protocol}" %{status} %{size} "-" "%{user_agent}"'
+  - date:
+      fields:
+        - datetime
+      formats:
+        - "%d/%b/%Y:%H:%M:%S %z"
   - date:
       fields:
         - timestamp
@@ -7,9 +17,20 @@ processors:
 
 transform:
   - fields:
-      - message
+      - ip
+      - method
+      - path
+      - protocol
+      - user_agent
     type: string
+  - fields:
+      - status
+      - size
+    type: uint32
+  - fields:
+      - datetime
+    type: timestamp
+    index: timestamp
   - fields:
       - timestamp
     type: timestamp
-    index: timestamp

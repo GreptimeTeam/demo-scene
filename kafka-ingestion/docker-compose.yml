@@ -51,7 +51,7 @@ services:
       - demo-network
     depends_on:
       greptimedb:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./config_data:/config_data
     command: sh -c "curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/pipeline.yaml' -v"
