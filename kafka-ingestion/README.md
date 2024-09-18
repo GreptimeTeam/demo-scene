@@ -25,44 +25,61 @@ You can access GreptimeDB using `mysql` client. Just run `mysql -h 127.0.0.1 -P
 start.
 
 ```
-$ mysql -h 127.0.0.1 -P 4002
-mysql: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb' instead
-WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
-Welcome to the MariaDB monitor.  Commands end with ; or \g.
+mysql -h 127.0.0.1 -P 4002
+Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 8
 Server version: 8.4.2 Greptime
 
-Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-MySQL [(none)]> show tables;
-+-----------+
-| Tables    |
-+-----------+
-| demo_logs |
-| numbers   |
-+-----------+
-2 rows in set (0.009 sec)
+mysql> show tables;
++-------------+
+| Tables      |
++-------------+
+| demo_logs   |
+| monitor_cpu |
+| numbers     |
++-------------+
+3 rows in set (0.00 sec)
 
-MySQL [(none)]> select * from demo_logs order by timestamp desc limit 10;
-+------------------------+----------------------------+
-| message                | timestamp                  |
-+------------------------+----------------------------+
-| this is a test message | 2024-08-20 08:46:50.700000 |
-| this is a test message | 2024-08-20 08:46:47.696000 |
-| this is a test message | 2024-08-20 08:46:44.693000 |
-| this is a test message | 2024-08-20 08:46:41.689000 |
-| this is a test message | 2024-08-20 08:46:38.685000 |
-| this is a test message | 2024-08-20 08:46:35.682000 |
-| this is a test message | 2024-08-20 08:46:32.679000 |
-| this is a test message | 2024-08-20 08:46:29.675000 |
-| this is a test message | 2024-08-20 08:46:26.671000 |
-| this is a test message | 2024-08-20 08:46:23.668000 |
-+------------------------+----------------------------+
-10 rows in set (0.005 sec)
+mysql> select * from demo_logs order by timestamp desc limit 10;
++-----------+--------+------+----------+------------------------------------------------------------------------+--------+------+---------------------+----------------------------+
+| ip        | method | path | protocol | user_agent                                                             | status | size | datetime            | timestamp                  |
++-----------+--------+------+----------+------------------------------------------------------------------------+--------+------+---------------------+----------------------------+
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:41.651000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:38.647000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:35.642000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:32.639000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:29.635000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:26.632000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:23.628000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:20.624000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:17.620000 |
+| 127.0.0.1 | GET    | /    | HTTP/1.1 | Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0 |    200 |  615 | 2024-09-04 22:46:13 | 2024-09-18 09:05:14.616000 |
++-----------+--------+------+----------+------------------------------------------------------------------------+--------+------+---------------------+----------------------------+
+10 rows in set (0.00 sec)
 
-MySQL [(none)]> Bye
+mysql> desc demo_logs;
++------------+---------------------+------+------+---------+---------------+
+| Column     | Type                | Key  | Null | Default | Semantic Type |
++------------+---------------------+------+------+---------+---------------+
+| ip         | String              |      | YES  |         | FIELD         |
+| method     | String              |      | YES  |         | FIELD         |
+| path       | String              |      | YES  |         | FIELD         |
+| protocol   | String              |      | YES  |         | FIELD         |
+| user_agent | String              |      | YES  |         | FIELD         |
+| status     | UInt32              |      | YES  |         | FIELD         |
+| size       | UInt32              |      | YES  |         | FIELD         |
+| datetime   | TimestampNanosecond | PRI  | NO   |         | TIMESTAMP     |
+| timestamp  | TimestampNanosecond |      | YES  |         | FIELD         |
++------------+---------------------+------+------+---------+---------------+
+9 rows in set (0.00 sec)
 ```
 
 You can also open your browser at http://localhost:4000/dashboard for the Web
