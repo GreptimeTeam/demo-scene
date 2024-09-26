@@ -5,40 +5,40 @@ driving metrics with OpenTelemetry and Python in GreptimeDB.
  
 ## How to run this demo
 
-Ensure you have `git`, `docker`, `docker-compose` `python` and `poetry`
-installed. 
+Ensure you have installed `git`, `docker`, `docker-compose` 
 
 You also must have a valid Tesla Login with a registered vehicle.
 This project uses [TeslaPy](https://github.com/tdorssers/TeslaPy) 
 which leverages the Tesla Owner API to gather the vehicle metrics.
 
-
 To run this demo:
 
-**Step 1: Download the cache.json file which requires you to log in to your Tesla account through your browser**
+**Start the Docker Network**
+
+This command builds the containers and 
+waits for the app container to start up.
 
 ```shell
-git clone https://github.com/GreptimeTeam/demo-scene.git
-cd demo-scene/ev-open-telemetry/ev_observer && poetry install
-TESLA_USER_EMAIL={your_tesla_email} poetry run python main.py
+TESLA_USER_EMAIL=<Your Tesla Email> docker-compose up -d && \
+while [ "$(docker inspect -f '{{.State.Running}}' ev-open-telemetry_ev_observer_1)" != "true" ]; do
+  echo "Waiting for container ev-open-telemetry_ev_observer_1 to be up..."
+  sleep 1
+done && docker attach ev-open-telemetry_ev_observer_1
 ```
 
-After this point a browser window will open up in order for you to login 
+**Authenticate to Tesla**
+
+When the container is running, you will see the string 
+
+`Open this URL to authenticate: https://auth.tesla.com/oauth2/v3/authorize?...`
+
+Follow this URL in your browser window and login 
 with your Tesla credentials.  Upon successful authentication, 
-you will be redirected to a blank page. you must copy and paste the url in your browser 
-into your terminal which will save the cache file to authenticate for you.
-After you complete this process once, the cache.json file will be able to 
+you will be redirected to a blank page. 
+Copy and paste the url from your browser 
+into your terminal, which will use the token to authenticate for you.
+After you complete this process once, the `cache.json` file will be able to 
 use the refresh token to keep the authenticated session active.
-
-use `ctr+c` to close the process and run your docker-compose network
-
-**Step 2: Run Docket Network**
-
-This starts the Greptimedb service, Grafana, and Tesla  metric collection process
-
-```sh
-TESLA_USER_EMAIL={your_email_info} docker compose up
-```
 
 
 ## How it works
@@ -97,11 +97,9 @@ classDiagram
 
 ## Future Development
 **To add additional metrics to our collection**
-1. create a new class that sub-classes the `MetricCollector` 
-
+1. Create a new class that sub-classes the `MetricCollector` 
 2. Add a property to the `VehicleInstrumentor` that contains a reference to this new collector
-
-3. Update the `MetricFetcher` to 
+3. Update the `AbstractVehicleDataFetcher` implementation to return this new MetricCollector data
 
 **To add new collection process with different vehicles**
 
