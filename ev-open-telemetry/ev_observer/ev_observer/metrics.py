@@ -2,9 +2,20 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from typing import Optional
 from opentelemetry.metrics import Observation, Meter
+from opentelemetry.util.types import Attributes
 
 
 class MetricCollector(BaseModel):
+    _attributes: Attributes = None
+
+    @property
+    def attributes(self):
+        return self._attributes
+
+    @attributes.setter
+    def attributes(self, value):
+        self._attributes = value
+
     def make_instruments(self, meter: Meter):
         num_instruments = 0
         for field_name, field_info in self.model_fields.items():
@@ -24,11 +35,14 @@ class MetricCollector(BaseModel):
     def _create_metric_reader_callback(self, field_name):
         def callback(options):
             value = getattr(self, field_name)
-            return [Observation(value=value)] if value is not None else []
+            if value is None:
+                return []
+
+            return [Observation(value=value, attributes=self.attributes)]
 
         return callback
 
-    def update(self, other: "MetricCollector"):
+    def update_values(self, other: "MetricCollector"):
         for field_name in self.model_fields:
             if hasattr(other, field_name):
                 setattr(self, field_name, getattr(other, field_name))

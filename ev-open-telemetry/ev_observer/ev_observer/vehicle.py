@@ -3,9 +3,11 @@ import sys
 import random
 from datetime import datetime
 from abc import ABC, abstractmethod
+from typing import Optional
 from pydantic import BaseModel
 from requests import HTTPError
 from opentelemetry.metrics import Meter
+from opentelemetry.util.types import Attributes
 import teslapy
 
 from ev_observer.metrics import (
@@ -17,6 +19,7 @@ from ev_observer.metrics import (
 
 
 class EVMetricData(BaseModel):
+    attributes: Optional[Attributes] = None
     charge_state: ChargeState = ChargeState()
     drive_state: DriveState = DriveState()
     # ... any future states can be added here ...
@@ -27,12 +30,11 @@ class EVMetricData(BaseModel):
                 value.make_instruments(meter)
 
     def update(self, new_data: "EVMetricData"):
-        for attr, value in self.__dict__.items():
-            if hasattr(new_data, attr) and isinstance(value, MetricCollector):
-                print("old data was", getattr(self, attr))
-                print("new data IS", getattr(new_data, attr))
-
-                getattr(self, attr).update(getattr(new_data, attr))
+        for metric_type, value in self.__dict__.items():
+            if hasattr(new_data, metric_type) and isinstance(value, MetricCollector):
+                metric_state = getattr(self, metric_type)
+                metric_state.attributes = new_data.attributes
+                getattr(self, metric_type).update_values(getattr(new_data, metric_type))
 
 
 class AbstractVehicleDataFetcher(ABC):
@@ -67,10 +69,12 @@ class TeslaMetricFetcher(AbstractVehicleDataFetcher):
             try:
                 vehicles = tesla.vehicle_list()
                 main_vehicle = vehicles[0]
+
                 res = main_vehicle.get_vehicle_data()
-                print("✅ data fetched")
                 return EVMetricData(
-                    charge_state=res["charge_state"], drive_state=res["drive_state"]
+                    charge_state=res["charge_state"],
+                    drive_state=res["drive_state"],
+                    attributes={"vehicle_id": main_vehicle["display_name"]},
                 )
             except HTTPError as e:
                 if e.response.status_code == 408:
