@@ -1,0 +1,55 @@
+services:
+  greptimedb:
+    image: docker.io/greptime/greptimedb-dev:dev-20240901-1725202129-e56709b5
+    command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+    ports:
+      - 4000:4000
+      - 4001:4001
+      - 4002:4002
+      - 4003:4003
+    networks:
+      - demo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:4000/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - /tmp/greptimedb-demo:/tmp/greptimedb
+
+  ev_observer:
+    build:
+      context: ./ev_observer
+      dockerfile: Dockerfile
+    networks:
+      - demo-network
+    environment:
+      - GREPTIME_HOST=${GREPTIME_HOST:-greptimedb:4000}
+      - GREPTIME_DB=${GREPTIME_DB:-public}
+      - SCRAPE_INTERVAL_SEC=${SCRAPE_INTERVAL_SEC:-5}
+      - TESLA_USER_EMAIL=${TESLA_USER_EMAIL}
+    stdin_open: true
+    tty: true
+
+    depends_on:
+      greptimedb:
+        condition: service_started
+
+  grafana:
+    build:
+      context: ./grafana
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    networks:
+      - demo-network
+    user: "$UID:$GID"
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    restart: always
+
+networks:
+  demo-network:
