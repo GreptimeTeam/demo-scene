@@ -19,16 +19,19 @@ This command builds the containers and
 waits for the app container to start up.
 
 ```shell
+git clone https://github.com/GreptimeTeam/demo-scene.git
+cd demo-scene/ev-open-telemetry
+
 TESLA_USER_EMAIL=<Your Tesla Email> docker-compose up -d && \
 while [ "$(docker inspect -f '{{.State.Running}}' ev-open-telemetry_ev_observer_1)" != "true" ]; do
   echo "Waiting for container ev-open-telemetry_ev_observer_1 to be up..."
   sleep 1
-done && docker attach ev-open-telemetry_ev_observer_1
+done && docker logs ev-open-telemetry_ev_observer_1 & docker attach ev-open-telemetry_ev_observer_1
 ```
 
 **Authenticate to Tesla**
 
-When the container is running, you will see the string 
+When the container is running, you will see the output in the logs 
 
 `Open this URL to authenticate: https://auth.tesla.com/oauth2/v3/authorize?...`
 
