@@ -77,9 +77,9 @@ class TeslaMetricFetcher(AbstractVehicleDataFetcher):
                     attributes={"vehicle_id": main_vehicle["display_name"]},
                 )
             except HTTPError as e:
-                if e.response.status_code == 408:
-                    # Silently ignore 408 Request Sleeping error
-                    print("car is sleeping")
+                if e.response.status_code in [408, 504]:
+                    # Silently ignore 408 Request Sleeping error and 504 Gateway Timeout
+                    print("car is sleeping or connection timed out")
                     return EVMetricData(charge_state=ChargeState(), drive_state=DriveState())
                 else:
                     raise

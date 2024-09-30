@@ -26,7 +26,7 @@ services:
     environment:
       - GREPTIME_HOST=${GREPTIME_HOST:-greptimedb:4000}
       - GREPTIME_DB=${GREPTIME_DB:-public}
-      - SCRAPE_INTERVAL_SEC=${SCRAPE_INTERVAL_SEC:-5}
+      - SCRAPE_INTERVAL_SEC=${SCRAPE_INTERVAL_SEC:-300}
       - TESLA_USER_EMAIL=${TESLA_USER_EMAIL}
     stdin_open: true
     tty: true

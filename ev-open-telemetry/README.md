@@ -96,6 +96,12 @@ classDiagram
     class GreptimeDB{
         <<OTLP Backend>>
     }
+
+    %% Style directives
+    style GreptimeDB fill:#8322FF,stroke:#000,stroke-width:2px
+    style AbstractVehicleFetcher fill:#4a90e2,stroke:#000,stroke-width:2px
+    style TeslaVehicleFetcher fill:#1f4e79,stroke:#000,stroke-width:1px
+    style BYDVehicleFetcher fill:#1f4e79,stroke:#000,stroke-width:1pxY
 ```
 
 ## Future Development
