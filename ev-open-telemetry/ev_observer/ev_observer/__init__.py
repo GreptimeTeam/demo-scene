@@ -1,6 +1,6 @@
-from opentelemetry import metrics
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+from opentelemetry import metrics
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
     OTLPMetricExporter,
 )
