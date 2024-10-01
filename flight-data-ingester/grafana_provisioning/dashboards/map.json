@@ -154,7 +154,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select icao24, longitude, latitude, baro_altitude, geo_altitude, velocity, geohash(latitude, longitude, 7) as geohash, h3(latitude, longitude, 7) as h3 from icao24_state where icao24 = '$icao24' and $__timeFilter(ts) order by ts desc limit 500;",
+          "rawSql": "select icao24, longitude, latitude, baro_altitude, geo_altitude, velocity, geohash(latitude, longitude, 7) as geohash, h3_latlng_to_cell(latitude, longitude, 7) as h3 from icao24_state where icao24 = '$icao24' and $__timeFilter(ts) order by ts desc limit 500;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -375,7 +375,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select\n  ts,\n  velocity as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, $h3_resolution) = h3($lat, $lon, $h3_resolution)\norder by ts desc;",
+          "rawSql": "select\n  ts,\n  velocity as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3_latlng_to_cell(latitude, longitude, $h3_resolution) = h3_latlng_to_cell($lat, $lon, $h3_resolution)\norder by ts desc;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -531,7 +531,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select\n  ts,\n  baro_altitude as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3(latitude, longitude, $h3_resolution) = h3($lat, $lon, $h3_resolution)\norder by\n  ts desc;",
+          "rawSql": "select\n  ts,\n  baro_altitude as value\nfrom\n  icao24_state\nwhere\n  icao24 = '$icao24'\n  and $__timeFilter(ts)\n  and h3_latlng_to_cell(latitude, longitude, $h3_resolution) = h3_latlng_to_cell($lat, $lon, $h3_resolution)\norder by\n  ts desc;",
           "refId": "A",
           "sql": {
             "columns": [
