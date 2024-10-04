@@ -67,8 +67,8 @@ The topology is illustrated in this diagram.
 ```mermaid
 flowchart LR
   greptimedb[(GreptimeDB)]
-  alloy
-  grafana
+  alloy[Alloy]
+  grafana[Grafana]
 
   alloy --> greptimedb
   greptimedb --> grafana
