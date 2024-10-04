@@ -32,7 +32,8 @@ services:
       - 3000:3000
     networks:
       - demo-network
-    restart: always
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
 
   alloy:
     image: docker.io/grafana/alloy:v1.4.1
