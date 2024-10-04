@@ -89,6 +89,10 @@ GreptimeCloud Visualization
 
 ![greptimecloud](media/greptimecloud.png)
 
+Grafana Dashboard
+
+![grafana dashboard](media/grafana-dashboard.png)
+
 Grafana Alloy Topology Graph
 
 ![alloy graph](media/alloy-graph.png)
@@ -96,3 +100,7 @@ Grafana Alloy Topology Graph
 Grafana Alloy Component Detail
 
 ![alloy component detail](media/alloy-sink-detail.png)
+
+## What's Next
+
+- Use Grafana Alloy for Log ingestion into GreptimeDB
