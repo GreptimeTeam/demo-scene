@@ -82,3 +82,17 @@ by creating a `greptime.env` file from our sample `greptime.env.sample` and
 providing your host, dbname and authentication information. Then use `docker
 compose down` and `docker compose up` to recreate the compose cluster and apply
 new settings.
+
+## Screenshots
+
+GreptimeCloud Visualization
+
+![greptimecloud](media/greptimecloud.png)
+
+Grafana Alloy Topology Graph
+
+![alloy graph](media/alloy-graph.png)
+
+Grafana Alloy Component Detail
+
+![alloy component detail](media/alloy-sink-detail.png)
