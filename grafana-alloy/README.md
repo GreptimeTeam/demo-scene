@@ -1,4 +1,4 @@
-# Grafana Alloy and OpenTelemetry with GreptimeDB
+# OpenTelemetry and Grafana Alloy with GreptimeDB
 
 This docker-compose file demos how to ingest data from Grafana Alloy to
 GreptimeDB, as well as using GreptimeDB as an OpenTelemetry data collector.
@@ -9,6 +9,9 @@ ingest data into GreptimeDB using following protocols:
 
 - Prometheus Remote Write
 - OpenTelemetry OTLP
+
+In the real world, you will use Grafana Alloy as a Prometheus agent or an
+OpenTelemetry data collector, with both sinks connected to GreptimeDB.
 
 ## How to run this demo
 
@@ -73,27 +76,37 @@ flowchart LR
   grafana[Grafana]
 
   subgraph alloy[Alloy]
-    prometheus_exporter_unix_local_system -> prometheus_relabel
+    prometheus_exporter_unix -> prometheus_relabel
     prometheus_relabel -> prmetheus_remote_write
-    prmetheus_remote_write -> greptimedb
+    prmetheus_remote_write -> |PRW| greptimedb
 
     prometheus_relabel -> otelcol_receiver_prometheus
-    otelcol_receiver_prometheus -> otelcol_exporter_otlphttp
-    otelcol_exporter_otlphttp -> greptimedb
+    otelcol_receiver_prometheus -> otelcol_processor_transform
+    otelcol_processor_transform -> otelcol_exporter_otlphttp
+    otelcol_exporter_otlphttp --> |OTLP HTTP/Protobuf| greptimedb
   end
 
   greptimedb --> grafana
 ```
+
+Grafana Alloy is a telemetry data pipeline that ingests data in Prometheus,
+Loki, and OpenTelemetry formats. It also provides processing capabilities, such
+as Prometheus relabeling and OpenTelemetry OTTL (OpenTelemetry Transformation
+Language) functions.
+
+In this example, we generate metrics data from Alloy's built-in data source
+called `prometheus.exporter.unix` and export the data to both a Prometheus
+remote write sink and an OpenTelemetry-compatible collector, which is
+GreptimeDB.
 
 ## Run in GreptimeCloud
 
 By default, this example writes data into a GreptimeDB instance within the
 docker compose. It's also possible to write to your own GreptimeCloud instance
 by creating a `greptime.env` file from our sample `greptime.env.sample` and
-providing your host, dbname and authentication information.
-
-Then use `docker compose down` and `docker compose up` to recreate the compose
-cluster and apply new settings.
+providing your host, dbname and authentication information.Then use `docker
+compose down` and `docker compose up` to recreate the compose cluster and apply
+new settings.
 
 ## Screenshots
 

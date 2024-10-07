@@ -36,6 +36,19 @@ prometheus.remote_write "metrics_service" {
 // This is to demo the usage of using OpenTelemetry with GreptimeDB (we just use Prometheus as data source here)
 otelcol.receiver.prometheus "metrics_prm_to_otel" {
   output {
+    metrics = [otelcol.processor.transform.rename.input]
+  }
+}
+
+otelcol.processor.transform "rename" {
+  metric_statements {
+    context = "metric"
+    statements = [
+      "replace_pattern(name, \"(.*)\", \"otel_$$1\")",
+    ]
+  }
+
+  output {
     metrics = [otelcol.exporter.otlphttp.greptimedb.input]
   }
 }
@@ -44,7 +57,7 @@ otelcol.exporter.otlphttp "greptimedb" {
   client {
     endpoint = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/otlp/"
     headers  = {
-      "X-Greptime-DB-Name" = "${GREPTIME_DB_OTEL:=otel}",
+      "X-Greptime-DB-Name" = "${GREPTIME_DB:=public}",
     }
     auth     = otelcol.auth.basic.credentials.handler
   }

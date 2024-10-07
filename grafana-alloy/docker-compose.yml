@@ -26,15 +26,6 @@ services:
       timeout: 3s
       retries: 5
 
-  init_database:
-    image: docker.io/alpine/psql
-    networks:
-      - demo-network
-    depends_on:
-      greptimedb:
-        condition: service_healthy
-    command: "-h greptimedb -p 4003 -d public -c 'create database otel'"
-
   grafana:
     image: docker.io/grafana/grafana:11.1.0
     ports:
