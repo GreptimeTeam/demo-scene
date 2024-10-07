@@ -1,0 +1,55 @@
+services:
+  envsubst:
+    image: docker.io/widerplan/envsubst
+    command: "-i /config_input/config.alloy.tpl -o /config_output/config.alloy"
+    volumes:
+      - ./config.alloy.tpl:/config_input/config.alloy.tpl
+      - config:/config_output
+    env_file:
+      - path: "greptime.env"
+        required: false
+    init: true
+
+  greptimedb:
+    image: docker.io/greptime/greptimedb:v0.9.3
+    command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+    ports:
+      - 4000:4000
+      - 4001:4001
+      - 4002:4002
+      - 4003:4003
+    networks:
+      - demo-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:4000/health" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  grafana:
+    image: docker.io/grafana/grafana:11.1.0
+    ports:
+      - 3000:3000
+    networks:
+      - demo-network
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
+
+  alloy:
+    image: docker.io/grafana/alloy:v1.4.1
+    command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    networks:
+      - demo-network
+    volumes:
+      - config:/etc/alloy
+    depends_on:
+      envsubst:
+        condition: service_completed_successfully
+
+networks:
+  demo-network:
+
+volumes:
+  config:

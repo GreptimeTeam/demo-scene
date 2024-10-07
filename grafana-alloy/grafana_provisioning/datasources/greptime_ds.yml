@@ -1,0 +1,6 @@
+apiVersion: 2
+datasources:
+  - name: greptimedb
+    type: prometheus
+    access: proxy
+    url: http://greptimedb:4000/v1/prometheus/
