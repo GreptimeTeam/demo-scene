@@ -77,14 +77,14 @@ flowchart LR
 
   subgraph alloy[Alloy]
     prometheus_exporter_unix --> prometheus_relabel
-    prometheus_relabel --> prmetheus_remote_write
+    prometheus_relabel --> prometheus_remote_write
 
     prometheus_relabel --> otelcol_receiver_prometheus
     otelcol_receiver_prometheus --> otelcol_processor_transform
     otelcol_processor_transform --> otelcol_exporter_otlphttp
   end
 
-  prmetheus_remote_write --> |PRW| greptimedb
+  prometheus_remote_write --> |PRW| greptimedb
   otelcol_exporter_otlphttp --> |OTLP HTTP/Protobuf| greptimedb
 
   greptimedb --> grafana
