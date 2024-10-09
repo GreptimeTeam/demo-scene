@@ -16,7 +16,8 @@ OpenTelemetry data collector, with both sinks connected to GreptimeDB.
 ## How to run this demo
 
 Ensure you have `git`, `docker`, `docker-compose` and `mysql` client
-installed. To run this demo:
+installed. Docker Compose version 2.24 or higher is required. To run this
+demo:
 
 ```shell
 git clone https://github.com/GreptimeTeam/demo-scene.git
