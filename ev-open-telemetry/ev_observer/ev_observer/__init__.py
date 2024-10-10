@@ -1,4 +1,4 @@
-import os
+import os, base64
 from dotenv import load_dotenv
 from opentelemetry import metrics
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
@@ -12,31 +12,24 @@ from opentelemetry.sdk.metrics.export import (
 
 load_dotenv()
 
-required_env_vars = {
-    "GREPTIME_HOST": "db_host",
-    "GREPTIME_DB": "db_name",
-    # "GREPTIME_USER": "db_user",
-    # "GREPTIME_PASSWORD": "db_password",
-}
-
-db_host, db_name, db_user, db_password = "", "", "", ""
-for env_var, var_name in required_env_vars.items():
-    value = os.getenv(env_var)
-    if value is None:
-        raise Exception(f"Environment variable {env_var} is not set")
-    globals()[var_name] = value
+db_http_scheme = os.getenv("GREPTIME_SCHEME") or "http"
+db_host = os.getenv("GREPTIME_HOST") or "greptimedb"
+db_port = os.getenv("GREPTIME_PORT") or 4000
+db_name = os.getenv("GREPTIME_DB") or "public"
+db_user = os.getenv("GREPTIME_USERNAME") or ""
+db_password = os.getenv("GREPTIME_PASSWORD") or ""
 
 scrape_interval = int(os.getenv("SCRAPE_INTERVAL_SEC", "60"))
 is_mock = bool(os.getenv("IS_MOCK", False))
 
 # Uncomment below lines to use basic auth
-# auth = f"{db_user}:{db_password}"
-# b64_auth = base64.b64encode(auth.encode()).decode("ascii")
-endpoint = f"http://{db_host}/v1/otlp/v1/metrics"
+auth = f"{db_user}:{db_password}"
+b64_auth = base64.b64encode(auth.encode()).decode("ascii")
+endpoint = f"{db_http_scheme}://{db_host}:{db_port}/v1/otlp/v1/metrics"
 exporter = OTLPMetricExporter(
     endpoint=endpoint,
     headers={
-        # "Authorization": f"Basic {b64_auth}",
+        "Authorization": f"Basic {b64_auth}",
         "x-greptime-db-name": db_name,
     },
     timeout=5,
