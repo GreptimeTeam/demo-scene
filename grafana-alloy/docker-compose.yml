@@ -44,6 +44,7 @@ services:
       - demo-network
     volumes:
       - config:/etc/alloy
+      - ./foo.log:/tmp/foo.log
     depends_on:
       envsubst:
         condition: service_completed_successfully

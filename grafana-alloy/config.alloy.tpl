@@ -30,6 +30,16 @@ prometheus.remote_write "metrics_service" {
   }
 }
 
+// logs
+loki.source.file "example" {
+  targets    = [{
+    __path__ = "/tmp/foo.log", color="pink",
+    instance = constants.hostname,
+    __address__ = "alloydemo",
+  }]
+  forward_to = [otelcol.receiver.loki.logs_loki_to_otel.receiver]
+}
+
 // Additional example:
 // Convert Prometheus metrics into OpenTelemetry format and ingest into GreptimeDB OTLP endpoint
 //
@@ -37,6 +47,12 @@ prometheus.remote_write "metrics_service" {
 otelcol.receiver.prometheus "metrics_prm_to_otel" {
   output {
     metrics = [otelcol.processor.transform.rename.input]
+  }
+}
+
+otelcol.receiver.loki "logs_loki_to_otel" {
+  output {
+    logs = [otelcol.exporter.otlphttp.greptimedb.input]
   }
 }
 
@@ -55,9 +71,10 @@ otelcol.processor.transform "rename" {
 
 otelcol.exporter.otlphttp "greptimedb" {
   client {
-    endpoint = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/otlp/"
+    endpoint = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=172.17.0.1}:${GREPTIME_PORT:=4000}/v1/otlp/"
     headers  = {
       "X-Greptime-DB-Name" = "${GREPTIME_DB:=public}",
+      "x-greptime-table-name" = "demologs",
     }
     auth     = otelcol.auth.basic.credentials.handler
   }

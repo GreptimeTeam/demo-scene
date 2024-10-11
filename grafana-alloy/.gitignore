@@ -2,3 +2,4 @@
 /prometheus.yml
 greptime.env
 greptime.env.bak
+foo.log
