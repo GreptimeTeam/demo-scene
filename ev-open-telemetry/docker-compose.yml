@@ -1,6 +1,6 @@
 services:
   greptimedb:
-    image: docker.io/greptime/greptimedb:v0.9.3
+    image: docker.io/greptime/greptimedb:v0.10.0-nightly-20241007
     command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
     ports:
       - 4000:4000
@@ -14,8 +14,6 @@ services:
       interval: 3s
       timeout: 3s
       retries: 5
-    volumes:
-      - /tmp/greptimedb-demo:/tmp/greptimedb
 
   ev_observer:
     build:
@@ -26,6 +24,7 @@ services:
     environment:
       - SCRAPE_INTERVAL_SEC=${SCRAPE_INTERVAL_SEC:-300}
       - TESLA_USER_EMAIL=${TESLA_USER_EMAIL}
+      - IS_MOCK=
     env_file:
       - path: "greptime.env"
         required: false
