@@ -27,7 +27,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 * [Kafka + Vector + GreptimeDB + Web UI](kafka-ingestion)
 * [Flight data ingestion and visualization](flight-data-ingester), including
   geospatial index with H3
-* [Grafana Alloy + GreptimeDB](grafana-alloy)
+* [OpenTelemetry + Grafana Alloy + GreptimeDB](grafana-alloy)
 
 ### Data Migrations
 

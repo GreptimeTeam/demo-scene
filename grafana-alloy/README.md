@@ -1,16 +1,23 @@
-# Grafana Alloy with GreptimeDB
+# OpenTelemetry and Grafana Alloy with GreptimeDB
 
 This docker-compose file demos how to ingest data from Grafana Alloy to
-GreptimeDB.
+GreptimeDB, as well as using GreptimeDB as an OpenTelemetry data collector.
 
 It uses [Grafana Alloy](https://grafana.com/docs/alloy) as a Prometheus data
-source (combination of Prometheus Node Exporter and Prometheus Agent), and use
-remote write protocol to ingest data into GreptimeDB.
+source (combination of Prometheus Node Exporter and Prometheus Agent), and
+ingest data into GreptimeDB using following protocols:
+
+- Prometheus Remote Write
+- OpenTelemetry OTLP
+
+In the real world, you will use Grafana Alloy as a Prometheus agent or an
+OpenTelemetry data collector, with both sinks connected to GreptimeDB.
 
 ## How to run this demo
 
 Ensure you have `git`, `docker`, `docker-compose` and `mysql` client
-installed. To run this demo:
+installed. Docker Compose version 2.24 or higher is required. To run this
+demo:
 
 ```shell
 git clone https://github.com/GreptimeTeam/demo-scene.git
@@ -67,19 +74,39 @@ The topology is illustrated in this diagram.
 ```mermaid
 flowchart LR
   greptimedb[(GreptimeDB)]
-  alloy[Alloy]
   grafana[Grafana]
 
-  alloy --> greptimedb
+  subgraph alloy[Alloy]
+    prometheus_exporter_unix --> prometheus_relabel
+    prometheus_relabel --> prometheus_remote_write
+
+    prometheus_relabel --> otelcol_receiver_prometheus
+    otelcol_receiver_prometheus --> otelcol_processor_transform
+    otelcol_processor_transform --> otelcol_exporter_otlphttp
+  end
+
+  prometheus_remote_write --> |PRW| greptimedb
+  otelcol_exporter_otlphttp --> |OTLP HTTP/Protobuf| greptimedb
+
   greptimedb --> grafana
 ```
+
+Grafana Alloy is a telemetry data pipeline that ingests data in Prometheus,
+Loki, and OpenTelemetry formats. It also provides processing capabilities, such
+as Prometheus relabeling and OpenTelemetry OTTL (OpenTelemetry Transformation
+Language) functions.
+
+In this example, we generate metrics data from Alloy's built-in data source
+called `prometheus.exporter.unix` and export the data to both a Prometheus
+remote write sink and an OpenTelemetry-compatible collector, which is
+GreptimeDB.
 
 ## Run in GreptimeCloud
 
 By default, this example writes data into a GreptimeDB instance within the
 docker compose. It's also possible to write to your own GreptimeCloud instance
 by creating a `greptime.env` file from our sample `greptime.env.sample` and
-providing your host, dbname and authentication information. Then use `docker
+providing your host, dbname and authentication information.Then use `docker
 compose down` and `docker compose up` to recreate the compose cluster and apply
 new settings.
 

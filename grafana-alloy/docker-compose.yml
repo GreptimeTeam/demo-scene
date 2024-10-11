@@ -11,7 +11,7 @@ services:
     init: true
 
   greptimedb:
-    image: docker.io/greptime/greptimedb:v0.9.3
+    image: docker.io/greptime/greptimedb:v0.10.0-nightly-20241007
     command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
     ports:
       - 4000:4000
