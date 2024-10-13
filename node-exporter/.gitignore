@@ -1,2 +1,4 @@
 /prometheus-data
 /prometheus.yml
+greptime.env
+greptime.env.bak
