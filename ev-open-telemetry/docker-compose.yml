@@ -1,6 +1,6 @@
 services:
   greptimedb:
-    image: docker.io/greptime/greptimedb-dev:dev-20240901-1725202129-e56709b5
+    image: docker.io/greptime/greptimedb:v0.10.0-nightly-20241007
     command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
     ports:
       - 4000:4000
@@ -14,8 +14,6 @@ services:
       interval: 3s
       timeout: 3s
       retries: 5
-    volumes:
-      - /tmp/greptimedb-demo:/tmp/greptimedb
 
   ev_observer:
     build:
@@ -24,16 +22,29 @@ services:
     networks:
       - demo-network
     environment:
-      - GREPTIME_HOST=${GREPTIME_HOST:-greptimedb:4000}
-      - GREPTIME_DB=${GREPTIME_DB:-public}
       - SCRAPE_INTERVAL_SEC=${SCRAPE_INTERVAL_SEC:-300}
       - TESLA_USER_EMAIL=${TESLA_USER_EMAIL}
+      - IS_MOCK=${IS_MOCK:-false}
+      - GREPTIME_HOST=${GREPTIME_HOST:-greptimedb}
+    env_file:
+      - path: "greptime.env"
+        required: false
     stdin_open: true
     tty: true
-
     depends_on:
       greptimedb:
         condition: service_started
+
+  envsubst:
+    image: docker.io/widerplan/envsubst
+    command: "-i /greptime_ds.yml.tpl -o /config_output/greptime_ds.yml"
+    volumes:
+      - ./greptime_ds.yml.tpl:/greptime_ds.yml.tpl
+      - datasource:/config_output
+    env_file:
+      - path: "greptime.env"
+        required: false
+    init: true
 
   grafana:
     build:
@@ -45,11 +56,20 @@ services:
       - demo-network
     user: "$UID:$GID"
     volumes:
-      - ./grafana_provisioning:/etc/grafana/provisioning
+      - provisioning:/etc/grafana/provisioning
+      - datasource:/etc/grafana/provisioning/datasources
     depends_on:
-      greptimedb:
-        condition: service_healthy
+      envsubst:
+        condition: service_completed_successfully
     restart: always
 
 networks:
   demo-network:
+volumes:
+  datasource:
+  provisioning:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./grafana_provisioning

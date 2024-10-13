@@ -2,52 +2,52 @@
 
 This project demonstrates capturing Tesla charging and
 driving metrics with OpenTelemetry and Python in GreptimeDB.
- 
+
 ## How to run this demo
 
-Ensure you have installed `git`, `docker`, `docker-compose` 
+Ensure you have installed `git`, `docker` and `docker-compose` 22.4 or newer.
 
 You also must have a valid Tesla Login with a registered vehicle.
-This project uses [TeslaPy](https://github.com/tdorssers/TeslaPy) 
+This project uses [TeslaPy](https://github.com/tdorssers/TeslaPy)
 which leverages the Tesla Owner API to gather the vehicle metrics.
 
 To run this demo:
 
 **Start the Docker Network**
 
-This command builds the containers and 
+This command builds the containers and
 waits for the app container to start up.
 
 ```shell
 git clone https://github.com/GreptimeTeam/demo-scene.git
 cd demo-scene/ev-open-telemetry
 
-TESLA_USER_EMAIL=<Your Tesla Email> docker-compose up -d && \
-while [ "$(docker inspect -f '{{.State.Running}}' ev-open-telemetry_ev_observer_1)" != "true" ]; do
-  echo "Waiting for container ev-open-telemetry_ev_observer_1 to be up..."
+TESLA_USER_EMAIL=<Your_Tesla_Email> docker compose up -d && \
+while [ "$(docker inspect -f '{{.State.Running}}' ev-open-telemetry-ev_observer-1)" != "true" ]; do
+  echo "Waiting for container ev-open-telemetry-ev_observer-1 to be up..."
   sleep 1
-done && docker logs ev-open-telemetry_ev_observer_1 & docker attach ev-open-telemetry_ev_observer_1
+done && docker logs ev-open-telemetry-ev_observer-1 & docker attach ev-open-telemetry_ev_observer_1
 ```
 
 **Authenticate to Tesla**
 
-When the container is running, you will see the output in the logs 
+When the container is running, you will see the output in the logs
 
 `Open this URL to authenticate: https://auth.tesla.com/oauth2/v3/authorize?...`
 
-Follow this URL in your browser window and login 
-with your Tesla credentials.  Upon successful authentication, 
-you will be redirected to a blank page. 
-Copy and paste the url from your browser 
+Follow this URL in your browser window and login
+with your Tesla credentials.  Upon successful authentication,
+you will be redirected to a blank page.
+Copy and paste the url from your browser
 into your terminal, which will use the token to authenticate for you.
-After you complete this process once, the `cache.json` file will be able to 
+After you complete this process once, the `cache.json` file will be able to
 use the refresh token to keep the authenticated session active.
 
 
 ## How it works
 This project uses the standard OpenTelemetry SDK to capture metrics
-and export them to the OTLP-compatible, GreptimeDB back end. 
-The configuration of the Metric Provider, Meter, Reader, and Exporter is all done in the [__init__.py](./ev_observer/ev_observer/__init__.py) file of the main package. 
+and export them to the OTLP-compatible, GreptimeDB back end.
+The configuration of the Metric Provider, Meter, Reader, and Exporter is all done in the [__init__.py](./ev_observer/ev_observer/__init__.py) file of the main package.
 
 After the meter is created, all instruments created with that meter
 will be read and exported as configured in the provider.
@@ -64,7 +64,7 @@ in the class diagram
 classDiagram
     VehicleInstrumentor o-- EVMetricData : contains/updates
     VehicleInstrumentor o-- AbstractVehicleFetcher : contains
-    
+
     AbstractVehicleFetcher --> EVMetricData : refreshes
     EVMetricData --> GreptimeDB : exports metrics to
 
@@ -106,7 +106,7 @@ classDiagram
 
 ## Future Development
 **To add additional metrics to our collection**
-1. Create a new class that sub-classes the `MetricCollector` 
+1. Create a new class that sub-classes the `MetricCollector`
 2. Add a property to the `VehicleInstrumentor` that contains a reference to this new collector
 3. Update the `AbstractVehicleDataFetcher` implementation to return this new MetricCollector data
 
