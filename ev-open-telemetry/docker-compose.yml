@@ -24,7 +24,8 @@ services:
     environment:
       - SCRAPE_INTERVAL_SEC=${SCRAPE_INTERVAL_SEC:-300}
       - TESLA_USER_EMAIL=${TESLA_USER_EMAIL}
-      - IS_MOCK=
+      - IS_MOCK=${IS_MOCK:-false}
+      - GREPTIME_HOST=${GREPTIME_HOST:-greptimedb}
     env_file:
       - path: "greptime.env"
         required: false

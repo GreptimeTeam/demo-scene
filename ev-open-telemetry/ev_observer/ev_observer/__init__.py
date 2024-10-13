@@ -11,9 +11,8 @@ from opentelemetry.sdk.metrics.export import (
 )
 
 load_dotenv()
-
 db_http_scheme = os.getenv("GREPTIME_SCHEME") or "http"
-db_host = os.getenv("GREPTIME_HOST") or "greptimedb"
+db_host = os.getenv("GREPTIME_HOST") or "0.0.0.0"
 db_port = os.getenv("GREPTIME_PORT") or 4000
 db_name = os.getenv("GREPTIME_DB") or "public"
 db_user = os.getenv("GREPTIME_USERNAME") or ""

@@ -49,8 +49,10 @@ class VehicleInstrumentor:
 
     def __init__(self, fetcher: AbstractVehicleDataFetcher, meter: Meter):
         self.metrics = EVMetricData()
-        self.metrics.init_instruments(meter)
+        # fill the metrics up before initialization of instruments
         self.fetcher = fetcher
+        self.observe()
+        self.metrics.init_instruments(meter)
 
     def observe(self):
         print(f"refreshing data at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
