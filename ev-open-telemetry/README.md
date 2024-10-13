@@ -22,11 +22,11 @@ waits for the app container to start up.
 git clone https://github.com/GreptimeTeam/demo-scene.git
 cd demo-scene/ev-open-telemetry
 
-TESLA_USER_EMAIL=<Your Tesla Email> docker-compose up -d && \
-while [ "$(docker inspect -f '{{.State.Running}}' ev-open-telemetry_ev_observer_1)" != "true" ]; do
-  echo "Waiting for container ev-open-telemetry_ev_observer_1 to be up..."
+TESLA_USER_EMAIL=<Your_Tesla_Email> docker compose up -d && \
+while [ "$(docker inspect -f '{{.State.Running}}' ev-open-telemetry-ev_observer-1)" != "true" ]; do
+  echo "Waiting for container ev-open-telemetry-ev_observer-1 to be up..."
   sleep 1
-done && docker logs ev-open-telemetry_ev_observer_1 & docker attach ev-open-telemetry_ev_observer_1
+done && docker logs ev-open-telemetry-ev_observer-1 & docker attach ev-open-telemetry_ev_observer_1
 ```
 
 **Authenticate to Tesla**
