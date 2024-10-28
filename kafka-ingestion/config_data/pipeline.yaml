@@ -18,13 +18,22 @@ processors:
 transform:
   - fields:
       - ip
-      - method
-      - path
-      - protocol
-      - user_agent
     type: string
   - fields:
+      - method
+      - protocol
+    type: string
+    index: tag
+  - fields:
+      - path
+      - user_agent
+    type: string
+    index: fulltext
+  - fields:
       - status
+    type: uint32
+    index: tag
+  - fields:
       - size
     type: uint32
   - fields:

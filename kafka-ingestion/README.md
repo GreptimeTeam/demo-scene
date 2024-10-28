@@ -75,11 +75,11 @@ mysql> desc demo_logs;
 | Column     | Type                | Key  | Null | Default | Semantic Type |
 +------------+---------------------+------+------+---------+---------------+
 | ip         | String              |      | YES  |         | FIELD         |
-| method     | String              |      | YES  |         | FIELD         |
+| method     | String              | PRI  | YES  |         | TAG           |
+| protocol   | String              | PRI  | YES  |         | TAG           |
 | path       | String              |      | YES  |         | FIELD         |
-| protocol   | String              |      | YES  |         | FIELD         |
 | user_agent | String              |      | YES  |         | FIELD         |
-| status     | UInt32              |      | YES  |         | FIELD         |
+| status     | UInt32              | PRI  | YES  |         | TAG           |
 | size       | UInt32              |      | YES  |         | FIELD         |
 | datetime   | TimestampNanosecond | PRI  | NO   |         | TIMESTAMP     |
 | timestamp  | TimestampNanosecond |      | YES  |         | FIELD         |
