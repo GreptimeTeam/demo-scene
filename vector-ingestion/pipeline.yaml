@@ -1,0 +1,40 @@
+#145.251.205.39 - devankoshal [29/Oct/2024:17:51:29 +0800] "DELETE /booper/bopper/mooper/mopper HTTP/1.1" 304 43420
+processors:
+  - dissect:
+      fields:
+        - message
+      patterns:
+        - '%{ip_address} - %{user} [%{request_time}] "%{http_method} %{request_path} HTTP/%{http_version}" %{status_code} %{response_size}'
+      ignore_missing: true
+  - date:
+      fields:
+        - request_time
+      formats:
+        # 29/Oct/2024:17:51:29 +0800
+        - "%d/%b/%Y:%H:%M:%S %z"
+
+transform:
+  - fields:
+      - ip_address
+      - http_method
+      - http_version
+    type: string
+    index: tag
+  - fields:
+      - status_code
+    type: int32
+    index: tag
+  - fields:
+      - request_path
+    type: string
+    index: fulltext
+  - fields:
+      - user
+    type: string
+  - fields:
+      - response_size
+    type: int32
+  - fields:
+      - request_time
+    type: time
+    index: timestamp
