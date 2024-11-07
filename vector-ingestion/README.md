@@ -1,4 +1,4 @@
-# GreptimeDB Kafka Ingestion Demo
+# GreptimeDB Vector Ingestion Demo
 
 This demo show how to ingest log and metrics data to GreptimeDB via Vector.
 
