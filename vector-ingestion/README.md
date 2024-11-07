@@ -133,3 +133,48 @@ UI.
 
 You can also use GreptimeCloud to store and visualize the data. Just sign up at https://console.greptime.cloud
 and create a new project. Then update the `start.env` file with the GreptimeCloud
+
+## Manual Code
+### create `apache_common_pipeline`:
+
+```Json
+curl -X "POST" "https://ervqd5nxnb8s.us-west-2.aws.greptime.cloud/v1/events/pipelines/apache_common_pipeline?db=z3294clox11alog_test-public" \
+     -u 'username:password' \
+     -F "file=@pipeline.yaml"
+```
+### Launch Vector
+
+```json
+sudo docker run \
+  --rm \
+  -v $PWD/example.toml:/etc/vector/vector.toml:ro \
+  --name vector \
+  timberio/vector:0.42.0-debian  --config-toml /etc/vector/vector.toml
+```
+### Query data 
+
+You can use SQL to query the data ingested in GreptimeCloud:
+
+```sql
+-- show pipeline data
+select * from greptime_private.pipelines;
+
+-- show metrics data
+SELECT * FROM "host_memory_free_bytes" ORDER BY ts DESC LIMIT 500;
+
+-- show raw logs
+SELECT * FROM "demo_logs" ORDER BY greptime_timestamp DESC LIMIT 100;
+
+-- show structured logs
+SELECT * FROM "demo_structured_logs" ORDER BY request_time DESC LIMIT 100;
+SELECT * FROM "demo_structured_logs" where status_code=500 ORDER BY request_time DESC LIMIT 100;
+
+-- show demo log schema and fulltext index
+desc demo_structured_logs;
+show create table demo_structured_logs;
+select * from demo_structured_logs where MATCHES(request_path,'work OR metrics') limit 10;
+```
+
+
+
+
