@@ -63,7 +63,32 @@ otelcol.exporter.otlphttp "greptimedb" {
   }
 }
 
+otelcol.exporter.otlphttp "greptimedb_logs" {
+  client {
+    endpoint = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/otlp/"
+    headers  = {
+      "X-Greptime-DB-Name" = "${GREPTIME_DB:=public}",
+      "x-greptime-log-table-name" = "demo_logs",
+      "x-greptime-log-extract-keys" = "filename,log.file.name,loki.attribute.labels",
+    }
+    auth     = otelcol.auth.basic.credentials.handler
+  }
+}
+
 otelcol.auth.basic "credentials" {
   username = "${GREPTIME_USERNAME}"
   password = "${GREPTIME_PASSWORD}"
+}
+
+loki.source.file "greptime" {
+  targets = [
+    {__path__ = "/tmp/foo.txt"},
+  ]
+  forward_to = [otelcol.receiver.loki.greptime.receiver]
+}
+
+otelcol.receiver.loki "greptime" {
+  output {
+    logs = [otelcol.exporter.otlphttp.greptimedb_logs.input]
+  }
 }
