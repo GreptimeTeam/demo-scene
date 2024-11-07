@@ -137,14 +137,14 @@ and create a new project. Then update the `start.env` file with the GreptimeClou
 ## Manual Code
 ### create `apache_common_pipeline`:
 
-```Json
-curl -X "POST" "https://ervqd5nxnb8s.us-west-2.aws.greptime.cloud/v1/events/pipelines/apache_common_pipeline?db=z3294clox11alog_test-public" \
+```bash
+curl -X "POST" "https://your-greptime-db-host/v1/events/pipelines/apache_common_pipeline?db=z3294clox11alog_test-public" \
      -u 'username:password' \
      -F "file=@pipeline.yaml"
 ```
 ### Launch Vector
 
-```json
+```bash
 sudo docker run \
   --rm \
   -v $PWD/example.toml:/etc/vector/vector.toml:ro \
