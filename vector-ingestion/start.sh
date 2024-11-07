@@ -36,13 +36,13 @@ fi
 function run_demo {
 
 ## if GT_GRPC_TLS is true set example.toml to use tls
-if [ "$GT_GRPC_TLS" = "true" ];
+if [ "$GT_GRPC_TLS" = true ];
 then
   echo "GT_GRPC_TLS is true, setting example.toml grpc to use tls"
-  sed -i 's/#tls = {}/tls = {}/g' example.toml
+  sed -i 's/^#tls = {}/tls = {}/g' example.toml
 else
   echo "GT_GRPC_TLS is not set or false, setting example.toml grpc to not use tls"
-  sed -i 's/tls = {}/#tls = {}/g' example.toml
+  sed -i 's/^tls = {}/#tls = {}/g' example.toml
 fi
 
 podman run \

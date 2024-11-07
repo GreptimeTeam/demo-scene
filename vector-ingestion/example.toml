@@ -19,7 +19,7 @@ dbname = "${GT_DB_NAME}"
 username = "${GT_USERNAME}"
 password = "${GT_PASSWORD}"
 grpc_compression = "gzip"
-###tls = {}
+#tls = {}
 
 [sinks.logs]
 type = "greptimedb_logs"

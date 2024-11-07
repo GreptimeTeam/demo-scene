@@ -142,12 +142,16 @@ curl -X "POST" "https://your-greptime-db-host/v1/events/pipelines/apache_common_
      -u 'username:password' \
      -F "file=@pipeline.yaml"
 ```
+### create `config.toml`
+
+create a `config.toml` file like `example.toml` with your GreptimeDB connect info.
+
 ### Launch Vector
 
 ```bash
 sudo docker run \
   --rm \
-  -v $PWD/example.toml:/etc/vector/vector.toml:ro \
+  -v $PWD/config.toml:/etc/vector/vector.toml:ro \
   --name vector \
   timberio/vector:0.42.0-debian  --config-toml /etc/vector/vector.toml
 ```
