@@ -69,7 +69,7 @@ otelcol.exporter.otlphttp "greptimedb_logs" {
     headers  = {
       "X-Greptime-DB-Name" = "${GREPTIME_DB:=public}",
       "x-greptime-log-table-name" = "demo_logs",
-      "x-greptime-log-extract-keys" = "filename,log.file.name,loki.attribute.labels",
+      "x-greptime-log-extract-keys" = "filename",
     }
     auth     = otelcol.auth.basic.credentials.handler
   }
