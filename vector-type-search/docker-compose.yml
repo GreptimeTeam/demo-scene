@@ -19,7 +19,7 @@ services:
     image: quay.io/jupyter/base-notebook:2024-11-19
     command: jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
     ports:
-      - 9888:8888
+      - 8888:8888
     networks:
       - demo-network
     volumes:
