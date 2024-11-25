@@ -84,11 +84,25 @@ loki.source.file "greptime" {
   targets = [
     {__path__ = "/tmp/foo.txt"},
   ]
-  forward_to = [otelcol.receiver.loki.greptime.receiver]
+  forward_to = [otelcol.receiver.loki.greptime.receiver, loki.write.greptime_loki.receiver]
 }
 
 otelcol.receiver.loki "greptime" {
   output {
     logs = [otelcol.exporter.otlphttp.greptimedb_logs.input]
   }
+}
+
+loki.write "greptime_loki" {
+    endpoint {
+        url = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/loki/api/v1/push"
+        headers  = {
+          "X-Greptime-DB-Name" = "${GREPTIME_DB:=public}",
+          "X-Greptime-Log-Table-Name" = "${GREPTIME_LOG_TABLE_NAME:=loki_demo_logs}",
+        }
+    }
+    external_labels = {
+        "job" = "greptime",
+        "from" = "alloy",
+    }
 }
