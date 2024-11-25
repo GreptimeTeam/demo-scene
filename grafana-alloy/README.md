@@ -13,6 +13,8 @@ ingest data into GreptimeDB using following protocols:
 In the real world, you will use Grafana Alloy as a Prometheus agent or an
 OpenTelemetry data collector, with both sinks connected to GreptimeDB.
 
+Additionally, we send Alloy meta logs to GreptimeDB via OpenTelemetry as well.
+
 ## How to run this demo
 
 Ensure you have `git`, `docker`, `docker-compose` and `mysql` client
@@ -83,6 +85,10 @@ flowchart LR
     prometheus_relabel --> otelcol_receiver_prometheus
     otelcol_receiver_prometheus --> otelcol_processor_transform
     otelcol_processor_transform --> otelcol_exporter_otlphttp
+
+    logging --> otelcol_receiver_loki
+    otelcol_receiver_loki --> otelcol_processor_attributes_enrichment
+    otelcol_processor_attributes_enrichment --> otelcol_exporter_otlphttp
   end
 
   prometheus_remote_write --> |PRW| greptimedb
