@@ -1,4 +1,15 @@
 services:
+  envsubst:
+    image: docker.io/widerplan/envsubst
+    command: "-i /config_input/prometheus.yml.tpl -o /config_output/prometheus.yml"
+    volumes:
+      - ./prometheus.yml.tpl:/config_input/prometheus.yml.tpl
+      - config:/config_output
+    env_file:
+      - path: "greptime.env"
+        required: false
+    init: true
+
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node_exporter
@@ -15,23 +26,17 @@ services:
     networks:
       - demo-network
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - config:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.enable-lifecycle'
     depends_on:
       - node_exporter
+      - envsubst
     ports:
       - 9090:9090
 
-  grafana:
-    image: docker.io/grafana/grafana:11.1.0
-    ports:
-      - 3000:3000
-    networks:
-      - demo-network
-    restart: always
-
-
 networks:
   demo-network:
+volumes:
+  config:
