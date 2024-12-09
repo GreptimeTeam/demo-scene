@@ -102,7 +102,7 @@ otelcol.processor.attributes "enrichment" {
   }
 
   output {
-    logs = [otelcol.exporter.otlphttp.greptimedb_logs.input, loki.write.greptime_loki.receiver]
+    logs = [otelcol.exporter.otlphttp.greptimedb_logs.input]
   }
 }
 
@@ -115,5 +115,5 @@ otelcol.receiver.loki "greptime" {
 logging {
   level    = "info"
   format   = "json"
-  write_to = [otelcol.receiver.loki.greptime.receiver]
+  write_to = [otelcol.receiver.loki.greptime.receiver,  loki.write.greptime_loki.receiver]
 }
