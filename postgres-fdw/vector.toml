@@ -1,0 +1,20 @@
+[sources.logs_in]
+type = "demo_logs"
+format = "json"
+
+[transforms.logs_json]
+type = "remap"
+inputs = ["logs_in"]
+source = '''
+. = parse_json!(.message)
+'''
+
+[sinks.logs_out2]
+inputs = ["logs_json"]
+type = "greptimedb_logs"
+endpoint = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}"
+compression = "gzip"
+dbname = "${GREPTIME_DB:=public}"
+username = "${GREPTIME_USERNAME}"
+password = "${GREPTIME_PASSWORD}"
+table = "demo_logs_json"
