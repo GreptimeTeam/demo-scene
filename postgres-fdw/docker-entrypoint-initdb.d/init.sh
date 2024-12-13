@@ -7,11 +7,11 @@ CREATE EXTENSION postgres_fdw;
 
 CREATE SERVER greptimedb
 FOREIGN DATA WRAPPER postgres_fdw
-OPTIONS (host 'greptimedb', dbname 'public', port '4003');
+OPTIONS (host '${GREPTIME_HOST:=greptimedb}', dbname '${GREPTIME_DB:=public}', port '4003');
 
 CREATE USER MAPPING FOR postgres
 SERVER greptimedb
-OPTIONS (user 'greptime', password '...');
+OPTIONS (user '${GREPTIME_USERNAME:=greptime}', password '${GREPTIME_PASSWORD:=greptime}');
 
 CREATE FOREIGN TABLE ft_demo_logs_json (
   "bytes" INT8,
