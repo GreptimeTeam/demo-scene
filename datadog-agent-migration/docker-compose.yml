@@ -34,6 +34,7 @@ services:
       - DD_API_KEY=random_string
       - DD_DD_URL=http://vector:8000
       - DD_HOSTNAME=testagent
+      - DD_LOGS_ENABLED=true
 
   vector:
     image: docker.io/timberio/vector:0.43.X-alpine
