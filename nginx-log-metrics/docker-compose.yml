@@ -1,6 +1,6 @@
 services:
   greptimedb:
-    image: docker.io/greptime/greptimedb:v0.9.3
+    image: docker.io/greptime/greptimedb:v0.11.1
     command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
     ports:
       - 4000:4000
@@ -32,7 +32,7 @@ services:
     restart: always
 
   init_database:
-    image: docker.io/postgres
+    image: docker.io/postgres:17
     networks:
       - demo-network
     depends_on:
@@ -43,6 +43,7 @@ services:
     command: psql -h greptimedb -p 4003 -d public -f /config_data/init_database.sql
     environment:
       PGSSLMODE: disable
+    init: yes
 
   init_pipeline:
     image: docker.io/alpine/curl
@@ -53,7 +54,8 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./config_data:/config_data
-    command: sh -c "curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/greptime_pipeline.yaml' -v; curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/server_log' -F 'file=@/config_data/server_log_pipeline.yaml' -v"
+    command: sh -c "sleep 20 && curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/greptime_pipeline.yaml' -v; curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/server_log' -F 'file=@/config_data/server_log_pipeline.yaml' -v"
+    init: yes
 
   vector:
     image: docker.io/timberio/vector:0.41.X-alpine
@@ -63,11 +65,6 @@ services:
     volumes:
       - ./config_data:/config_data
       - logs:/logs
-    depends_on:
-      init_pipeline:
-        condition: service_completed_successfully
-      nginx:
-        condition: service_started
 
   nginx:
     image: docker.io/nginx:1.27.0
