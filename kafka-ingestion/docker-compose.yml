@@ -1,3 +1,5 @@
+include:
+  - ../greptimedb-common.yml
 services:
   kafka:
     image: docker.io/bitnami/kafka:3.6.0
@@ -66,22 +68,6 @@ services:
       kafka-init:
         condition: service_completed_successfully
     command: "-c /config_data/vector.toml"
-
-  greptimedb:
-    image: docker.io/greptime/greptimedb:v0.9.3
-    command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
-    ports:
-      - 4000:4000
-      - 4001:4001
-      - 4002:4002
-      - 4003:4003
-    networks:
-      - demo-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:4000/health"]
-      interval: 3s
-      timeout: 3s
-      retries: 5
 
 networks:
   demo-network:
