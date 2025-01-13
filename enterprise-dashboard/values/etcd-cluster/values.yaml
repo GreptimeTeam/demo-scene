@@ -1,0 +1,11 @@
+image:
+  registry: greptime-registry.cn-hangzhou.cr.aliyuncs.com
+  tag: "3.5.12"
+
+replicaCount: 1
+
+auth:
+  rbac:
+    create: false
+    token:
+      enabled: false

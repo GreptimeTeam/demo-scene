@@ -1,0 +1,7 @@
+image:
+  registry: greptime-registry.cn-hangzhou.cr.aliyuncs.com
+
+apiServer:
+  enabled: true
+  podMetrics:
+    enabled: true

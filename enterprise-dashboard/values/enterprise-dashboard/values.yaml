@@ -1,0 +1,56 @@
+replicaCount: 1
+
+image:
+  repository: greptime-registry.cn-hangzhou.cr.aliyuncs.com/greptime/dashboard-apiserver
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "5a2275da-20250113090734"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+logLevel: debug
+operatorAddr: greptimedb-operator.default.svc.cluster.local:8081
+servicePort: 19095
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 19095
+  annotations: {}
+
+resources: {}
+#  requests:
+#    cpu: 100m
+#    memory: 128Mi
+#  limits:
+#    cpu: 100m
+#    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

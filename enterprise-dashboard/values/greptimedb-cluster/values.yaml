@@ -1,0 +1,38 @@
+image:
+  registry: greptime-registry.cn-hangzhou.cr.aliyuncs.com
+  tag: latest
+
+initializer:
+  registry: greptime-registry.cn-hangzhou.cr.aliyuncs.com
+
+base:
+  podTemplate:
+    main:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 1
+          memory: 1Gi
+
+meta:
+  etcdEndpoints: "etcd.default.svc.cluster.local:2379"
+
+logging:
+  slowQuery:
+    enabled: true
+    threshold: 100ms
+
+datanode:
+  replicas: 3
+
+monitoring:
+  enabled: true
+  vector:
+    registry: greptime-registry.cn-hangzhou.cr.aliyuncs.com
+
+grafana:
+  enabled: true
+  image:
+    registry: greptime-registry.cn-hangzhou.cr.aliyuncs.com
