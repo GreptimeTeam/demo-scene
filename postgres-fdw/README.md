@@ -107,7 +107,7 @@ flowchart LR
 ```
 
 To see how we can configure GreptimeDB for `postgres_fdw` extension, see the
-[init.sh](./docker-entrypoint-initdb/init.sh).
+[init.sh](./docker-entrypoint-initdb.d/init.sh).
 
 ## Run in GreptimeCloud
 
