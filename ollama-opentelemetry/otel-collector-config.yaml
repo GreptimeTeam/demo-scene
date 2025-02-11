@@ -1,0 +1,35 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlp:
+    endpoint: localhost:4317
+    tls:
+      insecure: true
+  otlphttp:
+    endpoint: http://greptimedb:4000/v1/otlp
+    tls:
+      insecure: true
+
+extensions:
+  health_check:
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug,otlphttp]
+    metrics:
+      receivers: [otlp]
+      exporters: [debug,otlphttp]
+    logs:
+      receivers: [otlp]
+      exporters: [debug,otlphttp]
