@@ -1,0 +1,45 @@
+include:
+  - ../greptimedb-common.yml
+
+services:
+  create-nginx-logs-pipeline:
+    image: docker.io/alpine/curl:latest
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    volumes:
+      - ./configs/greptimedb:/configs
+    command: sh -c "sleep 5 && curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/nginx-logs-pipeline' -F 'file=@/configs/nginx-logs-pipeline.yml' -v"
+    init: yes
+
+  nginx-log-generator:
+    image: docker.io/library/python:3.10
+    networks:
+      - demo-network
+    volumes:
+      - ./nginx-log-generator:/app
+    working_dir: /app
+    command: ["sh", "-c", "sleep 10 && python3 app.py --interval 3 --output ./access.log"]
+    healthcheck:
+      test: ["CMD", "test", "-f", "./access.log"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.17.0
+    networks:
+      - demo-network
+    depends_on:
+      nginx-log-generator:
+        condition: service_healthy
+    volumes:
+      - ./configs/logstash/pipeline.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./configs/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./nginx-log-generator:/var/log/nginx
+
+networks:
+  demo-network:
