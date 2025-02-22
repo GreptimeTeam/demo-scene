@@ -16,12 +16,14 @@ resource = Resource.create({"service.name": "myproject"})
 trace.set_tracer_provider(TracerProvider(resource=resource))
 trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
 
-
-# Add OTLP HTTP Exporter for remote observability
-# otlp_exporter = OTLPSpanExporter(
-#     endpoint="http://localhost:4318/v1/traces"  # OTLP HTTP endpoint
-# )
-# trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter))
+# Add OTLP HTTP Exporter if endpoint is provided
+otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+if otlp_endpoint:
+    otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint)
+    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter))
+    logger.info(f"OTLP Exporter enabled with endpoint: {otlp_endpoint}")
+else:
+    logger.info("OTLP Exporter disabled: OTEL_EXPORTER_OTLP_ENDPOINT not set")
 
 # Instrument Django
 DjangoInstrumentor().instrument()

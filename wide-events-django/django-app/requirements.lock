@@ -31,6 +31,8 @@ googleapis-common-protos==1.68.0
     # via opentelemetry-exporter-otlp-proto-http
 grpcio==1.70.0
     # via opentelemetry-exporter-otlp-proto-grpc
+gunicorn==23.0.0
+    # via django-app
 idna==3.10
     # via requests
 importlib-metadata==8.5.0
@@ -86,6 +88,7 @@ opentelemetry-util-http==0.51b0
     # via opentelemetry-instrumentation-django
     # via opentelemetry-instrumentation-wsgi
 packaging==24.2
+    # via gunicorn
     # via opentelemetry-instrumentation
 protobuf==5.29.3
     # via googleapis-common-protos
