@@ -18,5 +18,7 @@ EXPOSE 8000
 
 ENV DJANGO_SETTINGS_MODULE=myproject.settings
 
+RUN python manage.py migrate
+
 # Run the application with Gunicorn
 CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8000"]
