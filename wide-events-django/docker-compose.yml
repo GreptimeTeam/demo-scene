@@ -10,7 +10,11 @@ services:
       - DEBUG=0
       - ALLOWED_HOSTS=*
       - DJANGO_SETTINGS_MODULE=myproject.settings
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://greptimedb:4000/v1/otlp/v1/traces  # Optional
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://greptimedb:4000/v1/otlp/v1/traces
+  client:
+    build: todo-client/
+    environment:
+      - BASE_URL=http://django:8000
 
 networks:
   demo-network:
