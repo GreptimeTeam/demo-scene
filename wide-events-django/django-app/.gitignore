@@ -8,5 +8,6 @@ wheels/
 
 # venv
 .venv
+.envrc
 
 db.sqlite3
