@@ -9,7 +9,6 @@ services:
     environment:
       - DEBUG=0
       - ALLOWED_HOSTS=*
-      - DJANGO_SETTINGS_MODULE=myproject.settings
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://greptimedb:4000/v1/otlp/v1/traces
   client:
     build: todo-client/

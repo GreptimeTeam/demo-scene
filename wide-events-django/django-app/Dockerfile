@@ -17,6 +17,7 @@ RUN uv pip install --system -r requirements.lock
 EXPOSE 8000
 
 ENV DJANGO_SETTINGS_MODULE=myproject.settings
+ENV OTEL_SEMCONV_STABILITY_OPT_IN=http,database
 
 RUN python manage.py migrate
 
