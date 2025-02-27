@@ -2,6 +2,36 @@ import random
 import time
 import requests
 import os
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
+# Initialize tracing
+resource = Resource.create({"service.name": "todo-client"})
+trace.set_tracer_provider(TracerProvider(resource=resource))
+
+# Add ConsoleSpanExporter for debugging
+console_exporter = ConsoleSpanExporter()
+trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(console_exporter))
+
+# Add OTLP HTTP Exporter if endpoint is provided
+otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+if otlp_endpoint:
+    otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint)
+    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter))
+    logger.info(f"OTLP Exporter enabled with endpoint: {otlp_endpoint}")
+else:
+    logger.info("OTLP Exporter disabled: OTEL_EXPORTER_OTLP_ENDPOINT not set")
+
+# Instrument the requests library
+RequestsInstrumentor().instrument()
 
 # Configuration
 base_url = os.getenv("BASE_URL")
