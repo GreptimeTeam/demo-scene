@@ -20,7 +20,8 @@ trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExp
 # Add OTLP HTTP Exporter if endpoint is provided
 otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 if otlp_endpoint:
-    otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint)
+    headers = {"x-greptime-log-pipeline-name": "greptime_trace_v1", "x-greptime-trace-table-name": "web_trace_demo"}
+    otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint, headers=headers)
     trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter))
     logger.info(f"OTLP Exporter enabled with endpoint: {otlp_endpoint}")
 else:
