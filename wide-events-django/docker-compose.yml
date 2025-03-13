@@ -1,0 +1,22 @@
+include:
+  - ../greptimedb-common.yml
+
+services:
+  django:
+    build: django-app/
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=0
+      - ALLOWED_HOSTS=*
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://greptimedb:4000/v1/otlp/v1/traces
+  client:
+    build: todo-client/
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://greptimedb:4000/v1/otlp/v1/traces
+      - BASE_URL=http://django:8000
+    depends_on:
+      - django
+
+networks:
+  demo-network:
