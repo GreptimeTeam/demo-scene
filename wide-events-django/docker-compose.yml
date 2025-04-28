@@ -2,6 +2,20 @@ include:
   - ../greptimedb-common.yml
 
 services:
+  init_database:
+    image: docker.io/postgres:17
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    volumes:
+      - ./init.sql:/init.sql
+    command: psql -h greptimedb -p 4003 -d public -f /init.sql
+    environment:
+      PGSSLMODE: disable
+    init: yes
+
   django:
     build: django-app/
     ports:
@@ -10,6 +24,7 @@ services:
       - DEBUG=0
       - ALLOWED_HOSTS=*
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://greptimedb:4000/v1/otlp/v1/traces
+
   client:
     build: todo-client/
     environment:
@@ -17,6 +32,11 @@ services:
       - BASE_URL=http://django:8000
     depends_on:
       - django
+
+  grafana:
+    image: docker.io/greptime/grafana-greptimedb:11.2.5-greptime-v-2.0-rc.1
+    ports:
+      - 3000:3000
 
 networks:
   demo-network:

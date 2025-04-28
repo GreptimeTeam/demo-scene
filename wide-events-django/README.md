@@ -39,8 +39,24 @@ owners.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-mysql> show tables;
-TODO
+mysql> SELECT * FROM web_trace_demo\G
+```
+
+### Access derived metrics
+
+We created an example to generate django p99 latency as event data ingested. To
+access the generated data, use SQL query like this:
+
+```sql
+SELECT
+    span_name,
+    time_window,
+    uddsketch_calc(0.90, "latency_sketch") AS p90
+FROM
+    django_http_request_latency
+ORDER BY
+    time_window DESC
+LIMIT 100;
 ```
 
 ## How it works
@@ -50,8 +66,12 @@ The topology is illustrated in this diagram.
 ```mermaid
 flowchart LR
   greptimedb[(GreptimeDB)]
-  grafana[Grafana]
+  django_app
+  client_app
 
+  client_app --> django_app
+  django_app --> greptimedb
+  client_app --> greptimedb
 
-  greptimedb --> grafana
+  grafana --> greptimedb
 ```
