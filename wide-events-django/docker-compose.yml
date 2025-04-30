@@ -11,7 +11,7 @@ services:
         condition: service_healthy
     volumes:
       - ./init.sql:/init.sql
-    command: psql -h greptimedb -p 4003 -d public -f /init.sql
+    entrypoint: sh -c "sleep 10 && psql -h greptimedb -p 4003 -d public -f /init.sql"
     environment:
       PGSSLMODE: disable
     init: yes
