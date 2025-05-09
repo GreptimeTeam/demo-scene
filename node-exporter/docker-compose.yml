@@ -1,3 +1,5 @@
+include:
+  - ../greptimedb-common.yml
 services:
   envsubst:
     image: docker.io/widerplan/envsubst
@@ -13,7 +15,6 @@ services:
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node_exporter
-    restart: unless-stopped
     command:
       - '--path.rootfs=/'
     networks:
@@ -21,8 +22,6 @@ services:
 
   prometheus:
     image: docker.io/prom/prometheus:latest
-    container_name: prometheus
-    restart: unless-stopped
     networks:
       - demo-network
     volumes:
@@ -31,8 +30,8 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.enable-lifecycle'
     depends_on:
-      - node_exporter
-      - envsubst
+      envsubst:
+        condition: service_completed_successfully
     ports:
       - 9090:9090
 
