@@ -22,8 +22,7 @@ docker compose up
 It can take a while for the first run to pull down images and also build
 necessary components.
 
-Open your browser at `http://localhost:3000` and find our preconfigured grafnaa
-dashboard. The default user/pw is admin/admin
+Open your browser at `http://localhost:3000` and find our preconfigured grafana dashboard `Flight-map`. The default user/password is `admin/admin`.
 
 ## How it works
 
