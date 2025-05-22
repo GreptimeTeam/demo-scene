@@ -74,6 +74,6 @@ You can make sample queries from the Web Dashboard:
 
 ![Dashboard](media/dashboard.png)
 
-You can also build charts from the statstics for visualization:
+You can also build charts from the statistics for visualization:
 
 ![Workbench](media/panels.png)
