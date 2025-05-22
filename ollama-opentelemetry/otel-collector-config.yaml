@@ -15,6 +15,8 @@ exporters:
       insecure: true
   otlphttp:
     endpoint: http://greptimedb:4000/v1/otlp
+    headers:
+      x-greptime-pipeline-name: "greptime_trace_v1"
     tls:
       insecure: true
 

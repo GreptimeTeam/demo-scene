@@ -90,17 +90,16 @@ Verify the setup by accessing the GreptimeDB dashboard at [http://localhost:4000
 
 ## Step 3: Run the LLM Demo
 
-Install the required Python dependencies:
+Install the required Python dependencies by [uv](https://github.com/astral-sh/uv):
 ```bash
-pip install ollama --quiet
-pip install langchain --quiet
-pip install langchain-ollama --quiet
-pip install openlit --quiet
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
 
 Run the `joke.py` script:
 ```bash
-python joke.py
+uv run joke.py
 ```
 
 This script uses DeepSeek to generate a joke:
@@ -115,7 +114,7 @@ print(llm.invoke("Tell me a joke"))
 
 ## Step 4: Data Visualization Using GreptimeDB Dashboard
 
-Access the GreptimeDB Dashboard's log view to examine trace data: [http://localhost:4000/dashboard/log-query](http://localhost:4000/dashboard/log-query)
+Access the GreptimeDB Dashboard's log view to examine trace data: [http://localhost:4000/dashboard/log-query#/dashboard/log-query](http://localhost:4000/dashboard/log-query#/dashboard/log-query)
 
 ![Trace View](./images/trace.png)
 
