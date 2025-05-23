@@ -1,0 +1,36 @@
+name: Bump Patch Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number with patch (e.g., 1.0.2 or 0.12.2)'
+        required: true
+        type: string
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Call update scripts
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          .github/scripts/release-patch.sh $VERSION
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "chore: bump greptimedb version to ${{ github.event.inputs.version }}"
+          title: "chore: bump greptimedb version ${{ github.event.inputs.version }}"
+          body: "This PR updates the greptimedb version to ${{ github.event.inputs.version }}."
+          branch: "version-website-${{ github.event.inputs.version }}"
+          base: main
+          delete-branch: true
