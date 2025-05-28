@@ -92,10 +92,12 @@ flowchart LR
     logging --> otelcol_receiver_loki
     otelcol_receiver_loki --> otelcol_processor_attributes_enrichment
     otelcol_processor_attributes_enrichment --> otelcol_exporter_otlphttp
+
+    otelcol_receiver_otlp --> otelcol_exporter_otlphttp
   end
 
   prometheus_remote_write --> |PRW| greptimedb
-  otelcol_exporter_otlphttp --> |OTLP HTTP/Protobuf| greptimedb
+  otelcol_exporter_otlphttp --> |OTLP/HTTP| greptimedb
 
   greptimedb --> grafana
 ```
