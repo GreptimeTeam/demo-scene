@@ -57,7 +57,7 @@ otelcol.exporter.otlphttp "greptimedb" {
   client {
     endpoint = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/otlp/"
     headers  = {
-      "X-Greptime-DB-Name" = "${GREPTIME_DB:=public}",
+      "x-greptime-db-name" = "${GREPTIME_DB:=public}",
     }
     auth     = otelcol.auth.basic.credentials.handler
   }
@@ -67,7 +67,7 @@ otelcol.exporter.otlphttp "greptimedb_logs" {
   client {
     endpoint = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/otlp/"
     headers  = {
-      "X-Greptime-DB-Name" = "${GREPTIME_DB:=public}",
+      "x-greptime-db-name" = "${GREPTIME_DB:=public}",
       "x-greptime-log-table-name" = "alloy_meta_logs",
       "x-greptime-log-extract-keys" = "hostname",
     }
@@ -79,8 +79,8 @@ loki.write "greptime_loki" {
     endpoint {
         url = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/loki/api/v1/push"
         headers  = {
-          "X-Greptime-DB-Name" = "${GREPTIME_DB:=public}",
-          "X-Greptime-Log-Table-Name" = "${GREPTIME_LOG_TABLE_NAME:=loki_demo_logs}",
+          "x-greptime-db-name" = "${GREPTIME_DB:=public}",
+          "x-greptime-log-table-name" = "${GREPTIME_LOG_TABLE_NAME:=loki_demo_logs}",
         }
     }
     external_labels = {
@@ -116,4 +116,25 @@ logging {
   level    = "info"
   format   = "json"
   write_to = [otelcol.receiver.loki.greptime.receiver,  loki.write.greptime_loki.receiver]
+}
+
+otelcol.exporter.otlphttp "greptimedb_traces" {
+  client {
+    endpoint = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/otlp/"
+    headers  = {
+      "x-greptime-db-name" = "${GREPTIME_DB:=public}",
+      "x-greptime-trace-table-name" = "myapp_traces",
+      "x-greptime-pipeline-name" = "greptime_trace_v1",
+    }
+    auth     = otelcol.auth.basic.credentials.handler
+  }
+}
+
+otelcol.receiver.otlp "otel_traces" {
+  http {}
+  grpc {}
+
+  output {
+    traces  = [otelcol.exporter.otlphttp.greptimedb_traces.input]
+  }
 }

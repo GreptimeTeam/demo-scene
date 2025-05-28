@@ -30,7 +30,6 @@ services:
       - demo-network
     volumes:
       - config:/etc/alloy
-      - ./foo.txt:/tmp/foo.txt
     depends_on:
       envsubst:
         condition: service_completed_successfully
