@@ -1,0 +1,5 @@
+## this script is to update for patch updates
+## the input version format should be like: 1.0.2 or 0.12.2
+VERSION=$1
+
+sed -i "s/greptimedb:v[^']*/greptimedb:v$VERSION/" greptimedb-common.yml

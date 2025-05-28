@@ -1,7 +1,7 @@
 processors:
   - dissect:
       fields:
-        - line
+        - message
       patterns:
         - '%{ip_address} - - [%{timestamp}] "%{http_method} %{request_line}" %{status_code} %{response_size} "-" "%{user_agent}"'
       ignore_missing: true

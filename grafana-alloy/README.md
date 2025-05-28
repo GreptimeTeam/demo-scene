@@ -69,6 +69,9 @@ mysql> show tables;
 | ...                                         |
 ```
 
+
+Open your browser at `http://localhost:3000` and find our preconfigured grafana dashboard `Node Exporter Full`. The default user/password is `admin/admin`.
+
 ## How it works
 
 The topology is illustrated in this diagram.

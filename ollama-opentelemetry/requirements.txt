@@ -1,0 +1,5 @@
+ollama==0.4.8
+langchain==0.3.25
+langchain-community==0.3.24
+langchain-ollama==0.3.3
+openlit==1.33.21
