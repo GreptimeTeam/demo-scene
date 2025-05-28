@@ -8,7 +8,7 @@ GreptimeDB supports both InfluxDB V1 and V2 ingestion APIs. To simplify the conf
 
 ## Step 1: Set up Greptime service
 
-1. Obtain a free Greptime service from [GreptimeCloud](https://console.greptime.cloud/). 
+1. Obtain a free Greptime service from [GreptimeCloud](https://console.greptime.cloud/).
 2. Click the "Connection Information" button and find the connection string.
 3. Export the necessary environment variables:
 

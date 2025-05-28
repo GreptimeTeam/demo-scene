@@ -9,15 +9,17 @@ global:
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: "node"
-
-    # metrics_path defaults to '/metrics'
-    # scheme defaults to 'http'.
-
     static_configs:
-      - targets: ["node_exporter:9100"]
+      - targets:
+        - node_exporter:9100
+
+  - job_name: "prom"
+    static_configs:
+      - targets:
+        - localhost:9090
 
 remote_write:
-  - url: "https://${GREPTIME_HOST}/v1/prometheus/write?db=${GREPTIME_DB}"
+  - url: "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/prometheus/write?db=${GREPTIME_DB:=public}"
     basic_auth:
       username: ${GREPTIME_USERNAME}
       password: ${GREPTIME_PASSWORD}

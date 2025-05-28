@@ -1,0 +1,35 @@
+[project]
+name = "django-app"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Ning Sun", email = "sunning@greptime.com" }
+]
+dependencies = [
+    "django>=4.2.19",
+    "opentelemetry-api>=1.30.0",
+    "opentelemetry-sdk>=1.30.0",
+    "opentelemetry-instrumentation-django>=0.51b0",
+    "opentelemetry-exporter-otlp>=1.30.0",
+    "djangorestframework>=3.15.2",
+    "opentelemetry-instrumentation-sqlite3>=0.51b0",
+    "gunicorn>=23.0.0",
+]
+readme = "README.md"
+requires-python = ">= 3.9"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pyright",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/django_app"]
