@@ -42,7 +42,7 @@ docker compose up
 
 ## Step 3: Visualize on GreptimeCloud Dashboard
 
-You can visualize the node mertics from the Web Dashboard:
+You can visualize the node metrics from the Web Dashboard:
 
 ![Portal](/media/portal.png)
 
