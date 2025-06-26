@@ -1,0 +1,80 @@
+include:
+  - ../greptimedb-common.yml
+services:
+  init_database:
+    image: docker.io/postgres:17
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    volumes:
+      - ./init:/init
+    command: psql -h greptimedb -p 4003 -d public -f /init/init_database.sql
+    environment:
+      PGSSLMODE: disable
+    init: yes
+
+  kafka:
+    image: docker.io/bitnami/kafka:3.6.0
+    container_name: kafka
+    ports:
+      - 9092
+    networks:
+      - demo-network
+    environment:
+      # KRaft settings
+      KAFKA_KRAFT_CLUSTER_ID: Kmp-xkTnSf-WWXhWmiorDg
+      KAFKA_ENABLE_KRAFT: "yes"
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@127.0.0.1:2181
+      # Listeners
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_BROKER_ID: "1"
+
+  kafka-init:
+    image: docker.io/bitnami/kafka:3.6.0
+    networks:
+      - demo-network
+    command: >
+      /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic nginx_access_log --bootstrap-server kafka:9092
+    depends_on:
+      kafka:
+        condition: service_started
+
+  msg_gen:
+    build:
+      context: ./producer
+      dockerfile: ./Dockerfile
+    networks:
+      - demo-network
+    environment:
+      - KAFKA_LOG_TOPIC_NAME=nginx_access_log
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  flink-demo:
+    build:
+      context: ./flink-demo
+      dockerfile: ./Dockerfile
+    ports:
+      - "8081:8081"
+    networks:
+      - demo-network
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - GREPTIMEDB_ENDPOINT=greptimedb:4001
+    depends_on:
+      init_database:
+        condition: service_completed_successfully
+      kafka-init:
+        condition: service_completed_successfully
+
+networks:
+  demo-network:
