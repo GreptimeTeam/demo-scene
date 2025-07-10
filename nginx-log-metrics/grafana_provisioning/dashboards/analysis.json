@@ -319,7 +319,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n  status::string,\n  sum(total_logs) as count\nFROM ngx_statistics\nWHERE $__timeFilter(time_window)\nGROUP BY status\nORDER BY count desc\nLIMIT 100",
+                    "rawSql": "SELECT\n  status::string as s,\n  sum(total_logs) as count\nFROM ngx_statistics\nWHERE $__timeFilter(time_window)\nGROUP BY s\nORDER BY count desc\nLIMIT 100",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -749,7 +749,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "select \n  status::string,\n  sum(high_size_count) as count\nfrom ngx_statistics\nwhere $__timeFilter(time_window)\ngroup by status\norder by status;",
+                    "rawSql": "select \n  status::string as s,\n  sum(high_size_count) as count\nfrom ngx_statistics\nwhere $__timeFilter(time_window)\ngroup by s\norder by s;",
                     "refId": "A",
                     "sql": {
                         "columns": [
