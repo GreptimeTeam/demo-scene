@@ -4,8 +4,7 @@
 
 This project demonstrates a real-time data ingestion pipeline using Apache Flink for GreptimeDB. It simulates the
 process of collecting Nginx access logs, processing them with Apache Flink, and storing them in GreptimeDB for further
-analysis. We have also opensourced the code for the Apache Flink job, which you can find in
-the [flink-demo](https://github.com/GreptimeTeam/flink-demo) repository.
+analysis. We have also opensourced the codes for the Apache Flink job, you can find them in the ["flink-sink"](./flink-sink) directory.
 
 ## Architecture
 
