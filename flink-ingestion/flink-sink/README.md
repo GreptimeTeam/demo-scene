@@ -1,11 +1,10 @@
-# GreptimeDB Apache Flink Ingestion Demo
+# GreptimeDB Apache Flink Sink Example
 
-This is a demo for ingesting Nginx access logs into GreptimeDB using Apache Flink.
+This is an example of writing an Apache Flink sink for GreptimeDB. To make the example meaningful, it can be ran as a demo of ingesting Nginx access logs into GreptimeDB.
 
 ## How to Run
 
-We provide a simple way to see this demo running directly: you can check out
-this [docker-compose](https://github.com/GreptimeTeam/demo-scene/flink-ingestion).
+We provide a simple way to see this demo running directly: you can check out the docker compose file in the parent directory.
 
 If you prefer to run the demo manually, you can follow the steps below.
 
@@ -17,8 +16,8 @@ If you prefer to run the demo manually, you can follow the steps below.
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/GreptimeTeam/flink-demo.git
-   cd flink-demo
+   git clone https://github.com/GreptimeTeam/demo-scene.git
+   cd demo-scene/flink-ingestion/flink-sink
    ```
 
 2. **Build the project**:
