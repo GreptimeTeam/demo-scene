@@ -76,17 +76,21 @@ otelcol.exporter.otlphttp "greptimedb_logs" {
 }
 
 loki.write "greptime_loki" {
-    endpoint {
-        url = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/loki/api/v1/push"
-        headers  = {
-          "x-greptime-db-name" = "${GREPTIME_DB:=public}",
-          "x-greptime-log-table-name" = "${GREPTIME_LOG_TABLE_NAME:=loki_demo_logs}",
-        }
+  endpoint {
+    url = "${GREPTIME_SCHEME:=http}://${GREPTIME_HOST:=greptimedb}:${GREPTIME_PORT:=4000}/v1/loki/api/v1/push"
+    headers  = {
+      "x-greptime-db-name" = "${GREPTIME_DB:=public}",
+      "x-greptime-log-table-name" = "${GREPTIME_LOG_TABLE_NAME:=loki_demo_logs}",
     }
-    external_labels = {
-        "job" = "greptime",
-        "from" = "alloy",
+    basic_auth {
+      username = "${GREPTIME_USERNAME}"
+      password = "${GREPTIME_PASSWORD}"
     }
+  }
+  external_labels = {
+    "job" = "greptime",
+    "from" = "alloy",
+  }
 }
 
 otelcol.auth.basic "credentials" {
