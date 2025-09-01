@@ -2,7 +2,7 @@ include:
   - ../greptimedb-common.yml
 services:
   kafka:
-    image: docker.io/bitnami/kafka:3.6.0
+    image: docker.io/greptime/kafka:3.6.0
     container_name: kafka
     ports:
       - 9092
@@ -24,7 +24,7 @@ services:
       KAFKA_BROKER_ID: "1"
 
   kafka-init:
-    image: docker.io/bitnami/kafka:3.6.0
+    image: docker.io/greptime/kafka:3.6.0
     networks:
       - demo-network
     command: >
