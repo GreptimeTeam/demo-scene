@@ -19,20 +19,19 @@ docker compose up
 ```
 
 You can access GreptimeDB using `psql` client. Just run `psql -h 127.0.0.1 -p
-4003 -d public` to connect to the database and use SQL query like `SHOW TABLES`
-as a start.
+4003 -d public` to connect to the database and check its content.
 
 ```
 psql -h 127.0.0.1 -p 4003 -d public
-psql (16.5, server 16.3-greptimedb-0.11.0)
+psql (17.7, server 16.3-greptimedb-1.0.0-beta.2)
 Type "help" for help.
 
-public=> show tables;
-     Tables
-----------------
- demo_logs_json
- numbers
-(2 rows)
+public=> \dt
+             List of relations
+ Schema |      Name      | Type  |  Owner
+--------+----------------+-------+----------
+ public | demo_logs_json | table | postgres
+(1 row)
 ```
 
 Next, use `psql` to access vanilla postgres using `psql -h 127.0.0.1 -p 5432 -U
@@ -85,6 +84,33 @@ postgres=# SELECT * FROM ft_demo_logs_json WHERE method = 'GET' ORDER BY greptim
  26599 | 13/Dec/2024:07:33:04 | 68.55.2.213    | GET    | HTTP/2.0 | https://names.fyi/this/endpoint/prints/money           | /booper/bopper/mooper/mopper | 404    | shaneIxD        | 2024-12-13 07:33:04.808889
  38680 | 13/Dec/2024:07:32:57 | 101.219.74.21  | GET    | HTTP/1.0 | https://for.eu/do-not-access/needs-work                | /secret-info/open-sesame     | 400    | b0rnc0nfused    | 2024-12-13 07:32:58.809528
   3421 | 13/Dec/2024:07:32:56 | 68.52.17.154   | GET    | HTTP/2.0 | https://some.productions/this/endpoint/prints/money    | /apps/deploy                 | 400    | shaneIxD        | 2024-12-13 07:32:56.80887
+(10 rows)
+
+postgres=# SELECT
+  DATE_TRUNC('minute', greptime_timestamp) AS minute_timestamp,
+  method,
+  COUNT(*) AS request_count
+FROM  ft_demo_logs_json
+WHERE greptime_timestamp IS NOT NULL
+GROUP BY
+  DATE_TRUNC('minute', greptime_timestamp),
+  method
+ORDER BY
+  minute_timestamp DESC,
+  method
+LIMIT 10;
+  minute_timestamp   | method | request_count
+---------------------+--------+---------------
+ 2025-12-15 09:31:00 | DELETE |             8
+ 2025-12-15 09:31:00 | GET    |             5
+ 2025-12-15 09:31:00 | HEAD   |             6
+ 2025-12-15 09:31:00 | OPTION |             9
+ 2025-12-15 09:31:00 | PATCH  |            11
+ 2025-12-15 09:31:00 | POST   |             4
+ 2025-12-15 09:31:00 | PUT    |             3
+ 2025-12-15 09:30:00 | DELETE |            16
+ 2025-12-15 09:30:00 | GET    |             6
+ 2025-12-15 09:30:00 | HEAD   |             6
 (10 rows)
 ```
 
