@@ -135,11 +135,3 @@ flowchart LR
 To see how we can configure GreptimeDB for `postgres_fdw` extension, see the
 [init.sh](./docker-entrypoint-initdb.d/init.sh).
 
-## Run in GreptimeCloud
-
-By default, this example writes data into a GreptimeDB instance within the
-docker compose. It's also possible to write to your own GreptimeCloud instance
-by creating a `greptime.env` file from our sample `greptime.env.sample` and
-providing your host, dbname and authentication information.Then use `docker
-compose down` and `docker compose up` to recreate the compose cluster and apply
-new settings.
