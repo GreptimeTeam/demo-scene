@@ -1,39 +1,22 @@
 # GreptimeDB Vector Ingestion Demo
 
-This demo show how to ingest log and metrics data to GreptimeDB via Vector.
+This demo shows how to ingest log and metrics data to GreptimeDB via Vector.
 
-[Vector](https://vector.dev) is a observability data pipeline.
+[Vector](https://vector.dev) is an observability data pipeline.
 
 ## How to run this demo
 
-Ensure you have `git`, `docker` `sed` client
-installed. To run this demo:
+Ensure you have `git`, `docker`, and `docker-compose` installed. Docker Compose version 2.24 or higher is required. To run this demo:
 
 ```shell
 git clone https://github.com/GreptimeTeam/demo-scene.git
-cd vector-ingestion/
+cd demo-scene/vector-ingestion
+docker compose up
 ```
 
-change `start.env` file to set your GreptimeDB connect info and run:
+By default, this example writes data into a GreptimeDB instance within the docker compose.
 
-```shell
-sh start.sh create_pipeline
-```
-
-It will create pipeline named `apache_common_pipeline`
-
-then run:
-
-```shell
-sh start.sh run_demo
-```
-
-It can take a while for the first run to pull down images and also build
-necessary components.
-
-You can access GreptimeDB using `mysql` client. Just run `mysql -h 127.0.0.1 -P
-4002` to connect to the database and use SQL query like `SHOW TABLES` as a
-start.
+You can access GreptimeDB using `mysql` client. Just run `mysql -h 127.0.0.1 -P 4002` to connect to the database and use SQL query like `SHOW TABLES` as a start.
 
 ```
 mysql -h 127.0.0.1 -P 4002
@@ -43,11 +26,11 @@ Server version: 8.4.2 Greptime
 
 Copyright (c) 2000, 2024, Oracle and/or its affiliates.
 
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
+Oracle and/or its affiliates. Other names may be trademarks of their
+respective owners.
 
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+Type 'help;' or '\h' for help. Type '\c' to clear the current input
+statement.
 
 mysql> show tables;
 +-------------------------------------+
@@ -107,7 +90,7 @@ mysql> select * from demo_structured_logs limit 10;
 | 114.114.186.132 | POST        | 1.1          |         304 | /wp-admin                         | shaneIxD     |         39731 | 2024-11-06 09:18:04 |
 | 119.88.70.103   | GET         | 1.0          |         307 | /wp-admin                         | CrucifiX     |         14333 | 2024-11-06 09:17:51 |
 | 12.65.107.156   | OPTION      | 2.0          |         500 | /user/booperbot124                | shaneIxD     |         35444 | 2024-11-06 09:17:14 |
-| 122.173.13.156  | PUT         | 1.0          |         503 | /controller/setup                 | b0rnc0nfused |         19266 | 2024-11-06 09:19:00 |
+| 122.173.13.156  | PUT         | 1.0          |         503 | /controller/setup                 | b0rnc0nfused |          19266 | 2024-11-06 09:19:00 |
 | 127.119.164.82  | OPTION      | 1.0          |         410 | /observability/metrics/production | devankoshal  |         28647 | 2024-11-06 09:18:51 |
 +-----------------+-------------+--------------+-------------+-----------------------------------+--------------+---------------+---------------------+
 10 rows in set (0.02 sec)
@@ -126,59 +109,48 @@ mysql> select * from host_memory_free_bytes limit 10;
 6 rows in set (0.01 sec)
 ```
 
-You can also open your browser at http://localhost:4000/dashboard for the Web
-UI.
+You can also open your browser at http://localhost:4000/dashboard for the Web UI.
 
-## GreptimeCloud
+## Run in GreptimeCloud
 
-You can also use GreptimeCloud to store and visualize the data. Just sign up at https://console.greptime.cloud
-and create a new project. Then update the `start.env` file with the GreptimeCloud
+By default, this example writes data into a GreptimeDB instance within the docker compose. It's also possible to write to your own GreptimeCloud instance by creating a `greptime.env` file from our sample `greptime.env.sample` and providing your host, dbname and authentication information. Then use `docker compose down` and `docker compose up` to recreate the compose cluster and apply new settings.
 
-## Manual Code
-### create `apache_common_pipeline`:
+## How it works
 
-```bash
-curl -X "POST" "https://your-greptime-db-host/v1/events/pipelines/apache_common_pipeline?db=z3294clox11alog_test-public" \
-     -u 'username:password' \
-     -F "file=@pipeline.yaml"
-```
-### create `config.toml`
+The topology is:
 
-create a `config.toml` file like `example.toml` with your GreptimeDB connect info.
+```mermaid
+flowchart LR
+  vector[Vector]
+  subgraph vector_data_sources[Vector Data Sources]
+    host_metrics[Host Metrics]
+    apache_logs[Apache Logs]
+  end
+  subgraph vector_sinks[Vector Sinks]
+    metrics[GreptimeDB Metrics]
+    logs[GreptimeDB Logs]
+    structured_logs[GreptimeDB Structured Logs]
+  end
 
-### Launch Vector
+  host_metrics --> vector
+  apache_logs --> vector
 
-```bash
-sudo docker run \
-  --rm \
-  -v $PWD/config.toml:/etc/vector/vector.toml:ro \
-  --name vector \
-  timberio/vector:0.42.0-debian  --config-toml /etc/vector/vector.toml
-```
-### Query data 
+  vector --> metrics
+  vector --> logs
+  vector --> structured_logs
 
-You can use SQL to query the data ingested in GreptimeCloud:
-
-```sql
--- show pipeline data
-select * from greptime_private.pipelines;
-
--- show metrics data
-SELECT * FROM "host_memory_free_bytes" ORDER BY ts DESC LIMIT 500;
-
--- show raw logs
-SELECT * FROM "demo_logs" ORDER BY greptime_timestamp DESC LIMIT 100;
-
--- show structured logs
-SELECT * FROM "demo_structured_logs" ORDER BY request_time DESC LIMIT 100;
-SELECT * FROM "demo_structured_logs" where status_code=500 ORDER BY request_time DESC LIMIT 100;
-
--- show demo log schema and fulltext index
-desc demo_structured_logs;
-show create table demo_structured_logs;
-select * from demo_structured_logs where MATCHES(request_path,'work OR metrics') limit 10;
+  metrics --> greptimedb[(GreptimeDB)]
+  logs --> greptimedb
+  structured_logs --> greptimedb
 ```
 
+Vector ingests:
+- **Host Metrics**: CPU, load, and memory metrics from the host system
+- **Apache Logs**: Simulated Apache access logs in common log format
 
+Vector transforms and writes data to GreptimeDB via:
+- **Metrics**: gRPC protocol to the metrics endpoint
+- **Logs**: HTTP protocol to the log endpoint using the `greptime_identity` pipeline
+- **Structured Logs**: HTTP protocol to the log endpoint using the `apache_common_pipeline` pipeline
 
-
+The `apache_common_pipeline` defined in `pipeline.yaml` parses Apache common log format and extracts fields like IP address, HTTP method, request path, and status code.
