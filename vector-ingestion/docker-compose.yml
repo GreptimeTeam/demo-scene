@@ -1,0 +1,82 @@
+include:
+  - ../greptimedb-common.yml
+services:
+  envsubst:
+    image: docker.io/widerplan/envsubst
+    command: "-i /config_input/example.toml.tpl -o /config_output/vector.toml"
+    volumes:
+      - ./example.toml.tpl:/config_input/example.toml.tpl
+      - config:/config_output
+    env_file:
+      - path: "greptime.env"
+        required: false
+    environment:
+      GT_GRPC_PORT: ${GT_GRPC_PORT:-4001}
+      GT_HTTP_PORT: ${GT_HTTP_PORT:-4000}
+      GT_SCHEMA: ${GT_SCHEMA:-http}
+      GT_DB_NAME: ${GT_DB_NAME:-public}
+      GT_HOST: ${GT_HOST:-greptimedb}
+      GT_USERNAME: ${GT_USERNAME}
+      GT_PASSWORD: ${GT_PASSWORD}
+      GT_TLS: ${GT_TLS:-}
+    init: true
+
+  create-pipeline:
+    image: curlimages/curl:latest
+    command: >
+      sh -c "if [ -n \"$$GT_USERNAME\" ] && [ -n \"$$GT_PASSWORD\" ]; then
+        curl -X POST \"$$GT_SCHEMA://$$GT_HOST:$$GT_HTTP_PORT/v1/events/pipelines/apache_common_pipeline?db=$$GT_DB_NAME\" \
+          -u \"$$GT_USERNAME:$$GT_PASSWORD\" -F 'file=@/pipeline/pipeline.yaml';
+      else
+        curl -X POST \"$$GT_SCHEMA://$$GT_HOST:$$GT_HTTP_PORT/v1/events/pipelines/apache_common_pipeline?db=$$GT_DB_NAME\" \
+          -F 'file=@/pipeline/pipeline.yaml';
+      fi"
+    volumes:
+      - ./pipeline.yaml:/pipeline/pipeline.yaml:ro
+    env_file:
+      - path: "greptime.env"
+        required: false
+    environment:
+      GT_GRPC_PORT: ${GT_GRPC_PORT:-4001}
+      GT_HTTP_PORT: ${GT_HTTP_PORT:-4000}
+      GT_SCHEMA: ${GT_SCHEMA:-http}
+      GT_DB_NAME: ${GT_DB_NAME:-public}
+      GT_HOST: ${GT_HOST:-greptimedb}
+      GT_USERNAME: ${GT_USERNAME}
+      GT_PASSWORD: ${GT_PASSWORD}
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+
+  vector:
+    image: timberio/vector:0.42.0-debian
+    command: "--config-toml /etc/vector/vector.toml"
+    volumes:
+      - config:/etc/vector
+      - ./pipeline.yaml:/pipeline.yaml:ro
+    env_file:
+      - path: "greptime.env"
+        required: false
+    depends_on:
+      envsubst:
+        condition: service_completed_successfully
+      create-pipeline:
+        condition: service_completed_successfully
+    environment:
+      GT_GRPC_PORT: ${GT_GRPC_PORT:-4001}
+      GT_HTTP_PORT: ${GT_HTTP_PORT:-4000}
+      GT_SCHEMA: ${GT_SCHEMA:-http}
+      GT_DB_NAME: ${GT_DB_NAME:-public}
+      GT_HOST: ${GT_HOST:-greptimedb}
+      GT_USERNAME: ${GT_USERNAME}
+      GT_PASSWORD: ${GT_PASSWORD}
+    networks:
+      - demo-network
+
+networks:
+  demo-network:
+
+volumes:
+  config:
