@@ -37,6 +37,8 @@ services:
     image: docker.io/greptime/grafana-greptimedb:11.2.5-greptime-v-2.0-rc.1
     ports:
       - 3000:3000
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
 
 networks:
   demo-network:

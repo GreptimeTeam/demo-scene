@@ -17,7 +17,7 @@ demo:
 
 ```shell
 git clone https://github.com/GreptimeTeam/demo-scene.git
-cd demo-scene/wide-events-django
+cd demo-scene/opentelemetry-trace-django
 docker compose up
 ```
 
