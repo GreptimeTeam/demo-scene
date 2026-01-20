@@ -56,6 +56,12 @@ ORDER BY
 LIMIT 100;
 ```
 
+### Visualization from Greptime Dashboard
+
+Visit `http://127.0.0.1:4000/dashboard` for the trace visualization.
+
+![screenshot2](screenshot2.png)
+
 ### Visualizing Traces from Grafana
 
 We already have grafana instance included in this demo. Visit
@@ -78,10 +84,11 @@ flowchart LR
   greptimedb[(GreptimeDB)]
   django_app
   client_app
+  grafana
 
-  client_app --> django_app
-  django_app --> greptimedb
-  client_app --> greptimedb
+  client_app --> |http call| django_app
+  django_app --> |opentelemetry otlp| greptimedb
+  client_app --> |opentelemetry otlp| greptimedb
 
-  grafana --> greptimedb
+  grafana --> |jaeger/sql query| greptimedb
 ```
