@@ -11,7 +11,7 @@ format.
 
 ## How to run this demo
 
-Ensure you have `git`, `docker`, `docker-compose` and `mysql` client
+Ensure you have `git`, `docker`, `docker-compose` and `psql` client
 installed. Docker Compose version 2.24 or higher is required. To run this
 demo:
 
@@ -21,25 +21,22 @@ cd demo-scene/opentelemetry-trace-django
 docker compose up
 ```
 
-You can access GreptimeDB using `mysql` client. Just run `mysql -h 127.0.0.1 -P
-4002` to connect to the database and use SQL query like `SHOW TABLES` as a
-start.
+You can access GreptimeDB using `psql` client. Just run `psql -h 127.0.0.1 -p
+4003 -d public` to connect to the database and use `\d` for a list of tables.
 
 ```
-mysql -h 127.0.0.1 -P 4002
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 8
-Server version: 8.4.2 Greptime
+psql (17.7, server 16.3-greptimedb-1.0.0-beta.4)
+Type "help" for help.
 
-Copyright (c) 2000, 2024, Oracle and/or its affiliates.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> SELECT * FROM web_trace_demo\G
+public=> \d
+                    List of relations
+ Schema |            Name             | Type  |  Owner
+--------+-----------------------------+-------+----------
+ public | django_http_request_latency | table | postgres
+ public | web_trace_demo              | table | postgres
+ public | web_trace_demo_operations   | table | postgres
+ public | web_trace_demo_services     | table | postgres
+(4 rows)
 ```
 
 ### Access derived metrics
@@ -58,6 +55,19 @@ ORDER BY
     time_window DESC
 LIMIT 100;
 ```
+
+### Visualizing Traces from Grafana
+
+We already have grafana instance included in this demo. Visit
+`http://127.0.0.1:3000` for the grafana UI. Use default username and password
+`admin`, `admin` to login.
+
+From the Explorer section, we can query traces using GreptimeDB's Jaeger
+compatible API.
+
+![screenshot](screenshot.png)
+
+We can also run SQL queries from Grafana using the greptimedb-pg data source.
 
 ## How it works
 

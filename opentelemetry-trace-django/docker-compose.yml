@@ -34,7 +34,7 @@ services:
       - django
 
   grafana:
-    image: docker.io/greptime/grafana-greptimedb:11.2.5-greptime-v-2.0-rc.1
+    image: docker.io/grafana/grafana:12.3.0
     ports:
       - 3000:3000
     volumes:

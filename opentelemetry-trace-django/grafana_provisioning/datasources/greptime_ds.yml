@@ -1,6 +1,16 @@
 apiVersion: 2
 datasources:
-  - name: greptimedb
+  - name: greptimedb-jaeger
     type: jaeger
     access: proxy
     url: http://greptimedb:4000/v1/jaeger
+    jsonData:
+      httpHeaderName1: x-greptime-trace-table-name
+    secureJsonData:
+      httpHeaderValue1: web_trace_demo
+  - name: greptimedb_pg
+    type: postgres
+    url: greptimedb:4003
+    jsonData:
+      database: public
+      sslmode: 'disable'
