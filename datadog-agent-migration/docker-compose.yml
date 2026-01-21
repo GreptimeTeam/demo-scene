@@ -1,0 +1,55 @@
+services:
+  envsubst:
+    image: docker.io/widerplan/envsubst
+    command: "-i /config_input/vector.toml -o /config_output/vector.toml"
+    volumes:
+      - ./vector.toml:/config_input/vector.toml
+      - config:/config_output
+    env_file:
+      - path: "greptime.env"
+        required: false
+    init: true
+
+  greptimedb:
+    image: docker.io/greptime/greptimedb:v0.11.0
+    command: standalone start --http-addr=0.0.0.0:4000 --rpc-addr=0.0.0.0:4001 --mysql-addr=0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+    ports:
+      - 24000:4000
+      - 24001:4001
+      - 24002:4002
+      - 24003:4003
+    networks:
+      - demo-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:4000/health" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  datadog_agent:
+    image: docker.io/datadog/agent:7
+    networks:
+      - demo-network
+    environment:
+      - DD_API_KEY=random_string
+      - DD_DD_URL=http://vector:8000
+      - DD_HOSTNAME=testagent
+      - DD_LOGS_ENABLED=true
+
+  vector:
+    image: docker.io/timberio/vector:0.43.X-alpine
+    networks:
+      - demo-network
+    volumes:
+      - config:/config_data
+    command: "-c /config_data/vector.toml"
+    depends_on:
+      envsubst:
+        condition: service_completed_successfully
+
+
+networks:
+  demo-network:
+
+volumes:
+  config:
