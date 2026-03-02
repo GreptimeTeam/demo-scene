@@ -1,0 +1,330 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Total Spans",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT COUNT(*) AS total FROM opentelemetry_traces WHERE $__timeFilter(timestamp)", "format": "table", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "stat",
+      "title": "Error Spans",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT COUNT(*) AS errors FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND span_status_code = 'Error'", "format": "table", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }, "overrides": [] }
+    },
+    {
+      "type": "stat",
+      "title": "Unique Traces",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT COUNT(DISTINCT trace_id) AS traces FROM opentelemetry_traces WHERE $__timeFilter(timestamp)", "format": "table", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "stat",
+      "title": "Avg Duration",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT AVG(duration_nano) / 1000000 AS avg_ms FROM opentelemetry_traces WHERE $__timeFilter(timestamp)", "format": "table", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] }
+    },
+
+    {
+      "type": "row",
+      "title": "HTTP",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Rate (req/s)",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT greptime_timestamp AS time, (max(greptime_value) - min(greptime_value)) RANGE '1m' / 60 AS rps FROM http_server_duration_milliseconds_count WHERE $__timeFilter(greptime_timestamp) ALIGN '30s' FILL NULL ORDER BY greptime_timestamp", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "reqps", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Responses by Status Code",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT greptime_timestamp AS time, status_code AS metric, (max(greptime_value) - min(greptime_value)) RANGE '1m' AS responses FROM http_server_response_count_total WHERE $__timeFilter(greptime_timestamp) ALIGN '30s' BY (status_code) FILL NULL ORDER BY greptime_timestamp", "format": "time_series", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 50, "stacking": { "mode": "normal" } }, "unit": "short", "min": 0 },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "5.." }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] },
+          { "matcher": { "id": "byRegexp", "options": "4.." }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }] }
+        ]
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Requests",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT greptime_timestamp AS time, max(greptime_value) RANGE '30s' AS active FROM http_server_active_requests WHERE $__timeFilter(greptime_timestamp) ALIGN '30s' FILL PREV ORDER BY greptime_timestamp", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 20 }, "unit": "short", "min": 0 }, "overrides": [] }
+    },
+
+    {
+      "type": "row",
+      "title": "HTTP Latency (Flow: uddsketch over traces)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "P50 Latency",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 15 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT time_window AS time, span_name AS metric, uddsketch_calc(0.50, duration_sketch) / 1000000 AS value FROM trace_http_latency_30s WHERE $__timeFilter(time_window) ORDER BY time_window", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "ms", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "P90 Latency",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 15 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT time_window AS time, span_name AS metric, uddsketch_calc(0.90, duration_sketch) / 1000000 AS value FROM trace_http_latency_30s WHERE $__timeFilter(time_window) ORDER BY time_window", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "ms", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "P99 Latency",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 15 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT time_window AS time, span_name AS metric, uddsketch_calc(0.99, duration_sketch) / 1000000 AS value FROM trace_http_latency_30s WHERE $__timeFilter(time_window) ORDER BY time_window", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "ms", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "table",
+      "title": "Endpoints (per 30s window with latency percentiles)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 23 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT time_window, span_name, request_count, uddsketch_calc(0.50, duration_sketch) / 1000000 AS p50_ms, uddsketch_calc(0.90, duration_sketch) / 1000000 AS p90_ms, uddsketch_calc(0.99, duration_sketch) / 1000000 AS p99_ms FROM trace_http_latency_30s WHERE $__timeFilter(time_window) ORDER BY time_window DESC LIMIT 30", "format": "table", "refId": "A" }]
+    },
+    {
+      "type": "table",
+      "title": "Top Endpoints by Total Requests",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 23 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT http_target, http_method, status_code, max(greptime_value) AS total_count FROM http_server_response_count_total WHERE $__timeFilter(greptime_timestamp) GROUP BY http_target, http_method, status_code ORDER BY total_count DESC LIMIT 30", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "type": "row",
+      "title": "Celery & Database",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Celery Task Rate (tasks/s)",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 32 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT greptime_timestamp AS time, (max(greptime_value) - min(greptime_value)) RANGE '1m' / 60 AS tps FROM flower_task_runtime_seconds_count WHERE $__timeFilter(greptime_timestamp) ALIGN '30s' FILL NULL ORDER BY greptime_timestamp", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "short", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Celery Task Runtime Increase (/min)",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 32 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT greptime_timestamp AS time, (max(greptime_value) - min(greptime_value)) RANGE '1m' AS runtime_increase FROM flower_task_runtime_seconds_sum WHERE $__timeFilter(greptime_timestamp) ALIGN '30s' FILL NULL ORDER BY greptime_timestamp", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "s", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "DB Connection Pool Usage",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 32 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT greptime_timestamp AS time, max(greptime_value) RANGE '30s' AS connections FROM db_client_connections_usage WHERE $__timeFilter(greptime_timestamp) ALIGN '30s' FILL PREV ORDER BY greptime_timestamp", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 20 }, "unit": "short", "min": 0 }, "overrides": [] }
+    },
+
+    {
+      "type": "row",
+      "title": "Traces",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 40 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Span Volume",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 41 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT date_bin('30 seconds'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS spans FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND ('${trace_id}' = '' OR trace_id = '${trace_id}') GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 }, "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Spans Over Time",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 41 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT date_bin('1 minute'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS errors FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND span_status_code = 'Error' AND ('${trace_id}' = '' OR trace_id = '${trace_id}') GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 }, "color": { "mode": "fixed", "fixedColor": "red" }, "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "table",
+      "title": "Top Operations",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 49 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT span_name, service_name, span_kind, COUNT(*) AS count, AVG(duration_nano) / 1000000 AS avg_ms, MAX(duration_nano) / 1000000 AS max_ms FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND ('${trace_id}' = '' OR trace_id = '${trace_id}') GROUP BY span_name, service_name, span_kind ORDER BY count DESC LIMIT 30", "format": "table", "refId": "A" }]
+    },
+    {
+      "type": "table",
+      "title": "Slowest Spans",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 49 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT timestamp, trace_id, span_name, service_name, span_kind, duration_nano / 1000000 AS duration_ms, span_status_code FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND ('${trace_id}' = '' OR trace_id = '${trace_id}') ORDER BY duration_nano DESC LIMIT 30", "format": "table", "refId": "A" }]
+    },
+    {
+      "type": "traces",
+      "title": "Traces",
+      "gridPos": { "h": 14, "w": 24, "x": 0, "y": 57 },
+      "datasource": { "type": "info8fcc-greptimedb-datasource", "uid": "${DS_GREPTIMEDB_PLUGIN}" },
+      "targets": [
+        {
+          "refId": "Trace ID",
+          "editorType": "builder",
+          "rawSql": "SELECT trace_id, span_id, parent_span_id, service_name, span_name, CAST(timestamp AS INT64) / 1000000 as ts_ms, CAST(duration_nano AS FLOAT64) / 1000000 as dur_ms, json_to_string(span_events) as span_events FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND trace_id = COALESCE(NULLIF('${trace_id}', ''), (SELECT trace_id FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp DESC LIMIT 1)) ORDER BY timestamp",
+          "builderOptions": {
+            "database": "public",
+            "table": "opentelemetry_traces",
+            "queryType": "traces",
+            "columns": [
+              { "name": "trace_id", "hint": "trace_id" },
+              { "name": "span_id", "hint": "trace_span_id" },
+              { "name": "parent_span_id", "hint": "trace_parent_span_id" },
+              { "name": "service_name", "hint": "trace_service_name" },
+              { "name": "span_name", "hint": "trace_operation_name" },
+              { "name": "timestamp", "hint": "time" },
+              { "name": "duration_nano", "hint": "trace_duration_time" },
+              { "name": "span_events" }
+            ],
+            "limit": 1000,
+            "meta": {
+              "traceDurationUnit": "nanoseconds",
+              "isTraceIdMode": false
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "type": "row",
+      "title": "Logs",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 71 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Log Volume",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 72 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT date_bin('30 seconds'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS logs FROM dify_logs WHERE $__timeFilter(timestamp) AND ('${log_search}' = '' OR body LIKE '%${log_search}%') GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 }, "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Logs",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 72 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT date_bin('1 minute'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS errors FROM dify_logs WHERE $__timeFilter(timestamp) AND body LIKE '%ERROR%' AND ('${log_search}' = '' OR body LIKE '%${log_search}%') GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 }, "color": { "mode": "fixed", "fixedColor": "red" }, "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "logs",
+      "title": "Logs",
+      "gridPos": { "h": 14, "w": 24, "x": 0, "y": 80 },
+      "datasource": { "type": "info8fcc-greptimedb-datasource", "uid": "${DS_GREPTIMEDB_PLUGIN}" },
+      "targets": [
+        {
+          "refId": "A",
+          "editorType": "builder",
+          "rawSql": "SELECT timestamp as \"timestamp\", body as \"body\", severity_text as \"level\", json_get_string(log_attributes, 'container_name') as container_name, json_get_string(log_attributes, 'container_id') as container_id, json_get_string(log_attributes, 'source') as source, json_get_string(log_attributes, '[\"fluent.tag\"]') as fluent_tag FROM dify_logs WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND ('${log_search}' = '' OR body LIKE '%${log_search}%') ORDER BY timestamp DESC LIMIT 500",
+          "builderOptions": {
+            "database": "public",
+            "table": "dify_logs",
+            "queryType": "logs",
+            "columns": [
+              { "name": "timestamp", "hint": "time" },
+              { "name": "body", "hint": "log_message" },
+              { "name": "severity_text", "hint": "log_level" },
+              { "name": "container_name" },
+              { "name": "container_id" },
+              { "name": "source" },
+              { "name": "fluent_tag" }
+            ],
+            "limit": 500
+          }
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "sortOrder": "Descending"
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["dify", "greptimedb", "opentelemetry"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 2,
+        "name": "DS_GREPTIMEDB",
+        "type": "datasource",
+        "query": "mysql"
+      },
+      {
+        "current": {},
+        "hide": 2,
+        "name": "DS_GREPTIMEDB_PLUGIN",
+        "type": "datasource",
+        "query": "info8fcc-greptimedb-datasource"
+      },
+      {
+        "current": { "text": "", "value": "" },
+        "name": "trace_id",
+        "label": "Trace ID",
+        "type": "textbox",
+        "hide": 0,
+        "query": ""
+      },
+      {
+        "current": { "text": "", "value": "" },
+        "name": "log_search",
+        "label": "Log Search",
+        "type": "textbox",
+        "hide": 0,
+        "query": ""
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Dify Monitoring",
+  "uid": "dify-monitoring"
+}
