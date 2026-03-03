@@ -52,40 +52,25 @@ rm -f .env.bak
 cd "$SCRIPT_DIR"
 echo "    OTEL enabled, exporting to otel-collector:4318."
 
-# --- Start monitoring stack ---
-echo "==> Starting monitoring stack (GreptimeDB + OTel Collector + Grafana)..."
-docker compose -f "$SCRIPT_DIR/docker-compose.yml" up -d
-
-echo "    Waiting for GreptimeDB to be healthy..."
-until docker compose -f "$SCRIPT_DIR/docker-compose.yml" exec -T greptimedb curl -sf http://127.0.0.1:4000/health > /dev/null 2>&1; do
-    sleep 2
-done
-echo "    GreptimeDB is ready."
-
-# --- Start Dify ---
-echo "==> Starting Dify..."
+# --- Start all services (Dify + monitoring) ---
+echo "==> Starting all services (Dify + GreptimeDB + OTel Collector + Grafana)..."
 docker compose \
-    -f "$SCRIPT_DIR/dify/docker-compose.yaml" \
-    -f "$SCRIPT_DIR/dify-compose-override.yml" \
+    --project-directory "$SCRIPT_DIR" \
+    -f "$SCRIPT_DIR/docker-compose.yml" \
     --env-file "$SCRIPT_DIR/dify/.env" \
     -p dify \
     up -d
 
-# Ensure api/worker are on the monitoring network (compose network merge
-# can fail when Dify's compose uses list syntax instead of mapping syntax).
-echo "==> Ensuring Dify services can reach the monitoring network..."
-sleep 5
-for svc in api worker; do
-    container=$(docker compose \
-        -f "$SCRIPT_DIR/dify/docker-compose.yaml" \
-        -f "$SCRIPT_DIR/dify-compose-override.yml" \
-        --env-file "$SCRIPT_DIR/dify/.env" \
-        -p dify \
-        ps -q "$svc" 2>/dev/null || true)
-    if [ -n "$container" ]; then
-        docker network connect --alias "$svc" dify-monitoring "$container" 2>/dev/null || true
-    fi
+echo "    Waiting for GreptimeDB to be healthy..."
+until docker compose \
+    --project-directory "$SCRIPT_DIR" \
+    -f "$SCRIPT_DIR/docker-compose.yml" \
+    --env-file "$SCRIPT_DIR/dify/.env" \
+    -p dify \
+    exec -T greptimedb curl -sf http://127.0.0.1:4000/health > /dev/null 2>&1; do
+    sleep 2
 done
+echo "    GreptimeDB is ready."
 
 echo ""
 echo "============================================"
