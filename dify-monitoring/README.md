@@ -49,7 +49,7 @@ This will:
 
 1. Download Dify v1.13.0 docker files
 2. Enable OpenTelemetry in Dify's configuration
-3. Start all services (Dify + GreptimeDB + OTel Collector + Grafana) on a single network
+3. Start all services (Dify + GreptimeDB + OTel Collector + Grafana) using `docker-compose.yml`
 4. Initialize Flow aggregations in background (waits for `opentelemetry_traces` table, then creates flows)
 
 ## Access
@@ -160,7 +160,7 @@ These are set automatically by `setup.sh` in `dify/.env`:
 
 ### Log Collection
 
-Container logs (`api`, `worker`, `nginx`) are forwarded to the OTel Collector via Docker's [fluentd logging driver](https://docs.docker.com/config/containers/logging/fluentd/) and stored in the `dify_logs` table. See `dify-compose-merged.yml`.
+Container logs (`api`, `worker`, `nginx`) are forwarded to the OTel Collector via Docker's [fluentd logging driver](https://docs.docker.com/config/containers/logging/fluentd/) and stored in the `dify_logs` table. See `docker-compose.yml`.
 
 ### Dify Version
 
