@@ -9,7 +9,6 @@ if [ -f "$SCRIPT_DIR/docker-compose.yml" ]; then
     docker compose \
         -f "$SCRIPT_DIR/docker-compose.yml" \
         --env-file "$SCRIPT_DIR/dify/.env" \
-        -p dify \
         down ${DOWN_ARGS[@]+"${DOWN_ARGS[@]}"} || true
 fi
 
