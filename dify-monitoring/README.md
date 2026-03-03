@@ -51,7 +51,7 @@ This will:
 2. Enable OpenTelemetry in Dify's configuration
 3. Start the monitoring stack (GreptimeDB + OTel Collector + Grafana)
 4. Start Dify with fluentd log forwarding enabled
-5. Initialize Flow aggregations in background (waits for first traces, then creates flows)
+5. Initialize Flow aggregations in background (waits for `opentelemetry_traces` table, then creates flows)
 
 ## Access
 
@@ -71,12 +71,19 @@ Two dashboard variables are available in the top bar:
 - **Trace ID** — filter all trace panels by a specific trace. When empty, the waterfall shows the most recent trace.
 - **Log Search** — fuzzy search log body (`LIKE %keyword%`).
 
+![Overview, HTTP metrics, and latency percentiles](screenshots/dashboard-overview.png)
+
+![Celery, database, traces, and span tables](screenshots/dashboard-traces.png)
+
+![Trace waterfall and logs](screenshots/dashboard-logs.png)
+
 ## Flow: Trace-Derived Metrics
 
 `setup.sh` automatically initializes flows in the background. If you need to re-create them manually:
 
 ```bash
-./init-flow.sh
+# optional: increase wait timeout (seconds), default is 600
+WAIT_TIMEOUT_SECONDS=1200 ./init-flow.sh
 ```
 
 This creates two [GreptimeDB Flow](https://docs.greptime.com/user-guide/flow-computation/overview/) aggregations that continuously compute RED metrics from raw spans:
@@ -132,6 +139,9 @@ docker compose run --rm load-generator
 
 ```bash
 ./teardown.sh
+
+# or remove containers + volumes
+./teardown.sh -v
 ```
 
 ## Configuration

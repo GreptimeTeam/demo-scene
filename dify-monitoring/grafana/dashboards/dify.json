@@ -322,8 +322,9 @@
       }
     ]
   },
-  "time": { "from": "now-1h", "to": "now" },
+  "time": { "from": "now-15m", "to": "now" },
   "timepicker": {},
+  "refresh": "10s",
   "timezone": "",
   "title": "Dify Monitoring",
   "uid": "dify-monitoring"

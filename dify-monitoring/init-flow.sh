@@ -4,6 +4,17 @@ set -euo pipefail
 # GreptimeDB HTTP SQL endpoint
 GREPTIME_URL="${GREPTIME_URL:-http://localhost:4000}"
 DB="public"
+WAIT_TIMEOUT_SECONDS="${WAIT_TIMEOUT_SECONDS:-600}"
+WAIT_INTERVAL_SECONDS="${WAIT_INTERVAL_SECONDS:-2}"
+
+if ! [[ "$WAIT_TIMEOUT_SECONDS" =~ ^[0-9]+$ ]] || [ "$WAIT_TIMEOUT_SECONDS" -lt 0 ]; then
+    echo "ERROR: WAIT_TIMEOUT_SECONDS must be a non-negative integer, got: ${WAIT_TIMEOUT_SECONDS}"
+    exit 1
+fi
+if ! [[ "$WAIT_INTERVAL_SECONDS" =~ ^[0-9]+$ ]] || [ "$WAIT_INTERVAL_SECONDS" -le 0 ]; then
+    echo "ERROR: WAIT_INTERVAL_SECONDS must be a positive integer, got: ${WAIT_INTERVAL_SECONDS}"
+    exit 1
+fi
 
 sql() {
     local stmt="$1"
@@ -19,19 +30,21 @@ sql() {
 }
 
 echo "==> Waiting for opentelemetry_traces table to exist..."
-for i in $(seq 1 30); do
+elapsed=0
+while true; do
     if curl -sf -X POST "${GREPTIME_URL}/v1/sql?db=${DB}" \
         -H "Content-Type: application/x-www-form-urlencoded" \
         --data-urlencode "sql=SELECT 1 FROM opentelemetry_traces LIMIT 1" > /dev/null 2>&1; then
         echo "    Table found."
         break
     fi
-    if [ "$i" -eq 30 ]; then
-        echo "    ERROR: opentelemetry_traces not found after 60s."
+    if [ "$WAIT_TIMEOUT_SECONDS" -gt 0 ] && [ "$elapsed" -ge "$WAIT_TIMEOUT_SECONDS" ]; then
+        echo "    ERROR: opentelemetry_traces not found after ${WAIT_TIMEOUT_SECONDS}s."
         echo "    Make sure Dify is running and generating traces."
         exit 1
     fi
-    sleep 2
+    sleep "$WAIT_INTERVAL_SECONDS"
+    elapsed=$((elapsed + WAIT_INTERVAL_SECONDS))
 done
 
 echo ""
@@ -84,7 +97,7 @@ FROM opentelemetry_traces
 GROUP BY span_name, span_kind, time_window"
 
 echo ""
-echo "==> Done! Flow-derived metrics will appear in Grafana 'Dify Trace-Derived Metrics' dashboard."
+echo "==> Done! Flow-derived metrics will appear in Grafana 'Dify Monitoring' dashboard."
 echo ""
 echo "   Verify with:"
 echo "     mysql -h 127.0.0.1 -P 4002 -e 'SELECT * FROM trace_http_latency_30s LIMIT 5'"

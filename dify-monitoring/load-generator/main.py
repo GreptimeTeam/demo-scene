@@ -15,8 +15,14 @@ DIFY_API = os.environ["DIFY_API_ENDPOINT"].rstrip("/")
 API_KEY  = os.environ["DIFY_API_KEY"]
 SCENARIO = os.getenv("SCENARIO", "normal")
 RPS      = float(os.getenv("RPS", "2"))
+VALID_SCENARIOS = {"normal", "degraded", "failure"}
 if RPS <= 0:
     raise ValueError(f"RPS must be positive, got {RPS}")
+if SCENARIO not in VALID_SCENARIOS:
+    raise ValueError(
+        f"Invalid SCENARIO={SCENARIO!r}, expected one of: "
+        f"{', '.join(sorted(VALID_SCENARIOS))}"
+    )
 
 QUESTIONS_NORMAL = [
     "What is GreptimeDB?",

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DOWN_ARGS=("$@")
 
 echo "==> Stopping Dify..."
 if [ -f "$SCRIPT_DIR/dify/docker-compose.yaml" ]; then
@@ -10,10 +11,10 @@ if [ -f "$SCRIPT_DIR/dify/docker-compose.yaml" ]; then
         -f "$SCRIPT_DIR/dify-compose-override.yml" \
         --env-file "$SCRIPT_DIR/dify/.env" \
         -p dify \
-        down || true
+        down ${DOWN_ARGS[@]+"${DOWN_ARGS[@]}"} || true
 fi
 
 echo "==> Stopping monitoring stack..."
-docker compose -f "$SCRIPT_DIR/docker-compose.yml" down
+docker compose -f "$SCRIPT_DIR/docker-compose.yml" down ${DOWN_ARGS[@]+"${DOWN_ARGS[@]}"}
 
-echo "==> Done. Add -v flag to the commands above to also remove volumes."
+echo "==> Done."
