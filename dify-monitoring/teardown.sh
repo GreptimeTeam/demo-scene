@@ -7,7 +7,6 @@ DOWN_ARGS=("$@")
 echo "==> Stopping all services (Dify + monitoring)..."
 if [ -f "$SCRIPT_DIR/docker-compose.yml" ]; then
     docker compose \
-        --project-directory "$SCRIPT_DIR" \
         -f "$SCRIPT_DIR/docker-compose.yml" \
         --env-file "$SCRIPT_DIR/dify/.env" \
         -p dify \

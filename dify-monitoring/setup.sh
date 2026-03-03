@@ -55,22 +55,10 @@ echo "    OTEL enabled, exporting to otel-collector:4318."
 # --- Start all services (Dify + monitoring) ---
 echo "==> Starting all services (Dify + GreptimeDB + OTel Collector + Grafana)..."
 docker compose \
-    --project-directory "$SCRIPT_DIR" \
     -f "$SCRIPT_DIR/docker-compose.yml" \
     --env-file "$SCRIPT_DIR/dify/.env" \
     -p dify \
     up -d
-
-echo "    Waiting for GreptimeDB to be healthy..."
-until docker compose \
-    --project-directory "$SCRIPT_DIR" \
-    -f "$SCRIPT_DIR/docker-compose.yml" \
-    --env-file "$SCRIPT_DIR/dify/.env" \
-    -p dify \
-    exec -T greptimedb curl -sf http://127.0.0.1:4000/health > /dev/null 2>&1; do
-    sleep 2
-done
-echo "    GreptimeDB is ready."
 
 echo ""
 echo "============================================"
