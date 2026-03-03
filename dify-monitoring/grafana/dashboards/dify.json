@@ -167,7 +167,7 @@
       "title": "Span Volume",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 41 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT date_bin('30 seconds'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS spans FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND ('${trace_id}' = '' OR trace_id = '${trace_id}') GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
+      "targets": [{ "rawSql": "SELECT date_bin('30 seconds'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS spans FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
       "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 }, "unit": "short" }, "overrides": [] }
     },
     {
@@ -175,7 +175,7 @@
       "title": "Error Spans Over Time",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 41 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT date_bin('1 minute'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS errors FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND span_status_code = 'Error' AND ('${trace_id}' = '' OR trace_id = '${trace_id}') GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
+      "targets": [{ "rawSql": "SELECT date_bin('1 minute'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS errors FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND span_status_code = 'Error' AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
       "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 }, "color": { "mode": "fixed", "fixedColor": "red" }, "unit": "short" }, "overrides": [] }
     },
     {
@@ -183,14 +183,14 @@
       "title": "Top Operations",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 49 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT span_name, service_name, span_kind, COUNT(*) AS count, AVG(duration_nano) / 1000000 AS avg_ms, MAX(duration_nano) / 1000000 AS max_ms FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND ('${trace_id}' = '' OR trace_id = '${trace_id}') GROUP BY span_name, service_name, span_kind ORDER BY count DESC LIMIT 30", "format": "table", "refId": "A" }]
+      "targets": [{ "rawSql": "SELECT span_name, service_name, span_kind, COUNT(*) AS count, AVG(duration_nano) / 1000000 AS avg_ms, MAX(duration_nano) / 1000000 AS max_ms FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) GROUP BY span_name, service_name, span_kind ORDER BY count DESC LIMIT 30", "format": "table", "refId": "A" }]
     },
     {
       "type": "table",
       "title": "Slowest Spans",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 49 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT timestamp, trace_id, span_name, service_name, span_kind, duration_nano / 1000000 AS duration_ms, span_status_code FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND ('${trace_id}' = '' OR trace_id = '${trace_id}') ORDER BY duration_nano DESC LIMIT 30", "format": "table", "refId": "A" }]
+      "targets": [{ "rawSql": "SELECT timestamp, trace_id, span_name, service_name, span_kind, duration_nano / 1000000 AS duration_ms, span_status_code FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) ORDER BY duration_nano DESC LIMIT 30", "format": "table", "refId": "A" }]
     },
     {
       "type": "traces",
@@ -201,7 +201,7 @@
         {
           "refId": "Trace ID",
           "editorType": "builder",
-          "rawSql": "SELECT trace_id, span_id, parent_span_id, service_name, span_name, CAST(timestamp AS INT64) / 1000000 as ts_ms, CAST(duration_nano AS FLOAT64) / 1000000 as dur_ms, json_to_string(span_events) as span_events FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND trace_id = COALESCE(NULLIF('${trace_id}', ''), (SELECT trace_id FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp DESC LIMIT 1)) ORDER BY timestamp",
+          "rawSql": "SELECT trace_id, span_id, parent_span_id, service_name, span_name, CAST(timestamp AS INT64) / 1000000 as ts_ms, CAST(duration_nano AS FLOAT64) / 1000000 as dur_ms, json_to_string(span_events) as span_events FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND trace_id = COALESCE(NULLIF(${trace_id:sqlstring}, ''), (SELECT trace_id FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp DESC LIMIT 1)) ORDER BY timestamp",
           "builderOptions": {
             "database": "public",
             "table": "opentelemetry_traces",
@@ -237,7 +237,7 @@
       "title": "Log Volume",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 72 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT date_bin('30 seconds'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS logs FROM dify_logs WHERE $__timeFilter(timestamp) AND ('${log_search}' = '' OR body LIKE '%${log_search}%') GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
+      "targets": [{ "rawSql": "SELECT date_bin('30 seconds'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS logs FROM dify_logs WHERE $__timeFilter(timestamp) AND (${log_search:sqlstring} = '' OR body LIKE CONCAT('%', ${log_search:sqlstring}, '%')) GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
       "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 }, "unit": "short" }, "overrides": [] }
     },
     {
@@ -245,7 +245,7 @@
       "title": "Error Logs",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 72 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT date_bin('1 minute'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS errors FROM dify_logs WHERE $__timeFilter(timestamp) AND body LIKE '%ERROR%' AND ('${log_search}' = '' OR body LIKE '%${log_search}%') GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
+      "targets": [{ "rawSql": "SELECT date_bin('1 minute'::INTERVAL, timestamp, '1970-01-01T00:00:00Z'::TimestampNanosecond) AS time, COUNT(*) AS errors FROM dify_logs WHERE $__timeFilter(timestamp) AND body LIKE '%ERROR%' AND (${log_search:sqlstring} = '' OR body LIKE CONCAT('%', ${log_search:sqlstring}, '%')) GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }],
       "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 }, "color": { "mode": "fixed", "fixedColor": "red" }, "unit": "short" }, "overrides": [] }
     },
     {
@@ -257,7 +257,7 @@
         {
           "refId": "A",
           "editorType": "builder",
-          "rawSql": "SELECT timestamp as \"timestamp\", body as \"body\", severity_text as \"level\", json_get_string(log_attributes, 'container_name') as container_name, json_get_string(log_attributes, 'container_id') as container_id, json_get_string(log_attributes, 'source') as source, json_get_string(log_attributes, '[\"fluent.tag\"]') as fluent_tag FROM dify_logs WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND ('${log_search}' = '' OR body LIKE '%${log_search}%') ORDER BY timestamp DESC LIMIT 500",
+          "rawSql": "SELECT timestamp as \"timestamp\", body as \"body\", severity_text as \"level\", json_get_string(log_attributes, 'container_name') as container_name, json_get_string(log_attributes, 'container_id') as container_id, json_get_string(log_attributes, 'source') as source, json_get_string(log_attributes, '[\"fluent.tag\"]') as fluent_tag FROM dify_logs WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND (${log_search:sqlstring} = '' OR body LIKE CONCAT('%', ${log_search:sqlstring}, '%')) ORDER BY timestamp DESC LIMIT 500",
           "builderOptions": {
             "database": "public",
             "table": "dify_logs",

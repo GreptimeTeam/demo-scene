@@ -143,7 +143,7 @@ These are set automatically by `setup.sh` in `dify/.env`:
 | Variable                      | Value                          | Description                  |
 |-------------------------------|--------------------------------|------------------------------|
 | `ENABLE_OTEL`                 | `true`                         | Enable OpenTelemetry         |
-| `OTLP_BASE_ENDPOINT`         | `http://otel-collector:4318`   | Collector HTTP endpoint      |
+| `OTLP_BASE_ENDPOINT`          | `http://otel-collector:4318`   | Collector HTTP endpoint      |
 | `OTEL_SAMPLING_RATE`          | `1.0`                          | 100% sampling for demo       |
 | `OTEL_METRIC_EXPORT_INTERVAL` | `15000`                        | Export metrics every 15s     |
 

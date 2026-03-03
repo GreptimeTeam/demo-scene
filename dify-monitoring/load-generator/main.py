@@ -5,12 +5,18 @@ Simulates realistic Dify usage patterns with three scenarios:
 - degraded: inject slow responses (simulate model overload)
 - failure:  inject errors (simulate API key expiry, context overflow)
 """
-import os, time, random, requests
+import os
+import random
+import time
 
-DIFY_API = os.getenv("DIFY_API_ENDPOINT")
-API_KEY  = os.getenv("DIFY_API_KEY")
+import requests
+
+DIFY_API = os.environ["DIFY_API_ENDPOINT"].rstrip("/")
+API_KEY  = os.environ["DIFY_API_KEY"]
 SCENARIO = os.getenv("SCENARIO", "normal")
 RPS      = float(os.getenv("RPS", "2"))
+if RPS <= 0:
+    raise ValueError(f"RPS must be positive, got {RPS}")
 
 QUESTIONS_NORMAL = [
     "What is GreptimeDB?",
@@ -40,9 +46,10 @@ def send_query(question: str):
             },
             timeout=60,
         )
-        return resp.status_code, resp.elapsed.total_seconds()
-    except Exception as e:
-        return 0, str(e)
+        body = resp.text[:200] if resp.status_code >= 400 else None
+        return resp.status_code, resp.elapsed.total_seconds(), body
+    except requests.exceptions.RequestException as e:
+        return 0, 0.0, e
 
 def main():
     print(f"Starting load generator: scenario={SCENARIO}, rps={RPS}")
@@ -63,9 +70,12 @@ def main():
             else:
                 q = random.choice(QUESTIONS_NORMAL)
 
-        status, duration = send_query(q)
-        print(f"[{cycle}] status={status} duration={duration:.2f}s "
-              f"question={q[:50]}...")
+        status, duration, err = send_query(q)
+        if err:
+            print(f"[{cycle}] ERROR: {err}")
+        else:
+            print(f"[{cycle}] status={status} duration={duration:.2f}s "
+                  f"question={q[:50]}...")
 
         time.sleep(1.0 / RPS)
 

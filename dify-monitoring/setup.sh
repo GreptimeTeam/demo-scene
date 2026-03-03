@@ -78,10 +78,12 @@ sleep 5
 for svc in api worker; do
     container=$(docker compose \
         -f "$SCRIPT_DIR/dify/docker-compose.yaml" \
+        -f "$SCRIPT_DIR/dify-compose-override.yml" \
+        --env-file "$SCRIPT_DIR/dify/.env" \
         -p dify \
         ps -q "$svc" 2>/dev/null || true)
     if [ -n "$container" ]; then
-        docker network connect dify-monitoring "$container" 2>/dev/null || true
+        docker network connect --alias "$svc" dify-monitoring "$container" 2>/dev/null || true
     fi
 done
 
