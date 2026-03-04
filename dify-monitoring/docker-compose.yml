@@ -1,0 +1,123 @@
+include:
+  - ./dify/docker-compose.yaml
+
+services:
+  greptimedb:
+    image: docker.io/greptime/greptimedb:v1.0.0-rc.1
+    command: >
+      standalone start
+      --http-addr=0.0.0.0:4000
+      --rpc-addr=0.0.0.0:4001
+      --mysql-addr=0.0.0.0:4002
+      --postgres-addr=0.0.0.0:4003
+    ports:
+      - "4000:4000"
+      - "4001:4001"
+      - "4002:4002"
+      - "4003:4003"
+    volumes:
+      - greptimedb-data:/tmp/greptimedb
+    networks:
+      - dify-monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:4000/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  otel-collector:
+    image: docker.io/otel/opentelemetry-collector-contrib:0.120.0
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "24224:24224"
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    networks:
+      - dify-monitoring
+
+  grafana:
+    image: docker.io/grafana/grafana:11.6.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_INSTALL_PLUGINS: "https://github.com/GreptimeTeam/greptimedb-grafana-datasource/releases/download/v2.0.7/info8fcc-greptimedb-datasource.zip;info8fcc-greptimedb-datasource"
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: "info8fcc-greptimedb-datasource"
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    networks:
+      - dify-monitoring
+
+  load-generator:
+    build: ./load-generator
+    environment:
+      DIFY_API_ENDPOINT: http://api:5001/v1
+      DIFY_API_KEY: ${DIFY_API_KEY:-}
+      SCENARIO: normal
+      RPS: "2"
+    networks:
+      - dify-monitoring
+    profiles:
+      - load
+
+  # Dify service overrides: add dify-monitoring network + fluentd logging.
+  # Network lists are replaced (not merged) by compose, so we must repeat
+  # the original networks from dify/docker-compose.yaml (Dify v1.13.0).
+  # If upgrading Dify, check `docker compose config` for network changes.
+  api:
+    networks:
+      - ssrf_proxy_network
+      - default
+      - dify-monitoring
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        tag: dify.api
+
+  worker:
+    networks:
+      - ssrf_proxy_network
+      - default
+      - dify-monitoring
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        tag: dify.worker
+
+  worker_beat:
+    networks:
+      - ssrf_proxy_network
+      - default
+      - dify-monitoring
+
+  nginx:
+    networks:
+      - default
+      - dify-monitoring
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        tag: dify.nginx
+
+networks:
+  dify-monitoring:
+    name: dify-monitoring
+
+volumes:
+  greptimedb-data:
