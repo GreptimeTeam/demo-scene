@@ -1,3 +1,6 @@
+include:
+  - ./dify/docker-compose.yaml
+
 services:
   greptimedb:
     image: docker.io/greptime/greptimedb:v1.0.0-rc.1
@@ -15,7 +18,7 @@ services:
     volumes:
       - greptimedb-data:/tmp/greptimedb
     networks:
-      - monitoring
+      - dify-monitoring
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:4000/health"]
       interval: 3s
@@ -34,7 +37,7 @@ services:
       greptimedb:
         condition: service_healthy
     networks:
-      - monitoring
+      - dify-monitoring
 
   grafana:
     image: docker.io/grafana/grafana:11.6.0
@@ -53,7 +56,7 @@ services:
       greptimedb:
         condition: service_healthy
     networks:
-      - monitoring
+      - dify-monitoring
 
   load-generator:
     build: ./load-generator
@@ -63,13 +66,53 @@ services:
       SCENARIO: normal
       RPS: "2"
     networks:
-      - monitoring
+      - dify-monitoring
     profiles:
       - load
 
-volumes:
-  greptimedb-data:
+  api:
+    networks:
+      - ssrf_proxy_network
+      - default
+      - dify-monitoring
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        tag: dify.api
+
+  worker:
+    networks:
+      - ssrf_proxy_network
+      - default
+      - dify-monitoring
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        tag: dify.worker
+
+  worker_beat:
+    networks:
+      - ssrf_proxy_network
+      - dify-monitoring
+
+  nginx:
+    networks:
+      - default
+      - dify-monitoring
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        tag: dify.nginx
 
 networks:
-  monitoring:
+  dify-monitoring:
     name: dify-monitoring
+
+volumes:
+  greptimedb-data:
