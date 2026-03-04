@@ -29,7 +29,7 @@ services:
     command: psql -h greptimedb -p 4003 -d public -f /config_data/init_database.sql
     environment:
       PGSSLMODE: disable
-    init: yes
+    init: true
 
   init_pipeline:
     image: docker.io/alpine/curl
@@ -41,7 +41,7 @@ services:
     volumes:
       - ./config_data:/config_data
     command: sh -c "sleep 10 && curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/greptime_pipeline.yaml' -v; curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/server_log' -F 'file=@/config_data/server_log_pipeline.yaml' -v"
-    init: yes
+    init: true
 
   vector:
     image: docker.io/timberio/vector:0.41.X-alpine

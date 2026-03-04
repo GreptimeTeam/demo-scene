@@ -13,7 +13,7 @@ services:
     command: psql -h greptimedb -p 4003 -d public -f /init/init_database.sql
     environment:
       PGSSLMODE: disable
-    init: yes
+    init: true
 
   kafka:
     image: docker.io/greptime/kafka:3.6.0
