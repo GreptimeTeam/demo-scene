@@ -14,7 +14,7 @@ services:
     entrypoint: sh -c "sleep 10 && psql -h greptimedb -p 4003 -d public -f /init.sql"
     environment:
       PGSSLMODE: disable
-    init: yes
+    init: true
 
   django:
     build: django-app/

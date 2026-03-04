@@ -18,16 +18,30 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 * [Keyboard Monitor](keyboard-monitor) ([✍️ blog](https://greptime.com/blogs/2024-03-19-keyboard-monitoring))
 * [Observability for Nginx on Logs & Metrics](nginx-log-metrics)
+* [Dify Monitoring with OpenTelemetry](dify-monitoring)
+* [Tesla EV Metrics with OpenTelemetry](ev-open-telemetry)
 
-### Data pipelines (Ingestion + Greptime + Analysis or Display)
+### Observability
 
+* [Ollama + OpenTelemetry + GreptimeDB](ollama-opentelemetry)
+* [Django Tracing with OpenTelemetry](opentelemetry-trace-django)
+* [OpenTelemetry + Grafana Alloy + GreptimeDB](grafana-alloy)
+
+### Data Pipelines
+
+* [Vector + GreptimeDB](vector-ingestion)
+* [Kafka + Vector + GreptimeDB](kafka-ingestion)
+* [Apache Flink + GreptimeDB](flink-ingestion)
+* [Elasticsearch + GreptimeDB](elasticsearch-ingestion) ([📖 docs](https://docs.greptime.com/nightly/user-guide/ingest-data/for-observability/elasticsearch))
 * [InfluxDB Line Protocol + GreptimeDB + Web UI](influxdb-lineprotocol) ([🎥 tutorial](https://www.youtube.com/watch?v=JZuq0inSO9Q))
 * [Prometheus Node Exporter + GreptimeDB + Web Dashboard or Grafana Dashboard](node-exporter)
 * [Telegraf + GreptimeDB + Web UI](telegraf-ingestion)
-* [Kafka + Vector + GreptimeDB + Web UI](kafka-ingestion)
 * [Flight data ingestion and visualization](flight-data-ingester), including
   geospatial index with H3
-* [OpenTelemetry + Grafana Alloy + GreptimeDB](grafana-alloy)
+
+### Integrations
+
+* [PostgreSQL Foreign Data Wrapper for GreptimeDB](postgres-fdw)
 
 ### Data Migrations
 
