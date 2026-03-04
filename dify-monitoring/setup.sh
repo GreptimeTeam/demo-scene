@@ -60,7 +60,7 @@ docker compose \
     up -d
 
 echo "    Waiting for GreptimeDB to be healthy..."
-until docker compose -f "$SCRIPT_DIR/docker-compose.yml" exec -T greptimedb curl -sf http://127.0.0.1:4000/health > /dev/null 2>&1; do
+until docker compose -f "$SCRIPT_DIR/docker-compose.yml" --env-file "$SCRIPT_DIR/dify/.env" exec -T greptimedb curl -sf http://127.0.0.1:4000/health > /dev/null 2>&1; do
     sleep 2
 done
 echo "    GreptimeDB is ready."

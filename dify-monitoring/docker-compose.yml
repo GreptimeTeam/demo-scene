@@ -70,6 +70,10 @@ services:
     profiles:
       - load
 
+  # Dify service overrides: add dify-monitoring network + fluentd logging.
+  # Network lists are replaced (not merged) by compose, so we must repeat
+  # the original networks from dify/docker-compose.yaml (Dify v1.13.0).
+  # If upgrading Dify, check `docker compose config` for network changes.
   api:
     networks:
       - ssrf_proxy_network
@@ -97,6 +101,7 @@ services:
   worker_beat:
     networks:
       - ssrf_proxy_network
+      - default
       - dify-monitoring
 
   nginx:

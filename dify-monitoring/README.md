@@ -5,21 +5,22 @@ Monitor [Dify](https://github.com/langgenius/dify) using OpenTelemetry and [Grep
 ## Architecture
 
 ```
+docker-compose.yml (single project, includes dify/docker-compose.yaml)
 ┌──────────────────────────────────────────────────────┐
-│  Dify Stack                                          │
 │  ┌─────┐ ┌────────┐ ┌─────┐ ┌───────┐               │
 │  │ api │ │ worker │ │ web │ │ nginx │ :80           │
 │  └──┬──┘ └───┬────┘ └─────┘ └───┬───┘               │
 │     │ OTLP   │ OTLP     fluentd │ fluentd           │
-└─────┼────────┼──────────────────┼────────────────────┘
-      │        │                  │  network: dify-monitoring
-┌─────▼────────▼──────────────────▼────────────────────┐
-│  Monitoring Stack                                    │
-│  ┌──────────────────┐  ┌────────────┐  ┌─────────┐  │
-│  │  OTel Collector   │  │ GreptimeDB │  │ Grafana │  │
-│  │ :4318 OTLP       │─▶│   :4000    │◀─│  :3000  │  │
-│  │ :24224 fluentd   │  └────────────┘  └─────────┘  │
-│  └──────────────────┘                                │
+│     │        │                  │                    │
+│  ┌──▼────────▼──────────────────▼──┐  ┌───────────┐ │
+│  │       OTel Collector            │  │  Grafana   │ │
+│  │  :4318 OTLP  :24224 fluentd    │  │   :3000    │ │
+│  └─────────────┬───────────────────┘  └─────┬─────┘ │
+│                │                            │       │
+│           ┌────▼────────────────────────────▼──┐    │
+│           │           GreptimeDB               │    │
+│           │   :4000 HTTP  :4002 MySQL          │    │
+│           └────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -133,7 +134,7 @@ Generate synthetic traffic to produce telemetry data:
 # Set your Dify API key first
 export DIFY_API_KEY="app-xxxx"
 
-docker compose run --rm load-generator
+docker compose --env-file dify/.env run --rm load-generator
 ```
 
 ## Teardown
@@ -175,3 +176,4 @@ DIFY_VERSION=1.13.0 ./setup.sh
 - Dashboard queries assume the default GreptimeDB OTLP table schema. Run `SHOW TABLES` and adjust if table names differ.
 - Fluentd-collected logs have second-precision timestamps and no trace context. Container metadata (`container_name`, `source`) is extracted from `log_attributes` JSON.
 - The trace waterfall view shows one trace at a time (plugin limitation). Use the Trace ID filter or copy a trace ID from the Slowest Spans table.
+- Dify's Celery workers log `Failed to detach context` errors. This is a [known OpenTelemetry Python SDK issue](https://github.com/open-telemetry/opentelemetry-python/issues/2606) with context token handling across threads — harmless and does not affect trace collection.
