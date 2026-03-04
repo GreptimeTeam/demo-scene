@@ -53,6 +53,8 @@ This will:
 3. Start all services (Dify + GreptimeDB + OTel Collector + Grafana) using `docker-compose.yml` (which includes `dify/docker-compose.yaml` via the `include` directive)
 4. Initialize Flow aggregations in background (waits for `opentelemetry_traces` table, then creates flows)
 
+After setup completes, open http://localhost to finish Dify initialization: create an admin account, configure a model provider (e.g. Ollama, OpenAI), and create a Chatbot app. Send a few messages to generate traces, or use the [load generator](#load-generator-optional) for sustained traffic — the Grafana dashboard will start showing data shortly after.
+
 ## Access
 
 | Service              | URL                              |
