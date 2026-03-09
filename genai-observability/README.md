@@ -184,5 +184,5 @@ queryable columns, enabling SQL-based analysis on LLM telemetry.
 ## Cleanup
 
 ```bash
-docker compose --profile load --profile local --profile flow down -v
+docker compose --profile load --profile local down -v
 ```
