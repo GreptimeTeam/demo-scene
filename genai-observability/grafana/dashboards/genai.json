@@ -1,0 +1,432 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_GREPTIMEDB",
+      "label": "GreptimeDB",
+      "type": "datasource",
+      "pluginId": "mysql"
+    },
+    {
+      "name": "DS_GREPTIMEDB_PLUGIN",
+      "label": "GreptimeDB Plugin",
+      "type": "datasource",
+      "pluginId": "info8fcc-greptimedb-datasource"
+    }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "time": { "from": "now-15m", "to": "now" },
+  "refresh": "10s",
+  "title": "GenAI Observability",
+  "uid": "genai-observability",
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": false, "text": "GreptimeDB", "value": "GreptimeDB" },
+        "hide": 0,
+        "includeAll": false,
+        "name": "DS_GREPTIMEDB",
+        "options": [],
+        "query": "mysql",
+        "type": "datasource"
+      },
+      {
+        "current": {},
+        "hide": 2,
+        "name": "DS_GREPTIMEDB_PLUGIN",
+        "type": "datasource",
+        "query": "info8fcc-greptimedb-datasource"
+      },
+      {
+        "current": { "text": "", "value": "" },
+        "name": "trace_id",
+        "label": "Trace ID",
+        "type": "textbox",
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Total LLM Calls",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT COUNT(*) AS total FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "thresholds": { "steps": [{ "color": "blue", "value": null }] }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none" }
+    },
+    {
+      "type": "stat",
+      "title": "Total Tokens",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT SUM(`span_attributes.gen_ai.usage.input_tokens` + `span_attributes.gen_ai.usage.output_tokens`) AS total_tokens FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "purple" },
+          "thresholds": { "steps": [{ "color": "purple", "value": null }] }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none" }
+    },
+    {
+      "type": "stat",
+      "title": "Estimated Cost (USD)",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT ROUND(SUM(`span_attributes.gen_ai.usage.input_tokens`) * 0.15 / 1000000 + SUM(`span_attributes.gen_ai.usage.output_tokens`) * 0.60 / 1000000, 4) AS cost_usd FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 4,
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none" }
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT ROUND(SUM(CASE WHEN span_status = 'STATUS_CODE_ERROR' THEN request_count ELSE 0 END) * 100.0 / SUM(request_count), 1) AS error_rate_pct FROM genai_status_1m WHERE $__timeFilter(time_window)", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 }] }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none" }
+    },
+
+    {
+      "type": "row",
+      "title": "Token Usage",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Token Usage Over Time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        { "rawSql": "SELECT date_bin('1 minute'::INTERVAL, timestamp) AS time, SUM(`span_attributes.gen_ai.usage.input_tokens`) AS input_tokens, SUM(`span_attributes.gen_ai.usage.output_tokens`) AS output_tokens FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL GROUP BY time ORDER BY time", "format": "time_series", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 50, "stacking": { "mode": "normal" } }, "unit": "short", "min": 0 },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "input_tokens" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] },
+          { "matcher": { "id": "byName", "options": "output_tokens" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }] }
+        ]
+      }
+    },
+    {
+      "type": "barchart",
+      "title": "Token Usage by Model",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT `span_attributes.gen_ai.request.model` AS model, SUM(`span_attributes.gen_ai.usage.input_tokens`) AS input_tokens, SUM(`span_attributes.gen_ai.usage.output_tokens`) AS output_tokens FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL GROUP BY model ORDER BY input_tokens + output_tokens DESC", "format": "table", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "xField": "model" }
+    },
+
+    {
+      "type": "row",
+      "title": "Cost & Errors",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Successful vs Error Calls",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        { "rawSql": "SELECT time_window AS time, SUM(CASE WHEN span_status != 'STATUS_CODE_ERROR' THEN request_count ELSE 0 END) AS successful, SUM(CASE WHEN span_status = 'STATUS_CODE_ERROR' THEN request_count ELSE 0 END) AS errors FROM genai_status_1m WHERE $__timeFilter(time_window) GROUP BY time_window ORDER BY time_window", "format": "time_series", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "bars", "fillOpacity": 80, "stacking": { "mode": "normal" } },
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "successful" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
+          { "matcher": { "id": "byName", "options": "errors" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] }
+        ]
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Cumulative Cost (USD)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT time_window AS time, SUM(SUM(total_input_tokens * 0.15 / 1000000 + total_output_tokens * 0.60 / 1000000)) OVER (ORDER BY time_window) AS cumulative_cost FROM genai_token_usage_1m WHERE $__timeFilter(time_window) GROUP BY time_window ORDER BY time_window", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "currencyUSD", "min": 0 }, "overrides": [] }
+    },
+
+    {
+      "type": "row",
+      "title": "Latency",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "P50 / P95 Latency by Model (from Flow)",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT time_window AS time, model, ROUND(uddsketch_calc(0.50, duration_sketch) / 1000000, 1) AS p50_ms, ROUND(uddsketch_calc(0.95, duration_sketch) / 1000000, 1) AS p95_ms FROM genai_latency_1m WHERE $__timeFilter(time_window) ORDER BY time_window", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line" }, "unit": "ms", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Avg Duration per Request",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT date_bin('1 minute'::INTERVAL, timestamp) AS time, `span_attributes.gen_ai.request.model` AS metric, AVG(duration_nano) / 1000000 AS avg_ms FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL GROUP BY time, metric ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "ms", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "stat",
+      "title": "Tokens / sec",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT ROUND(SUM(`span_attributes.gen_ai.usage.input_tokens` + `span_attributes.gen_ai.usage.output_tokens`) / GREATEST(to_unixtime(MAX(timestamp)) - to_unixtime(MIN(timestamp)), 1), 1) AS tokens_per_sec FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "orange" },
+          "thresholds": { "steps": [{ "color": "orange", "value": null }] }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none" }
+    },
+
+    {
+      "type": "row",
+      "title": "Token Efficiency",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+      "collapsed": false
+    },
+    {
+      "type": "piechart",
+      "title": "Finish Reason Distribution",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 33 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT `span_attributes.gen_ai.response.finish_reasons` AS finish_reason, COUNT(*) AS count FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL AND `span_attributes.gen_ai.response.finish_reasons` IS NOT NULL GROUP BY finish_reason ORDER BY count DESC", "format": "table", "refId": "A" }],
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              { "fieldName": "finish_reason", "handlerKey": "field.name" },
+              { "fieldName": "count", "handlerKey": "field.value" }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": {
+        "pieType": "donut",
+        "legend": { "displayMode": "table", "placement": "right", "values": ["percent"] }
+      }
+    },
+    {
+      "type": "barchart",
+      "title": "Output / Input Token Ratio by Model",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 33 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT `span_attributes.gen_ai.request.model` AS model, ROUND(SUM(`span_attributes.gen_ai.usage.output_tokens`) / GREATEST(SUM(`span_attributes.gen_ai.usage.input_tokens`), 1), 2) AS output_input_ratio FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL GROUP BY model ORDER BY output_input_ratio DESC", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "purple" }
+        },
+        "overrides": []
+      },
+      "options": { "xField": "model" }
+    },
+    {
+      "type": "timeseries",
+      "title": "Avg Cost per Request",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 33 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT time_window AS time, model, ROUND((total_input_tokens * 0.15 + total_output_tokens * 0.60) / 1000000 / GREATEST(request_count, 1), 6) AS cost_per_request FROM genai_token_usage_1m WHERE $__timeFilter(time_window) ORDER BY time_window", "format": "time_series", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10 },
+          "unit": "currencyUSD",
+          "decimals": 6,
+          "min": 0
+        },
+        "overrides": []
+      }
+    },
+
+    {
+      "type": "row",
+      "title": "Model Comparison",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 },
+      "collapsed": false
+    },
+    {
+      "type": "piechart",
+      "title": "Requests by Model",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 42 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT `span_attributes.gen_ai.request.model` AS model, COUNT(*) AS requests FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL GROUP BY model ORDER BY requests DESC", "format": "table", "refId": "A" }],
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              { "fieldName": "model", "handlerKey": "field.name" },
+              { "fieldName": "requests", "handlerKey": "field.value" }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": {
+        "pieType": "donut",
+        "legend": { "displayMode": "table", "placement": "right", "values": ["percent"] }
+      }
+    },
+    {
+      "type": "barchart",
+      "title": "Avg Tokens per Request by Model",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 42 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT `span_attributes.gen_ai.request.model` AS model, ROUND(AVG(`span_attributes.gen_ai.usage.input_tokens`), 0) AS avg_input, ROUND(AVG(`span_attributes.gen_ai.usage.output_tokens`), 0) AS avg_output FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL GROUP BY model", "format": "table", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "xField": "model" }
+    },
+    {
+      "type": "barchart",
+      "title": "Error Rate by Model (%)",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 42 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT model, ROUND(SUM(CASE WHEN span_status = 'STATUS_CODE_ERROR' THEN request_count ELSE 0 END) * 100.0 / SUM(request_count), 1) AS error_rate_pct FROM genai_status_1m WHERE $__timeFilter(time_window) GROUP BY model", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 5 }] }
+        },
+        "overrides": []
+      },
+      "options": { "xField": "model" }
+    },
+
+    {
+      "type": "row",
+      "title": "Traces",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 50 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "Recent Traces",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 51 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [{ "rawSql": "SELECT timestamp AS time, trace_id, `span_attributes.gen_ai.request.model` AS model, span_name, span_status_code AS status, ROUND(duration_nano / 1000000, 0) AS duration_ms, `span_attributes.gen_ai.usage.input_tokens` AS input_tokens, `span_attributes.gen_ai.usage.output_tokens` AS output_tokens, `span_attributes.gen_ai.response.finish_reasons` AS finish_reason FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL ORDER BY timestamp DESC LIMIT 50", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "trace_id" },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View trace",
+                    "url": "/d/genai-observability/genai-observability?var-trace_id=${__data.fields.trace_id}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "duration_ms" },
+            "properties": [{ "id": "unit", "value": "ms" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "status" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "STATUS_CODE_ERROR": { "color": "red", "text": "ERROR" }, "STATUS_CODE_UNSET": { "color": "green", "text": "OK" } } }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+            ]
+          }
+        ]
+      },
+      "options": { "showHeader": true, "sortBy": [{ "displayName": "time", "desc": true }] }
+    },
+    {
+      "type": "traces",
+      "title": "Trace Detail",
+      "gridPos": { "h": 14, "w": 24, "x": 0, "y": 59 },
+      "datasource": { "type": "info8fcc-greptimedb-datasource", "uid": "${DS_GREPTIMEDB_PLUGIN}" },
+      "targets": [
+        {
+          "refId": "Trace ID",
+          "editorType": "builder",
+          "rawSql": "SELECT trace_id, span_id, parent_span_id, service_name, span_name, CAST(timestamp AS INT64) / 1000000 as ts_ms, CAST(duration_nano AS FLOAT64) / 1000000 as dur_ms, json_to_string(span_events) as span_events FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND trace_id = COALESCE(NULLIF('${trace_id}', ''), (SELECT trace_id FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp DESC LIMIT 1)) ORDER BY timestamp",
+          "builderOptions": {
+            "database": "public",
+            "table": "opentelemetry_traces",
+            "queryType": "traces",
+            "columns": [
+              { "name": "trace_id", "hint": "trace_id" },
+              { "name": "span_id", "hint": "trace_span_id" },
+              { "name": "parent_span_id", "hint": "trace_parent_span_id" },
+              { "name": "service_name", "hint": "trace_service_name" },
+              { "name": "span_name", "hint": "trace_operation_name" },
+              { "name": "timestamp", "hint": "time" },
+              { "name": "duration_nano", "hint": "trace_duration_time" },
+              { "name": "span_events" }
+            ],
+            "limit": 1000,
+            "meta": {
+              "traceDurationUnit": "nanoseconds",
+              "isTraceIdMode": false
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}

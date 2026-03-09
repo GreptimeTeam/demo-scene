@@ -1,0 +1,188 @@
+# GenAI Observability with GreptimeDB
+
+Monitor LLM token usage, latency, and cost using OpenTelemetry GenAI semantic
+conventions (`gen_ai.*`) and GreptimeDB.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│  GenAI App (Python)                             │
+│  OpenAI SDK + OTel GenAI Instrumentor           │
+│  - chat completions                             │
+│  - multi-model comparison                       │
+└──────────────┬──────────────────────────────────┘
+               │ OTLP (HTTP :4318)
+┌──────────────▼──────────────────────────────────┐
+│  OTel Collector                                 │
+│  receivers: otlp                                │
+│  exporters: otlphttp → GreptimeDB              │
+└──────────────┬──────────────────────────────────┘
+               │
+┌──────────────▼──────────────────────────────────┐
+│  GreptimeDB                                     │
+│  - opentelemetry_traces (gen_ai.* attributes)   │
+│  - Flow: token usage / latency aggregation      │
+├─────────────────────────────────────────────────┤
+│  Grafana (pre-built dashboard)                  │
+└─────────────────────────────────────────────────┘
+```
+
+## Quick Start
+
+### Option A: OpenAI API (recommended)
+
+```bash
+export OPENAI_API_KEY="sk-..."
+
+# Start all services + load generator + Flow aggregations
+docker compose --profile load up -d
+```
+
+### Option B: Ollama (local, free)
+
+```bash
+docker compose --profile local up -d
+
+# Pull a model
+docker compose exec ollama ollama pull llama3.2
+
+# Start load generator + Flow aggregations pointing to Ollama
+OPENAI_BASE_URL=http://ollama:11434/v1 MODEL_NAME=llama3.2 \
+  docker compose --profile load up -d
+```
+
+## Access
+
+| Service              | URL                                   |
+|----------------------|---------------------------------------|
+| Grafana              | http://localhost:3000 (admin / admin) |
+| GreptimeDB Dashboard | http://localhost:4000/dashboard        |
+| GreptimeDB MySQL     | `mysql -h 127.0.0.1 -P 4002`         |
+
+## Example Queries
+
+### Token Usage per Model per Minute
+
+```sql
+SELECT
+    "span_attributes.gen_ai.request.model" AS model,
+    date_bin('1 minute'::INTERVAL, timestamp) AS minute,
+    COUNT(*) AS requests,
+    SUM("span_attributes.gen_ai.usage.input_tokens") AS input_tokens,
+    SUM("span_attributes.gen_ai.usage.output_tokens") AS output_tokens
+FROM opentelemetry_traces
+WHERE "span_attributes.gen_ai.system" IS NOT NULL
+GROUP BY model, minute
+ORDER BY minute DESC;
+```
+
+### Cost Estimation (OpenAI Pricing)
+
+```sql
+SELECT
+    "span_attributes.gen_ai.request.model" AS model,
+    SUM("span_attributes.gen_ai.usage.input_tokens") AS input_tokens,
+    SUM("span_attributes.gen_ai.usage.output_tokens") AS output_tokens,
+    ROUND(SUM("span_attributes.gen_ai.usage.input_tokens") * 0.15 / 1000000
+        + SUM("span_attributes.gen_ai.usage.output_tokens") * 0.60 / 1000000, 4) AS estimated_cost_usd
+FROM opentelemetry_traces
+WHERE "span_attributes.gen_ai.system" IS NOT NULL
+  AND timestamp > NOW() - INTERVAL '1 hour'
+GROUP BY model
+ORDER BY estimated_cost_usd DESC;
+```
+
+### Latency Percentiles (from Flow)
+
+```sql
+SELECT
+    model,
+    request_count,
+    ROUND(uddsketch_calc(0.50, duration_sketch) / 1000000, 1) AS p50_ms,
+    ROUND(uddsketch_calc(0.95, duration_sketch) / 1000000, 1) AS p95_ms,
+    time_window
+FROM genai_latency_1m
+ORDER BY time_window DESC
+LIMIT 20;
+```
+
+### Error Rate per Model
+
+```sql
+SELECT
+    "span_attributes.gen_ai.request.model" AS model,
+    COUNT(*) AS total,
+    COUNT(CASE WHEN span_status_code = 'STATUS_CODE_ERROR' THEN 1 END) AS errors,
+    ROUND(
+        COUNT(CASE WHEN span_status_code = 'STATUS_CODE_ERROR' THEN 1 END) * 100.0 / COUNT(*),
+        1
+    ) AS error_rate_pct
+FROM opentelemetry_traces
+WHERE "span_attributes.gen_ai.system" IS NOT NULL
+  AND timestamp > NOW() - INTERVAL '1 hour'
+GROUP BY model
+ORDER BY error_rate_pct DESC;
+```
+
+### Finish Reason Distribution
+
+```sql
+SELECT
+    "span_attributes.gen_ai.response.finish_reasons" AS finish_reason,
+    COUNT(*) AS count
+FROM opentelemetry_traces
+WHERE "span_attributes.gen_ai.system" IS NOT NULL
+  AND timestamp > NOW() - INTERVAL '1 hour'
+GROUP BY finish_reason
+ORDER BY count DESC;
+```
+
+### Error Rate Trend (from Flow)
+
+```sql
+SELECT
+    time_window,
+    model,
+    SUM(CASE WHEN span_status = 'STATUS_CODE_ERROR' THEN request_count ELSE 0 END) * 100.0
+      / SUM(request_count) AS error_rate_pct
+FROM genai_status_1m
+GROUP BY time_window, model
+ORDER BY time_window DESC;
+```
+
+## How It Works
+
+This demo uses [OpenTelemetry GenAI Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
+to automatically instrument OpenAI SDK calls. The `opentelemetry-instrumentation-openai-v2`
+package captures:
+
+- `gen_ai.system` — provider (e.g., "openai")
+- `gen_ai.request.model` — requested model name
+- `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens` — token counts
+- `gen_ai.response.model` — actual model used
+- `gen_ai.response.finish_reasons` — completion reasons
+
+GreptimeDB's `greptime_trace_v1` pipeline flattens these span attributes into
+queryable columns, enabling SQL-based analysis on LLM telemetry.
+
+**Flow Aggregations** (`init-flow.sh`) create continuous materialized views for:
+- `genai_token_usage_1m` — token counts per model per minute
+- `genai_latency_1m` — latency distribution (uddsketch) per model per minute
+- `genai_status_1m` — request counts by model and status code per minute
+
+## Environment Variables
+
+| Variable           | Default         | Description                              |
+|--------------------|-----------------|------------------------------------------|
+| `OPENAI_API_KEY`   | *(empty)*       | OpenAI API key                           |
+| `OPENAI_BASE_URL`  | *(empty)*       | Custom base URL (for Ollama, etc.)       |
+| `MODEL_NAME`       | `gpt-4o-mini`   | Model to use                             |
+| `RPS`              | `0.5`           | Requests per second (load generator)     |
+| `MODELS`           | `$MODEL_NAME`   | Comma-separated model list for comparison |
+
+## Cleanup
+
+```bash
+docker compose --profile load --profile local --profile flow down -v
+```
