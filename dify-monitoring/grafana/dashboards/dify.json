@@ -200,7 +200,7 @@
       "targets": [
         {
           "refId": "Trace ID",
-          "editorType": "builder",
+          "editorType": "sql",
           "rawSql": "SELECT trace_id, span_id, parent_span_id, service_name, span_name, CAST(timestamp AS INT64) / 1000000 as ts_ms, CAST(duration_nano AS FLOAT64) / 1000000 as dur_ms, json_to_string(span_events) as span_events FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND trace_id = COALESCE(NULLIF(${trace_id:sqlstring}, ''), (SELECT trace_id FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp DESC LIMIT 1)) ORDER BY timestamp",
           "builderOptions": {
             "database": "public",
@@ -256,7 +256,7 @@
       "targets": [
         {
           "refId": "A",
-          "editorType": "builder",
+          "editorType": "sql",
           "rawSql": "SELECT timestamp as \"timestamp\", body as \"body\", severity_text as \"level\", json_get_string(log_attributes, 'container_name') as container_name, json_get_string(log_attributes, 'container_id') as container_id, json_get_string(log_attributes, 'source') as source, json_get_string(log_attributes, '[\"fluent.tag\"]') as fluent_tag FROM dify_logs WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND (${log_search:sqlstring} = '' OR body LIKE CONCAT('%', ${log_search:sqlstring}, '%')) ORDER BY timestamp DESC LIMIT 500",
           "builderOptions": {
             "database": "public",
