@@ -52,6 +52,26 @@ OPENAI_BASE_URL=http://ollama:11434/v1 MODEL_NAME=llama3.2 \
   docker compose --profile load up -d
 ```
 
+### Option C: DeepSeek
+
+```bash
+export OPENAI_API_KEY="sk-..."  # DeepSeek API key
+
+OPENAI_BASE_URL=https://api.deepseek.com MODEL_NAME=deepseek-chat \
+  docker compose --profile load up -d
+```
+
+### Option D: Claude (Anthropic)
+
+```bash
+export OPENAI_API_KEY="sk-ant-..."  # Anthropic API key
+
+OPENAI_BASE_URL=https://api.anthropic.com/v1/ MODEL_NAME=claude-sonnet-4-6 \
+  docker compose --profile load up -d
+```
+
+> Claude support uses Anthropic's [OpenAI SDK compatibility](https://docs.anthropic.com/en/api/openai-sdk) layer.
+
 ## Access
 
 | Service              | URL                                   |
@@ -283,8 +303,8 @@ a custom table (`genai_conversations`) specified by the `X-Greptime-Log-Table-Na
 
 | Variable           | Default         | Description                              |
 |--------------------|-----------------|------------------------------------------|
-| `OPENAI_API_KEY`   | *(empty)*       | OpenAI API key                           |
-| `OPENAI_BASE_URL`  | *(empty)*       | Custom base URL (for Ollama, etc.)       |
+| `OPENAI_API_KEY`   | *(empty)*       | API key (OpenAI, DeepSeek, or Anthropic) |
+| `OPENAI_BASE_URL`  | *(empty)*       | Custom base URL (for Ollama, DeepSeek, Claude, etc.) |
 | `MODEL_NAME`       | `gpt-4o-mini`   | Model to use                             |
 | `RPS`              | `0.5`           | Requests per second (load generator)     |
 | `MODELS`           | `$MODEL_NAME`   | Comma-separated model list for comparison |
