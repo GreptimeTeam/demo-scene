@@ -60,7 +60,25 @@ OPENAI_BASE_URL=http://ollama:11434/v1 MODEL_NAME=llama3.2 \
 | GreptimeDB Dashboard | http://localhost:4000/dashboard        |
 | GreptimeDB MySQL     | `mysql -h 127.0.0.1 -P 4002`         |
 
+## Dashboard
+
+The Grafana dashboard (`GenAI Observability`) has seven row sections: Overview, Token Usage, Cost & Errors, Latency, Token Efficiency, Model Comparison, and Traces. The Traces section includes a waterfall view via the [GreptimeDB Grafana plugin](https://github.com/GreptimeTeam/greptimedb-grafana-datasource).
+
+Three dashboard variables are available in the top bar:
+
+- **Input $/1M** / **Output $/1M** — token pricing for cost estimation (default: gpt-4o-mini pricing).
+- **Trace ID** — filter the trace waterfall by a specific trace. Click any `trace_id` in the Recent Traces table to populate it.
+
+![Overview, token usage, cost & errors, and latency](screenshots/dashboard-overview.png)
+
+![Token efficiency, model comparison, and recent traces](screenshots/dashboard-efficiency.png)
+
+![Trace detail waterfall — tool_call_pipeline with nested spans](screenshots/dashboard-trace-detail.png)
+
 ## Example Queries
+
+> **Tip:** You can run these queries interactively in the
+> [GreptimeDB Dashboard](http://localhost:4000/dashboard/#/dashboard/query).
 
 ### Token Usage per Model per Minute
 
@@ -161,12 +179,15 @@ package captures:
 - `gen_ai.request.model` — requested model name
 - `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens` — token counts
 - `gen_ai.response.model` — actual model used
-- `gen_ai.response.finish_reasons` — completion reasons
+- `gen_ai.response.finish_reasons` — why the model stopped generating:
+  - `stop` — natural completion (model finished its answer)
+  - `length` — truncated by `max_tokens` limit
+  - `tool_calls` — model requested a function/tool call instead of text
 
 GreptimeDB's `greptime_trace_v1` pipeline flattens these span attributes into
 queryable columns, enabling SQL-based analysis on LLM telemetry.
 
-**Flow Aggregations** (`init-flow.sh`) create continuous materialized views for:
+**Flow Aggregations** ([`flows.sql`](flows.sql)) create continuous materialized views for:
 - `genai_token_usage_1m` — token counts per model per minute
 - `genai_latency_1m` — latency distribution (uddsketch) per model per minute
 - `genai_status_1m` — request counts by model and status code per minute

@@ -58,6 +58,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       MODEL_NAME: ${MODEL_NAME:-gpt-4o-mini}
+      MODELS: ${MODELS:-}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_SERVICE_NAME: genai-demo
       RPS: ${RPS:-0.5}

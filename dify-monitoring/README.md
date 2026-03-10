@@ -95,7 +95,7 @@ This creates two [GreptimeDB Flow](https://docs.greptime.com/user-guide/flow-com
 | `trace_http_latency_flow` | `trace_http_latency_30s` | HTTP P50/P90/P99 latency via [uddsketch](https://docs.greptime.com/user-guide/traces/extend-trace/) |
 | `trace_operation_throughput_flow` | `trace_operation_throughput_30s` | Operation throughput by span kind |
 
-See [`init-flow.sh`](init-flow.sh) for the full CREATE FLOW SQL. You can inspect active flows with `SHOW FLOWS`.
+See [`flows.sql`](flows.sql) for the full CREATE TABLE / CREATE FLOW SQL. You can inspect active flows with `SHOW FLOWS`.
 
 Query example — P90 latency per endpoint:
 
@@ -108,6 +108,9 @@ LIMIT 10;
 ```
 
 ## Explore Data
+
+> **Tip:** You can run these queries interactively in the
+> [GreptimeDB Dashboard](http://localhost:4000/dashboard/#/dashboard/query).
 
 After Dify starts processing requests, connect to GreptimeDB and explore:
 

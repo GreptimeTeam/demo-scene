@@ -28,19 +28,20 @@ sql() {
     echo "     OK"
 }
 
-echo "==> Waiting for opentelemetry_traces table with gen_ai.* columns..."
+echo "==> Waiting for successful gen_ai spans (with token usage columns)..."
 elapsed=0
 while true; do
-    # Wait until gen_ai spans exist (not just the table), so Flow column references resolve
+    # Wait until a span with token usage exists — error-only spans lack gen_ai.usage.* columns,
+    # so checking gen_ai.system alone is not enough for CREATE FLOW to resolve all columns.
     if curl -sf -X POST "${GREPTIME_URL}/v1/sql?db=${DB}" \
         -H "Content-Type: application/x-www-form-urlencoded" \
-        --data-urlencode "sql=SELECT 1 FROM opentelemetry_traces WHERE \"span_attributes.gen_ai.system\" IS NOT NULL LIMIT 1" > /dev/null 2>&1; then
-        echo "    Table found with gen_ai.* columns."
+        --data-urlencode "sql=SELECT 1 FROM opentelemetry_traces WHERE \"span_attributes.gen_ai.usage.input_tokens\" IS NOT NULL LIMIT 1" > /dev/null 2>&1; then
+        echo "    Found gen_ai spans with token usage columns."
         break
     fi
     if [ "$WAIT_TIMEOUT_SECONDS" -gt 0 ] && [ "$elapsed" -ge "$WAIT_TIMEOUT_SECONDS" ]; then
-        echo "    ERROR: opentelemetry_traces with gen_ai.* columns not found after ${WAIT_TIMEOUT_SECONDS}s."
-        echo "    Make sure the GenAI app or load generator has run at least once."
+        echo "    ERROR: No gen_ai spans with token usage found after ${WAIT_TIMEOUT_SECONDS}s."
+        echo "    Make sure the LLM backend (Ollama/OpenAI) is reachable and at least one successful call has been made."
         exit 1
     fi
     sleep "$WAIT_INTERVAL_SECONDS"

@@ -6,6 +6,7 @@ GREPTIME_URL="${GREPTIME_URL:-http://localhost:4000}"
 DB="public"
 WAIT_TIMEOUT_SECONDS="${WAIT_TIMEOUT_SECONDS:-600}"
 WAIT_INTERVAL_SECONDS="${WAIT_INTERVAL_SECONDS:-2}"
+SQL_FILE="${SQL_FILE:-$(dirname "$0")/flows.sql}"
 
 if ! [[ "$WAIT_TIMEOUT_SECONDS" =~ ^[0-9]+$ ]] || [ "$WAIT_TIMEOUT_SECONDS" -lt 0 ]; then
     echo "ERROR: WAIT_TIMEOUT_SECONDS must be a non-negative integer, got: ${WAIT_TIMEOUT_SECONDS}"
@@ -48,53 +49,14 @@ while true; do
 done
 
 echo ""
-echo "==> Creating sink tables..."
+echo "==> Executing SQL from ${SQL_FILE}..."
 
-sql "CREATE TABLE IF NOT EXISTS trace_http_latency_30s (
-    span_name STRING,
-    request_count INT64,
-    duration_sketch BINARY,
-    time_window TIMESTAMP TIME INDEX,
-    PRIMARY KEY (span_name)
-)"
-
-sql "CREATE TABLE IF NOT EXISTS trace_operation_throughput_30s (
-    span_name STRING,
-    span_kind STRING,
-    total_count INT64,
-    time_window TIMESTAMP TIME INDEX,
-    PRIMARY KEY (span_name, span_kind)
-)"
-
-echo ""
-echo "==> Creating flows..."
-
-sql "CREATE FLOW IF NOT EXISTS trace_http_latency_flow
-SINK TO trace_http_latency_30s
-EXPIRE AFTER '1h'
-COMMENT 'HTTP request latency percentiles (uddsketch) from server spans'
-AS
-SELECT
-    span_name,
-    COUNT(span_name) AS request_count,
-    uddsketch_state(128, 0.01, duration_nano) AS duration_sketch,
-    date_bin('30 seconds'::INTERVAL, \"timestamp\") AS time_window
-FROM opentelemetry_traces
-WHERE span_kind = 'SPAN_KIND_SERVER'
-GROUP BY span_name, time_window"
-
-sql "CREATE FLOW IF NOT EXISTS trace_operation_throughput_flow
-SINK TO trace_operation_throughput_30s
-EXPIRE AFTER '1h'
-COMMENT 'Operation throughput from all trace spans'
-AS
-SELECT
-    span_name,
-    span_kind,
-    COUNT(span_name) AS total_count,
-    date_bin('30 seconds'::INTERVAL, \"timestamp\") AS time_window
-FROM opentelemetry_traces
-GROUP BY span_name, span_kind, time_window"
+# Strip comments, collapse into single line, split on semicolons, execute each statement
+sed 's/--.*$//' "$SQL_FILE" | tr '\n' ' ' | tr ';' '\n' | while IFS= read -r stmt; do
+    stmt=$(echo "$stmt" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    [ -z "$stmt" ] && continue
+    sql "$stmt"
+done
 
 echo ""
 echo "==> Done! Flow-derived metrics will appear in Grafana 'Dify Monitoring' dashboard."

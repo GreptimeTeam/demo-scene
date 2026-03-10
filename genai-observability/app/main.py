@@ -35,8 +35,8 @@ metrics.set_meter_provider(meter_provider)
 OpenAIInstrumentor().instrument()
 
 client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY", "ollama"),
-    base_url=os.getenv("OPENAI_BASE_URL"),
+    api_key=os.getenv("OPENAI_API_KEY") or "ollama",
+    base_url=os.getenv("OPENAI_BASE_URL") or None,
 )
 
 MODEL = os.getenv("MODEL_NAME", "gpt-4o-mini")

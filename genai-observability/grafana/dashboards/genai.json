@@ -25,7 +25,7 @@
     "list": [
       {
         "current": { "selected": false, "text": "GreptimeDB", "value": "GreptimeDB" },
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "name": "DS_GREPTIMEDB",
         "options": [],
@@ -38,6 +38,20 @@
         "name": "DS_GREPTIMEDB_PLUGIN",
         "type": "datasource",
         "query": "info8fcc-greptimedb-datasource"
+      },
+      {
+        "current": { "text": "0.15", "value": "0.15" },
+        "name": "input_price",
+        "label": "Input $/1M",
+        "type": "textbox",
+        "hide": 0
+      },
+      {
+        "current": { "text": "0.60", "value": "0.60" },
+        "name": "output_price",
+        "label": "Output $/1M",
+        "type": "textbox",
+        "hide": 0
       },
       {
         "current": { "text": "", "value": "" },
@@ -90,9 +104,10 @@
     {
       "type": "stat",
       "title": "Estimated Cost (USD)",
+      "description": "Uses Input $/1M and Output $/1M variables (default: gpt-4o-mini pricing).",
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT ROUND(SUM(`span_attributes.gen_ai.usage.input_tokens`) * 0.15 / 1000000 + SUM(`span_attributes.gen_ai.usage.output_tokens`) * 0.60 / 1000000, 4) AS cost_usd FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL", "format": "table", "refId": "A" }],
+      "targets": [{ "rawSql": "SELECT ROUND(SUM(`span_attributes.gen_ai.usage.input_tokens`) * ${input_price} / 1000000 + SUM(`span_attributes.gen_ai.usage.output_tokens`) * ${output_price} / 1000000, 4) AS cost_usd FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND `span_attributes.gen_ai.system` IS NOT NULL", "format": "table", "refId": "A" }],
       "fieldConfig": {
         "defaults": {
           "unit": "currencyUSD",
@@ -182,9 +197,10 @@
     {
       "type": "timeseries",
       "title": "Cumulative Cost (USD)",
+      "description": "Uses Input $/1M and Output $/1M variables (default: gpt-4o-mini pricing).",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT time_window AS time, SUM(SUM(total_input_tokens * 0.15 / 1000000 + total_output_tokens * 0.60 / 1000000)) OVER (ORDER BY time_window) AS cumulative_cost FROM genai_token_usage_1m WHERE $__timeFilter(time_window) GROUP BY time_window ORDER BY time_window", "format": "time_series", "refId": "A" }],
+      "targets": [{ "rawSql": "SELECT time_window AS time, SUM(SUM(total_input_tokens * ${input_price} / 1000000 + total_output_tokens * ${output_price} / 1000000)) OVER (ORDER BY time_window) AS cumulative_cost FROM genai_token_usage_1m WHERE $__timeFilter(time_window) GROUP BY time_window ORDER BY time_window", "format": "time_series", "refId": "A" }],
       "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "currencyUSD", "min": 0 }, "overrides": [] }
     },
 
@@ -274,9 +290,10 @@
     {
       "type": "timeseries",
       "title": "Avg Cost per Request",
+      "description": "Uses Input $/1M and Output $/1M variables (default: gpt-4o-mini pricing).",
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 33 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT time_window AS time, model, ROUND((total_input_tokens * 0.15 + total_output_tokens * 0.60) / 1000000 / GREATEST(request_count, 1), 6) AS cost_per_request FROM genai_token_usage_1m WHERE $__timeFilter(time_window) ORDER BY time_window", "format": "time_series", "refId": "A" }],
+      "targets": [{ "rawSql": "SELECT time_window AS time, model, ROUND((total_input_tokens * ${input_price} + total_output_tokens * ${output_price}) / 1000000 / GREATEST(request_count, 1), 6) AS cost_per_request FROM genai_token_usage_1m WHERE $__timeFilter(time_window) ORDER BY time_window", "format": "time_series", "refId": "A" }],
       "fieldConfig": {
         "defaults": {
           "custom": { "drawStyle": "line", "fillOpacity": 10 },
