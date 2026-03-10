@@ -23,6 +23,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ### Observability
 
+* [GenAI Observability with OpenTelemetry](genai-observability)
 * [Ollama + OpenTelemetry + GreptimeDB](ollama-opentelemetry)
 * [Django Tracing with OpenTelemetry](opentelemetry-trace-django)
 * [OpenTelemetry + Grafana Alloy + GreptimeDB](grafana-alloy)

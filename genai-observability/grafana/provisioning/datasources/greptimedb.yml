@@ -1,0 +1,37 @@
+apiVersion: 1
+
+datasources:
+  - name: GreptimeDB
+    type: mysql
+    uid: greptimedb-mysql
+    url: greptimedb:4002
+    database: public
+    isDefault: true
+    editable: true
+
+  - name: GreptimeDB-Prometheus
+    type: prometheus
+    uid: greptimedb-prometheus
+    url: http://greptimedb:4000/v1/prometheus
+    isDefault: false
+    editable: true
+
+  - name: GreptimeDB-Plugin
+    type: info8fcc-greptimedb-datasource
+    uid: greptimedb-plugin
+    isDefault: false
+    editable: true
+    jsonData:
+      host: http://greptimedb:4000
+      defaultDatabase: public
+      traces:
+        defaultDatabase: public
+        defaultTable: opentelemetry_traces
+        traceIdColumn: trace_id
+        spanIdColumn: span_id
+        parentSpanIdColumn: parent_span_id
+        serviceNameColumn: service_name
+        operationNameColumn: span_name
+        startTimeColumn: timestamp
+        durationColumn: duration_nano
+        durationUnit: nanoseconds

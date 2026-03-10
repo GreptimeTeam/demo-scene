@@ -190,7 +190,43 @@
       "title": "Slowest Spans",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 49 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "rawSql": "SELECT timestamp, trace_id, span_name, service_name, span_kind, duration_nano / 1000000 AS duration_ms, span_status_code FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) ORDER BY duration_nano DESC LIMIT 30", "format": "table", "refId": "A" }]
+      "targets": [{ "rawSql": "SELECT timestamp, trace_id, span_name, service_name, span_kind, duration_nano / 1000000 AS duration_ms, span_status_code FROM opentelemetry_traces WHERE $__timeFilter(timestamp) AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) ORDER BY duration_nano DESC LIMIT 30", "format": "table", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "trace_id" },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View trace",
+                    "url": "/d/dify-monitoring/dify-monitoring?var-trace_id=${__data.fields.trace_id}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "duration_ms" },
+            "properties": [{ "id": "unit", "value": "ms" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "span_status_code" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "Error": { "color": "red", "text": "ERROR" }, "Unset": { "color": "green", "text": "OK" } } }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+            ]
+          }
+        ]
+      }
     },
     {
       "type": "traces",
