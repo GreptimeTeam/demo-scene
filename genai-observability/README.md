@@ -45,7 +45,7 @@ docker compose --profile load up -d
 docker compose --profile local up -d
 
 # Pull a model
-docker compose exec ollama ollama pull llama3.2
+docker compose --profile local exec ollama ollama pull llama3.2
 
 # Start load generator + Flow aggregations pointing to Ollama
 OPENAI_BASE_URL=http://ollama:11434/v1 MODEL_NAME=llama3.2 \
