@@ -461,7 +461,7 @@
       "description": "LLM prompt and completion logs captured via OTel GenAI instrumentation.",
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 60 },
       "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
-      "targets": [{ "editorMode": "code", "rawSql": "SELECT timestamp AS time, trace_id, CASE WHEN json_get_string(parse_json(body), 'message.role') IS NOT NULL THEN json_get_string(parse_json(body), 'message.role') ELSE 'user' END AS role, COALESCE(json_get_string(parse_json(body), 'message.content'), json_get_string(parse_json(body), 'content')) AS content FROM genai_conversations WHERE $__timeFilter(timestamp) AND ('${search}' = '' OR MATCHES(body, '${search}')) ORDER BY timestamp DESC LIMIT 100", "format": "table", "refId": "A" }],
+      "targets": [{ "editorMode": "code", "rawSql": "SELECT timestamp AS time, trace_id, CASE WHEN json_get_string(parse_json(body), 'message.role') IS NOT NULL THEN json_get_string(parse_json(body), 'message.role') ELSE 'user' END AS role, COALESCE(json_get_string(parse_json(body), 'message.content'), json_get_string(parse_json(body), 'content')) AS content FROM genai_conversations WHERE $__timeFilter(timestamp) AND ('${search}' = '' OR matches_term(body, '${search}')) ORDER BY timestamp DESC LIMIT 100", "format": "table", "refId": "A" }],
       "fieldConfig": {
         "defaults": {},
         "overrides": [

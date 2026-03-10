@@ -72,7 +72,7 @@ This showcases three GreptimeDB query interfaces:
 
 Dashboard variables in the top bar:
 
-- **Search Conversations** — full-text search over conversation content (`MATCHES()`)
+- **Search Conversations** — full-text search over conversation content (`matches_term()`)
 - **Trace ID** — filter the trace waterfall by a specific trace. Click any `trace_id` in the Recent Traces or Conversations table to populate it.
 - **Input $/1M** / **Output $/1M** — token pricing for cost estimation (default: gpt-4o-mini pricing)
 
@@ -190,11 +190,17 @@ histogram_quantile(0.95, sum(rate(gen_ai_client_token_usage_bucket[5m])) by (le,
 
 ### Conversations
 
+Each log record's `body` has a different JSON structure depending on the role:
+- **User prompt**: `{"content": "What is GreptimeDB?"}` — top-level `content`, no `message` wrapper
+- **Assistant response**: `{"index": 0, "message": {"role": "assistant", "content": "..."}}` — nested under `message`
+
 ```sql
 SELECT
     timestamp AS time,
     trace_id,
-    json_get_string(parse_json(body), 'message.role') AS role,
+    CASE WHEN json_get_string(parse_json(body), 'message.role') IS NOT NULL
+         THEN json_get_string(parse_json(body), 'message.role')
+         ELSE 'user' END AS role,
     COALESCE(
         json_get_string(parse_json(body), 'message.content'),
         json_get_string(parse_json(body), 'content')
@@ -208,12 +214,36 @@ LIMIT 20;
 
 ```sql
 SELECT timestamp, trace_id,
-    json_get_string(parse_json(body), 'message.role') AS role,
-    json_get_string(parse_json(body), 'message.content') AS content
+    CASE WHEN json_get_string(parse_json(body), 'message.role') IS NOT NULL
+         THEN json_get_string(parse_json(body), 'message.role')
+         ELSE 'user' END AS role,
+    COALESCE(
+        json_get_string(parse_json(body), 'message.content'),
+        json_get_string(parse_json(body), 'content')
+    ) AS content
 FROM genai_conversations
-WHERE MATCHES(body, 'GreptimeDB')
+WHERE matches_term(body, 'GreptimeDB')
 ORDER BY timestamp DESC
 LIMIT 20;
+```
+
+### Correlate Traces with Conversations
+
+Join on `trace_id` + `span_id` to find the highest-token user prompts with their model and token counts:
+
+```sql
+SELECT
+    t.trace_id,
+    t."span_attributes.gen_ai.request.model" AS model,
+    t."span_attributes.gen_ai.usage.input_tokens"  AS input_tokens,
+    t."span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
+    json_get_string(parse_json(c.body), 'content') AS user_message
+FROM opentelemetry_traces t
+JOIN genai_conversations c ON t.trace_id = c.trace_id AND t.span_id = c.span_id
+WHERE t."span_attributes.gen_ai.system" IS NOT NULL
+  AND json_get_string(parse_json(c.body), 'message.role') IS NULL
+ORDER BY input_tokens DESC
+LIMIT 10;
 ```
 
 ## How It Works
@@ -228,7 +258,7 @@ package captures:
   - `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens` — token counts
   - `gen_ai.response.model` — actual model used
   - `gen_ai.response.finish_reasons` — why the model stopped generating
-- **Logs** — full prompt and completion content (when `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`), stored in the `genai_conversations` table. Each log record's `body` is a JSON string containing `message.role` and `message.content` (or `content`), extractable via `parse_json()` + `json_get_string()`. The `body` column has full-text indexing enabled, supporting `MATCHES()` for keyword search.
+- **Logs** — full prompt and completion content (when `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`), stored in the `genai_conversations` table. Each log record's `body` is a JSON string with structure that varies by role: user prompts have top-level `{"content": "..."}`, while assistant responses are nested as `{"message": {"role": "assistant", "content": "..."}}`. Use `parse_json()` + `json_get_string()` to extract fields. The `body` column has full-text indexing enabled, supporting `matches_term()` for keyword search.
 - **Metrics** — OTel histograms (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`) queryable via PromQL. Note: the OTel SDK appends unit suffixes to metric names (e.g., `gen_ai_client_operation_duration` becomes `gen_ai_client_operation_duration_seconds_count/bucket/sum`).
 
 GreptimeDB's `greptime_trace_v1` pipeline flattens span attributes into

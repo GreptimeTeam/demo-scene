@@ -13,8 +13,11 @@ case "$WAIT_TIMEOUT_SECONDS" in
     ''|*[!0-9]*) echo "ERROR: WAIT_TIMEOUT_SECONDS must be a non-negative integer, got: ${WAIT_TIMEOUT_SECONDS}"; exit 1;;
 esac
 case "$WAIT_INTERVAL_SECONDS" in
-    ''|*[!0-9]*|0) echo "ERROR: WAIT_INTERVAL_SECONDS must be a positive integer, got: ${WAIT_INTERVAL_SECONDS}"; exit 1;;
+    ''|*[!0-9]*) echo "ERROR: WAIT_INTERVAL_SECONDS must be a positive integer, got: ${WAIT_INTERVAL_SECONDS}"; exit 1;;
 esac
+if [ "$WAIT_INTERVAL_SECONDS" -eq 0 ]; then
+    echo "ERROR: WAIT_INTERVAL_SECONDS must be a positive integer, got: ${WAIT_INTERVAL_SECONDS}"; exit 1
+fi
 
 sql() {
     stmt="$1"
@@ -50,6 +53,11 @@ done
 
 echo ""
 echo "==> Executing SQL from ${SQL_FILE}..."
+
+if [ ! -f "$SQL_FILE" ]; then
+    echo "ERROR: SQL file not found: ${SQL_FILE}"
+    exit 1
+fi
 
 # Strip comments, collapse into single line, split on semicolons, execute each statement
 sed 's/--.*$//' "$SQL_FILE" | tr '\n' ' ' | tr ';' '\n' > /tmp/stmts.txt
