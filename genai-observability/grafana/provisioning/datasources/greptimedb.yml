@@ -9,6 +9,13 @@ datasources:
     isDefault: true
     editable: true
 
+  - name: GreptimeDB-Prometheus
+    type: prometheus
+    uid: greptimedb-prometheus
+    url: http://greptimedb:4000/v1/prometheus
+    isDefault: false
+    editable: true
+
   - name: GreptimeDB-Plugin
     type: info8fcc-greptimedb-datasource
     uid: greptimedb-plugin

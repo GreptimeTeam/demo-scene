@@ -21,20 +21,31 @@ import time
 
 from openai import OpenAI
 from opentelemetry import metrics, trace
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
+from opentelemetry.sdk._logs import LoggerProvider
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-# --- OTel setup (traces + metrics) ---
-endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318")
+# --- OTel setup (traces + metrics + logs) ---
+endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4000/v1/otlp")
 
 trace_provider = TracerProvider()
 trace_provider.add_span_processor(
-    BatchSpanProcessor(OTLPSpanExporter(endpoint=f"{endpoint}/v1/traces"))
+    BatchSpanProcessor(
+        OTLPSpanExporter(
+            endpoint=f"{endpoint}/v1/traces",
+            # Required: tells GreptimeDB to parse spans using its trace pipeline,
+            # which flattens span attributes (e.g. gen_ai.*) into queryable columns.
+            headers={"x-greptime-pipeline-name": "greptime_trace_v1"},
+        )
+    )
 )
 trace.set_tracer_provider(trace_provider)
 
@@ -44,6 +55,17 @@ metric_reader = PeriodicExportingMetricReader(
 )
 meter_provider = MeterProvider(metric_readers=[metric_reader])
 metrics.set_meter_provider(meter_provider)
+
+log_provider = LoggerProvider()
+log_provider.add_log_record_processor(
+    BatchLogRecordProcessor(
+        OTLPLogExporter(
+            endpoint=f"{endpoint}/v1/logs",
+            headers={"X-Greptime-Log-Table-Name": "genai_conversations"},
+        )
+    )
+)
+set_logger_provider(log_provider)
 
 # Auto-instruments all OpenAI SDK calls — each chat.completions.create()
 # becomes a span with gen_ai.* attributes (model, tokens, finish_reason, etc.)
@@ -153,7 +175,7 @@ RAG_CONTEXTS = [
     "It supports OTLP, Prometheus remote write, InfluxDB line protocol, and SQL for ingestion.",
     "In GreptimeDB, tags (primary keys) are indexed columns used for filtering and grouping, "
     "while fields store the actual measurements. Tags are stored as strings.",
-    "Configure the OTel Collector to export traces via otlphttp to GreptimeDB's /v1/otlp endpoint. "
+    "Send traces directly to GreptimeDB's /v1/otlp endpoint via OTLP HTTP. "
     "Set the x-greptime-pipeline-name header to greptime_trace_v1 for trace ingestion.",
     "GreptimeDB Flow provides continuous aggregation similar to materialized views. "
     "Define a source query over raw data and a sink table for pre-computed results.",
@@ -422,6 +444,7 @@ def shutdown(signum, frame):
     print("\nShutting down, flushing telemetry...")
     trace_provider.force_flush()
     meter_provider.force_flush()
+    log_provider.force_flush()
     sys.exit(0)
 
 

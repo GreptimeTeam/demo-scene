@@ -2,19 +2,6 @@ include:
   - ../greptimedb-common.yml
 
 services:
-  otel-collector:
-    image: docker.io/otel/opentelemetry-collector-contrib:0.120.0
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
-    ports:
-      - "4317:4317"
-      - "4318:4318"
-    depends_on:
-      greptimedb:
-        condition: service_healthy
-    networks:
-      - demo-network
-
   grafana:
     image: docker.io/grafana/grafana:11.6.0
     ports:
@@ -42,10 +29,12 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       MODEL_NAME: ${MODEL_NAME:-gpt-4o-mini}
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://greptimedb:4000/v1/otlp
       OTEL_SERVICE_NAME: genai-demo
+      OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: "true"
     depends_on:
-      - otel-collector
+      greptimedb:
+        condition: service_healthy
     networks:
       - demo-network
     profiles:
@@ -59,11 +48,13 @@ services:
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       MODEL_NAME: ${MODEL_NAME:-gpt-4o-mini}
       MODELS: ${MODELS:-}
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://greptimedb:4000/v1/otlp
       OTEL_SERVICE_NAME: genai-demo
+      OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: "true"
       RPS: ${RPS:-0.5}
     depends_on:
-      - otel-collector
+      greptimedb:
+        condition: service_healthy
     networks:
       - demo-network
     profiles:

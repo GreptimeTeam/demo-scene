@@ -1,7 +1,7 @@
 # GenAI Observability with GreptimeDB
 
-Monitor LLM token usage, latency, and cost using OpenTelemetry GenAI semantic
-conventions (`gen_ai.*`) and GreptimeDB.
+Monitor LLM token usage, latency, cost, and conversation content using
+OpenTelemetry GenAI semantic conventions (`gen_ai.*`) and GreptimeDB.
 
 ## Architecture
 
@@ -11,20 +11,20 @@ conventions (`gen_ai.*`) and GreptimeDB.
 │  OpenAI SDK + OTel GenAI Instrumentor           │
 │  - chat completions                             │
 │  - multi-model comparison                       │
+│  - conversation content capture (logs)          │
 └──────────────┬──────────────────────────────────┘
-               │ OTLP (HTTP :4318)
-┌──────────────▼──────────────────────────────────┐
-│  OTel Collector                                 │
-│  receivers: otlp                                │
-│  exporters: otlphttp → GreptimeDB              │
-└──────────────┬──────────────────────────────────┘
-               │
+               │ OTLP (HTTP): traces + metrics + logs
 ┌──────────────▼──────────────────────────────────┐
 │  GreptimeDB                                     │
 │  - opentelemetry_traces (gen_ai.* attributes)   │
+│  - genai_conversations  (prompt + completion)    │
+│  - OTel metrics (histograms → PromQL)           │
 │  - Flow: token usage / latency aggregation      │
 ├─────────────────────────────────────────────────┤
 │  Grafana (pre-built dashboard)                  │
+│  - SQL queries (traces, logs, Flow tables)      │
+│  - PromQL queries (OTel histogram metrics)      │
+│  - Trace waterfall (GreptimeDB plugin)          │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -62,16 +62,23 @@ OPENAI_BASE_URL=http://ollama:11434/v1 MODEL_NAME=llama3.2 \
 
 ## Dashboard
 
-The Grafana dashboard (`GenAI Observability`) has seven row sections: Overview, Token Usage, Cost & Errors, Latency, Token Efficiency, Model Comparison, and Traces. The Traces section includes a waterfall view via the [GreptimeDB Grafana plugin](https://github.com/GreptimeTeam/greptimedb-grafana-datasource).
+The Grafana dashboard (`GenAI Observability`) has nine row sections: Overview, Token Usage, Cost & Errors, Latency, Token Efficiency, Model Comparison, Metrics (PromQL), Conversations, and Traces.
 
-Three dashboard variables are available in the top bar:
+This showcases three GreptimeDB query interfaces:
 
-- **Input $/1M** / **Output $/1M** — token pricing for cost estimation (default: gpt-4o-mini pricing).
-- **Trace ID** — filter the trace waterfall by a specific trace. Click any `trace_id` in the Recent Traces table to populate it.
+- **SQL** — traces, logs, and Flow aggregation tables (MySQL datasource)
+- **PromQL** — OTel histogram metrics for token distribution, request rate, latency heatmap (Prometheus datasource)
+- **Trace waterfall** — via the [GreptimeDB Grafana plugin](https://github.com/GreptimeTeam/greptimedb-grafana-datasource)
+
+Dashboard variables in the top bar:
+
+- **Search Conversations** — full-text search over conversation content (`MATCHES()`)
+- **Trace ID** — filter the trace waterfall by a specific trace. Click any `trace_id` in the Recent Traces or Conversations table to populate it.
+- **Input $/1M** / **Output $/1M** — token pricing for cost estimation (default: gpt-4o-mini pricing)
 
 ![Overview, token usage, cost & errors, and latency](screenshots/dashboard-overview.png)
 
-![Token efficiency, model comparison, and recent traces](screenshots/dashboard-efficiency.png)
+![Token efficiency, model comparison, PromQL metrics, and conversations](screenshots/dashboard-metrics-conversations.png)
 
 ![Trace detail waterfall — tool_call_pipeline with nested spans](screenshots/dashboard-trace-detail.png)
 
@@ -169,28 +176,78 @@ GROUP BY time_window, model
 ORDER BY time_window DESC;
 ```
 
+### PromQL: Request Rate
+
+```promql
+sum(rate(gen_ai_client_operation_duration_seconds_count[5m])) by (gen_ai_request_model)
+```
+
+### PromQL: Token Distribution (p95)
+
+```promql
+histogram_quantile(0.95, sum(rate(gen_ai_client_token_usage_bucket[5m])) by (le, gen_ai_token_type))
+```
+
+### Conversations
+
+```sql
+SELECT
+    timestamp AS time,
+    trace_id,
+    json_get_string(parse_json(body), 'message.role') AS role,
+    COALESCE(
+        json_get_string(parse_json(body), 'message.content'),
+        json_get_string(parse_json(body), 'content')
+    ) AS content
+FROM genai_conversations
+ORDER BY timestamp DESC
+LIMIT 20;
+```
+
+### Full-text Search on Conversations
+
+```sql
+SELECT timestamp, trace_id,
+    json_get_string(parse_json(body), 'message.role') AS role,
+    json_get_string(parse_json(body), 'message.content') AS content
+FROM genai_conversations
+WHERE MATCHES(body, 'GreptimeDB')
+ORDER BY timestamp DESC
+LIMIT 20;
+```
+
 ## How It Works
 
 This demo uses [OpenTelemetry GenAI Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
 to automatically instrument OpenAI SDK calls. The `opentelemetry-instrumentation-openai-v2`
 package captures:
 
-- `gen_ai.system` — provider (e.g., "openai")
-- `gen_ai.request.model` — requested model name
-- `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens` — token counts
-- `gen_ai.response.model` — actual model used
-- `gen_ai.response.finish_reasons` — why the model stopped generating:
-  - `stop` — natural completion (model finished its answer)
-  - `length` — truncated by `max_tokens` limit
-  - `tool_calls` — model requested a function/tool call instead of text
+- **Traces** — span attributes for each LLM call:
+  - `gen_ai.system` — provider (e.g., "openai")
+  - `gen_ai.request.model` — requested model name
+  - `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens` — token counts
+  - `gen_ai.response.model` — actual model used
+  - `gen_ai.response.finish_reasons` — why the model stopped generating
+- **Logs** — full prompt and completion content (when `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`), stored in the `genai_conversations` table. Each log record's `body` is a JSON string containing `message.role` and `message.content` (or `content`), extractable via `parse_json()` + `json_get_string()`. The `body` column has full-text indexing enabled, supporting `MATCHES()` for keyword search.
+- **Metrics** — OTel histograms (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`) queryable via PromQL. Note: the OTel SDK appends unit suffixes to metric names (e.g., `gen_ai_client_operation_duration` becomes `gen_ai_client_operation_duration_seconds_count/bucket/sum`).
 
-GreptimeDB's `greptime_trace_v1` pipeline flattens these span attributes into
-queryable columns, enabling SQL-based analysis on LLM telemetry.
+GreptimeDB's `greptime_trace_v1` pipeline flattens span attributes into
+queryable columns, enabling SQL-based analysis on LLM telemetry. Logs are
+ingested via the default OTLP log handler (no pipeline header needed) into
+a custom table (`genai_conversations`) specified by the `X-Greptime-Log-Table-Name` header.
 
 **Flow Aggregations** ([`flows.sql`](flows.sql)) create continuous materialized views for:
 - `genai_token_usage_1m` — token counts per model per minute
 - `genai_latency_1m` — latency distribution (uddsketch) per model per minute
 - `genai_status_1m` — request counts by model and status code per minute
+
+> **Note:** This demo sends OTLP data directly to GreptimeDB without an OTel Collector
+> in between, keeping the architecture minimal. In production you'd typically add a
+> Collector for buffering/retry, fan-out to multiple backends, sampling, and PII redaction.
+
+> **Privacy:** This demo captures full prompt and completion content by default
+> (`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`). In production, disable
+> this or use an OTel Collector with redaction processors to protect sensitive data.
 
 ## Environment Variables
 
@@ -201,6 +258,7 @@ queryable columns, enabling SQL-based analysis on LLM telemetry.
 | `MODEL_NAME`       | `gpt-4o-mini`   | Model to use                             |
 | `RPS`              | `0.5`           | Requests per second (load generator)     |
 | `MODELS`           | `$MODEL_NAME`   | Comma-separated model list for comparison |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `true` | Capture prompt/completion in logs |
 
 ## Cleanup
 
