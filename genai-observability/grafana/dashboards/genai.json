@@ -24,7 +24,7 @@
   "graphTooltip": 1,
   "links": [],
   "time": { "from": "now-15m", "to": "now" },
-  "refresh": "10s",
+  "refresh": "30s",
   "title": "GenAI Observability",
   "uid": "genai-observability",
   "templating": {
@@ -564,7 +564,7 @@
         {
           "refId": "Trace ID",
           "editorType": "code",
-          "rawSql": "SELECT trace_id, span_id, parent_span_id, service_name, span_name, CAST(timestamp AS INT64) / 1000000 as ts_ms, CAST(duration_nano AS FLOAT64) / 1000000 as dur_ms, json_to_string(span_events) as span_events FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND trace_id = COALESCE(NULLIF('${trace_id}', ''), (SELECT trace_id FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp DESC LIMIT 1)) ORDER BY timestamp",
+          "rawSql": "SELECT trace_id, span_id, parent_span_id, service_name, span_name, CAST(timestamp AS INT64) / 1000000 as ts_ms, CAST(duration_nano AS FLOAT64) / 1000000 as dur_ms, json_to_string(span_events) as span_events, \"span_attributes.gen_ai.system\", \"span_attributes.gen_ai.operation.name\", \"span_attributes.gen_ai.request.model\", \"span_attributes.gen_ai.request.max_tokens\", \"span_attributes.server.address\", \"span_attributes.server.port\", span_status_code, \"resource_attributes.telemetry.sdk.name\", \"resource_attributes.telemetry.sdk.language\", \"resource_attributes.telemetry.sdk.version\" FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime AND trace_id = COALESCE(NULLIF('${trace_id}', ''), (SELECT trace_id FROM opentelemetry_traces WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp DESC LIMIT 1)) ORDER BY timestamp",
           "builderOptions": {
             "database": "public",
             "table": "opentelemetry_traces",
@@ -577,7 +577,17 @@
               { "name": "span_name", "hint": "trace_operation_name" },
               { "name": "timestamp", "hint": "time" },
               { "name": "duration_nano", "hint": "trace_duration_time" },
-              { "name": "span_events" }
+              { "name": "span_events" },
+              { "name": "span_attributes.gen_ai.system", "hint": "trace_tags" },
+              { "name": "span_attributes.gen_ai.operation.name", "hint": "trace_tags" },
+              { "name": "span_attributes.gen_ai.request.model", "hint": "trace_tags" },
+              { "name": "span_attributes.gen_ai.request.max_tokens", "hint": "trace_tags" },
+              { "name": "span_attributes.server.address", "hint": "trace_tags" },
+              { "name": "span_attributes.server.port", "hint": "trace_tags" },
+              { "name": "span_status_code", "hint": "trace_tags" },
+              { "name": "resource_attributes.telemetry.sdk.name", "hint": "trace_service_tags" },
+              { "name": "resource_attributes.telemetry.sdk.language", "hint": "trace_service_tags" },
+              { "name": "resource_attributes.telemetry.sdk.version", "hint": "trace_service_tags" }
             ],
             "limit": 1000,
             "meta": {
