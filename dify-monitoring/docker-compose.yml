@@ -3,7 +3,7 @@ include:
 
 services:
   greptimedb:
-    image: docker.io/greptime/greptimedb:v1.0.0-rc.1
+    image: docker.io/greptime/greptimedb:v1.0.0-rc.2
     command: >
       standalone start
       --http-addr=0.0.0.0:4000
