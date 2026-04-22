@@ -1,16 +1,9 @@
--- Sample analytical queries for the `worker_events` table.
+-- Sample queries for worker_events. Run via curl against
+--   http://localhost:4000/v1/sql?db=public
+-- or the web console at http://localhost:4000/dashboard.
 --
--- Run via HTTP:
---   curl -X POST "http://localhost:4000/v1/sql?db=public" \
---        --data-urlencode "sql=SELECT count(*) FROM worker_events"
---
--- Or use the GreptimeDB web console:
---   http://localhost:4000/dashboard
---
--- Note: the HTTP SQL endpoint follows standard SQL — identifiers are quoted
--- with double quotes ("path_group"). The Grafana MySQL datasource speaks the
--- MySQL wire protocol and requires backticks (`path_group`) instead. If you
--- copy a query into Grafana and it returns nothing, swap the quoting.
+-- Quoting gotcha: HTTP SQL uses double quotes ("path_group"); the Grafana
+-- MySQL datasource uses backticks (`path_group`). Swap when copying between.
 
 -- 1. Request count per minute by CF colo (PoP).
 SELECT
