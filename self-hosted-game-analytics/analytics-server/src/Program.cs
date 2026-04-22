@@ -10,7 +10,7 @@ var greptimeDb = Environment.GetEnvironmentVariable("GREPTIMEDB_DATABASE") ?? "p
 
 builder.Services.AddGreptimeClient(options =>
 {
-    options.Endpoint = greptimeEndpoint;
+    options.Endpoints = new List<string> { greptimeEndpoint };
     options.Database = greptimeDb;
     options.WriteTimeout = TimeSpan.FromSeconds(30);
 });

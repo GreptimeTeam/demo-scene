@@ -12,6 +12,16 @@
 //   3. The client batches events in memory and flushes every flushInterval
 //      seconds or when the buffer fills, whichever comes first.
 //
+// Reliability note:
+//   Flushing on quit is best-effort. OnApplicationQuit rarely lets a coroutine
+//   complete before Unity tears the player down, and mobile OSes can kill the
+//   process without calling it at all. This client flushes on
+//   OnApplicationPause(true) — which fires when the app goes to background on
+//   mobile while the process is still alive — to catch the most common
+//   "player leaves the session" moment. For guaranteed delivery across
+//   crashes, OS kills, and unclean quits, production code should persist the
+//   pending buffer to PlayerPrefs / a file and replay it on next Awake.
+//
 // This file covers business events via REST. For OpenTelemetry metrics
 // (FPS / memory) there is a community OpenTelemetry-for-Unity package that
 // works with netstandard2.1; until you wire that in, you can reuse Track()
@@ -116,19 +126,23 @@ namespace Greptime.Unity.Telemetry
             double? amountUsd = null,
             string reason = null)
         {
+            // Convert nullables to default zeros/empties at the boundary so the
+            // wire-level payload can use JsonUtility (which does not serialize
+            // Nullable<T>). The analytics server already treats 0 / "" as
+            // "field not set" for non-iap events.
             var payload = new EventPayload
             {
-                event_type = eventType,
+                event_type = eventType ?? string.Empty,
                 platform = _platform,
                 game_version = gameVersion,
                 player_id = _playerId,
                 session_id = _sessionId,
-                level_id = levelId,
-                duration_ms = durationMs,
-                score = score,
-                gold_delta = goldDelta,
-                amount_usd = amountUsd,
-                reason = reason,
+                level_id = levelId ?? string.Empty,
+                duration_ms = durationMs ?? 0.0,
+                score = score ?? 0L,
+                gold_delta = goldDelta ?? 0L,
+                amount_usd = amountUsd ?? 0.0,
+                reason = reason ?? string.Empty,
                 timestamp_ms = NowUnixMs(),
             };
 
@@ -196,8 +210,21 @@ namespace Greptime.Unity.Telemetry
             }
         }
 
+        // Fires when the app is paused/resumed (mobile: Home button, incoming call).
+        // More reliable than OnApplicationQuit on mobile — the OS can kill the
+        // process after pause without ever invoking OnApplicationQuit.
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus && Application.isPlaying)
+            {
+                StartCoroutine(FlushNow());
+            }
+        }
+
         private void OnApplicationQuit()
         {
+            // Best-effort — see the file header note. Production code should
+            // persist the remaining buffer to PlayerPrefs and replay on next run.
             if (Application.isPlaying)
             {
                 StartCoroutine(FlushNow());
@@ -207,6 +234,9 @@ namespace Greptime.Unity.Telemetry
         private static long NowUnixMs() =>
             (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
 
+        // JsonUtility cannot serialize top-level arrays, so we serialize each
+        // element individually (correctly escaping strings, unicode, etc.) and
+        // manually concatenate into the array the server expects.
         private static string BuildJsonArray(List<EventPayload> batch)
         {
             var sb = new StringBuilder(batch.Count * 256);
@@ -214,13 +244,14 @@ namespace Greptime.Unity.Telemetry
             for (int i = 0; i < batch.Count; i++)
             {
                 if (i > 0) sb.Append(',');
-                batch[i].AppendJson(sb);
+                sb.Append(JsonUtility.ToJson(batch[i]));
             }
             sb.Append(']');
             return sb.ToString();
         }
 
-        private sealed class EventPayload
+        [Serializable]
+        private class EventPayload
         {
             public string event_type;
             public string platform;
@@ -228,59 +259,12 @@ namespace Greptime.Unity.Telemetry
             public string player_id;
             public string session_id;
             public string level_id;
-            public double? duration_ms;
-            public long? score;
-            public long? gold_delta;
-            public double? amount_usd;
+            public double duration_ms;
+            public long score;
+            public long gold_delta;
+            public double amount_usd;
             public string reason;
             public long timestamp_ms;
-
-            public void AppendJson(StringBuilder sb)
-            {
-                sb.Append('{');
-                AppendField(sb, "event_type", event_type, first: true);
-                AppendField(sb, "platform", platform);
-                AppendField(sb, "game_version", game_version);
-                AppendField(sb, "player_id", player_id);
-                AppendField(sb, "session_id", session_id);
-                if (level_id != null) AppendField(sb, "level_id", level_id);
-                if (duration_ms.HasValue) AppendField(sb, "duration_ms", duration_ms.Value);
-                if (score.HasValue) AppendField(sb, "score", score.Value);
-                if (gold_delta.HasValue) AppendField(sb, "gold_delta", gold_delta.Value);
-                if (amount_usd.HasValue) AppendField(sb, "amount_usd", amount_usd.Value);
-                if (reason != null) AppendField(sb, "reason", reason);
-                AppendField(sb, "timestamp_ms", timestamp_ms);
-                sb.Append('}');
-            }
-
-            private static void AppendField(StringBuilder sb, string key, string val, bool first = false)
-            {
-                if (!first) sb.Append(',');
-                sb.Append('"').Append(key).Append("\":");
-                if (val == null) { sb.Append("null"); return; }
-                sb.Append('"');
-                foreach (var c in val)
-                {
-                    if (c == '"' || c == '\\') sb.Append('\\').Append(c);
-                    else if (c == '\n') sb.Append("\\n");
-                    else if (c == '\r') sb.Append("\\r");
-                    else if (c == '\t') sb.Append("\\t");
-                    else sb.Append(c);
-                }
-                sb.Append('"');
-            }
-
-            private static void AppendField(StringBuilder sb, string key, double val, bool first = false)
-            {
-                if (!first) sb.Append(',');
-                sb.Append('"').Append(key).Append("\":").Append(val.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
-            }
-
-            private static void AppendField(StringBuilder sb, string key, long val, bool first = false)
-            {
-                if (!first) sb.Append(',');
-                sb.Append('"').Append(key).Append("\":").Append(val.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            }
         }
     }
 

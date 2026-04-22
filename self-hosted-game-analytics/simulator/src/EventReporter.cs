@@ -60,30 +60,56 @@ public sealed class EventReporter : IAsyncDisposable
         {
             try
             {
-                var hasItem = await _channel.Reader.WaitToReadAsync(_cts.Token);
-                if (!hasItem)
+                // Bound the wait by the remaining budget until the next
+                // interval-based flush. This guarantees partial buffers
+                // reach the server even when traffic drops to zero.
+                var budget = _flushInterval - (DateTime.UtcNow - lastFlush);
+                bool timedOut = false;
+                bool hasData;
+                if (budget <= TimeSpan.Zero)
                 {
-                    break;
-                }
-
-                while (buffer.Count < _batchSize && _channel.Reader.TryRead(out var item))
-                {
-                    buffer.Add(item);
-                }
-
-                var now = DateTime.UtcNow;
-                if (buffer.Count >= _batchSize || now - lastFlush >= _flushInterval)
-                {
-                    if (buffer.Count > 0)
-                    {
-                        await FlushAsync(buffer);
-                        buffer.Clear();
-                        lastFlush = now;
-                    }
+                    timedOut = true;
+                    hasData = false;
                 }
                 else
                 {
-                    await Task.Delay(_flushInterval, _cts.Token);
+                    using var waitCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
+                    waitCts.CancelAfter(budget);
+                    try
+                    {
+                        hasData = await _channel.Reader.WaitToReadAsync(waitCts.Token);
+                    }
+                    catch (OperationCanceledException) when (!_cts.IsCancellationRequested)
+                    {
+                        timedOut = true;
+                        hasData = false;
+                    }
+                }
+
+                if (hasData)
+                {
+                    while (buffer.Count < _batchSize && _channel.Reader.TryRead(out var item))
+                    {
+                        buffer.Add(item);
+                    }
+                }
+                else if (!timedOut)
+                {
+                    break; // channel completed and drained
+                }
+
+                var shouldFlush = buffer.Count >= _batchSize
+                    || (timedOut && buffer.Count > 0);
+                if (shouldFlush)
+                {
+                    await FlushAsync(buffer);
+                    buffer.Clear();
+                    lastFlush = DateTime.UtcNow;
+                }
+                else if (timedOut)
+                {
+                    // Nothing to flush — just reset the interval clock.
+                    lastFlush = DateTime.UtcNow;
                 }
             }
             catch (OperationCanceledException)
@@ -96,6 +122,11 @@ public sealed class EventReporter : IAsyncDisposable
             }
         }
 
+        // Final drain: consume anything left in the channel before exiting.
+        while (_channel.Reader.TryRead(out var item))
+        {
+            buffer.Add(item);
+        }
         if (buffer.Count > 0)
         {
             try { await FlushAsync(buffer); } catch { /* shutdown */ }
@@ -125,9 +156,23 @@ public sealed class EventReporter : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        _cts.Cancel();
+        // Stop accepting new events; the drain loop exits naturally once
+        // the channel reports completed-and-empty.
         _channel.Writer.TryComplete();
-        try { await _drainTask; } catch { /* shutdown */ }
+        try
+        {
+            await _drainTask.WaitAsync(TimeSpan.FromSeconds(5));
+        }
+        catch (TimeoutException)
+        {
+            // Graceful drain took too long — force-cancel the in-flight HTTP.
+            _cts.Cancel();
+            try { await _drainTask; } catch { /* shutdown */ }
+        }
+        catch
+        {
+            // swallow — we're tearing down
+        }
         _http.Dispose();
         _cts.Dispose();
     }
