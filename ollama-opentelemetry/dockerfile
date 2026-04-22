@@ -4,10 +4,13 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-COPY pyproject.toml .
+COPY pyproject.toml README.md ./
 
-RUN uv pip install --system .
+RUN uv pip install --system --no-cache .
 
-COPY . .
+COPY joke.py ./
+
+RUN useradd --create-home --uid 1000 app && chown -R app:app /app
+USER app
 
 CMD ["python", "joke.py"]
