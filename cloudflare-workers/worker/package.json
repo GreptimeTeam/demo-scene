@@ -1,0 +1,20 @@
+{
+  "name": "greptime-edge-logger",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Worker that writes request events to GreptimeDB via the InfluxDB v2 SDK and queries them back via Hyperdrive.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@influxdata/influxdb-client-browser": "^1.35.0",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^3.95.0"
+  }
+}

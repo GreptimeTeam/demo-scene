@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: GreptimeDB
+    type: mysql
+    uid: greptimedb-mysql
+    url: greptimedb:4002
+    database: public
+    isDefault: true
+    editable: true

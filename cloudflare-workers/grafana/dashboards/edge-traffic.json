@@ -1,0 +1,280 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_GREPTIMEDB",
+      "label": "GreptimeDB",
+      "type": "datasource",
+      "pluginId": "mysql"
+    }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "30s",
+  "title": "Edge Traffic (CF Workers -> GreptimeDB)",
+  "uid": "cf-workers-edge-traffic",
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": false, "text": "GreptimeDB", "value": "GreptimeDB" },
+        "hide": 2,
+        "includeAll": false,
+        "name": "DS_GREPTIMEDB",
+        "options": [],
+        "query": "mysql",
+        "type": "datasource"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Total Requests",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT COUNT(*) AS total FROM worker_events WHERE $__timeFilter(ts)",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "thresholds": { "steps": [{ "color": "blue", "value": null }] }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "area" }
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT ROUND(approx_percentile_cont(`latency_ms`, 0.95), 1) AS p95_ms FROM worker_events WHERE $__timeFilter(ts)",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 300 },
+              { "color": "red", "value": 1000 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none" }
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN `http_status` >= 400 THEN 1 ELSE 0 END) / GREATEST(COUNT(*), 1), 2) AS error_rate FROM worker_events WHERE $__timeFilter(ts)",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none" }
+    },
+    {
+      "type": "stat",
+      "title": "Active Colos",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT COUNT(DISTINCT `colo`) AS colos FROM worker_events WHERE $__timeFilter(ts)",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "purple" },
+          "thresholds": { "steps": [{ "color": "purple", "value": null }] }
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background_solid", "graphMode": "none" }
+    },
+    {
+      "type": "row",
+      "title": "Traffic",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests per minute by colo",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, `colo`, COUNT(*) AS requests FROM worker_events WHERE $__timeFilter(ts) GROUP BY time, `colo` ORDER BY time",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10, "stacking": { "mode": "normal" } }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error rate (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, ROUND(100.0 * SUM(CASE WHEN `http_status` >= 400 THEN 1 ELSE 0 END) / GREATEST(COUNT(*), 1), 2) AS error_rate_pct FROM worker_events WHERE $__timeFilter(ts) GROUP BY time ORDER BY time",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15 },
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list" }, "tooltip": { "mode": "single" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 latency by route",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, `path_group`, ROUND(approx_percentile_cont(`latency_ms`, 0.95), 1) AS p95_ms FROM worker_events WHERE $__timeFilter(ts) GROUP BY time, `path_group` ORDER BY time",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 5 }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests per minute by country",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, `country`, COUNT(*) AS requests FROM worker_events WHERE $__timeFilter(ts) GROUP BY time, `country` ORDER BY time",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "drawStyle": "bars", "lineWidth": 1, "fillOpacity": 60, "stacking": { "mode": "normal" } }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "row",
+      "title": "Details",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "collapsed": false
+    },
+    {
+      "type": "table",
+      "title": "Top 10 slowest routes",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 23 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT `path_group`, COUNT(*) AS requests, ROUND(AVG(`latency_ms`), 1) AS avg_ms, ROUND(approx_percentile_cont(`latency_ms`, 0.95), 1) AS p95_ms, ROUND(MAX(`latency_ms`), 1) AS max_ms FROM worker_events WHERE $__timeFilter(ts) GROUP BY `path_group` ORDER BY p95_ms DESC LIMIT 10",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [] },
+      "options": { "showHeader": true }
+    },
+    {
+      "type": "table",
+      "title": "Recent errors",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 23 },
+      "datasource": { "type": "mysql", "uid": "${DS_GREPTIMEDB}" },
+      "targets": [
+        {
+          "editorMode": "code",
+          "rawSql": "SELECT ts, `http_status`, `colo`, `country`, `http_method`, `full_path`, `latency_ms`, `cf_ray` FROM worker_events WHERE $__timeFilter(ts) AND `http_status` >= 400 ORDER BY ts DESC LIMIT 50",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [] },
+      "options": { "showHeader": true }
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}

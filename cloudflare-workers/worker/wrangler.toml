@@ -1,0 +1,32 @@
+name = "greptime-edge-logger"
+main = "src/index.ts"
+compatibility_date = "2024-11-11"
+# postgres.js + Hyperdrive require Node compat.
+compatibility_flags = ["nodejs_compat"]
+
+# Defaults are sized for the docker-compose setup — `greptimedb` is the
+# service hostname on the compose network. If you run the Worker outside
+# docker, change both `greptimedb` references below to `localhost`.
+[vars]
+GREPTIME_URL = "http://greptimedb:4000"
+GREPTIME_DB = "public"
+ORIGIN_URL = "http://origin:8080"
+MEASUREMENT = "worker_events"
+
+# Hyperdrive binding — the read path goes through this.
+# `id` is ignored in local dev (wrangler uses `localConnectionString`
+# instead). Replace with a real id when deploying:
+#   wrangler hyperdrive create greptime-demo \
+#     --connection-string="postgres://<user>:<pass>@<host>:<port>/<db>"
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "00000000000000000000000000000000"
+localConnectionString = "postgres://greptime:greptime@greptimedb:4003/public"
+
+# Secrets — set when targeting a secured GreptimeDB deployment:
+#   wrangler secret put GREPTIME_USERNAME
+#   wrangler secret put GREPTIME_PASSWORD
+# The local docker-compose GreptimeDB has no auth; leave unset.
+
+[observability]
+enabled = true
