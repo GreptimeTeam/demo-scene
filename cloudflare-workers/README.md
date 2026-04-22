@@ -294,7 +294,7 @@ and recent-errors drilldown.
 - **Partitioning.** High-volume setups benefit from time partitioning —
   see [GreptimeDB docs][gdb-partition].
 - **Why not the GreptimeDB TypeScript ingester?** The official
-  [`@greptime/ingester`][gti] uses `@grpc/grpc-js` (Node-only) and
+  [`@greptime/ingester`][ingester-ts] uses `@grpc/grpc-js` (Node-only) and
   requires Node 20 APIs; it does not run in Workers today. The InfluxDB
   v2 browser SDK covers the ingestion case cleanly against a
   GreptimeDB-native endpoint. A fetch-based `@greptime/ingester-web` is
@@ -302,7 +302,7 @@ and recent-errors drilldown.
 
 [queues]: https://developers.cloudflare.com/queues/
 [gdb-partition]: https://docs.greptime.com/user-guide/deployments-administration/manage-data/table-sharding
-[gti]: https://github.com/GreptimeTeam/greptimedb-ingester-ts
+[ingester-ts]: https://github.com/GreptimeTeam/greptimedb-ingester-ts
 
 ## Appendix: getting listed on `developers.cloudflare.com`
 
