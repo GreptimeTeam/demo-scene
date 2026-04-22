@@ -1,0 +1,62 @@
+include:
+  - ../greptimedb-common.yml
+
+services:
+  analytics-server:
+    build:
+      context: ./analytics-server
+    environment:
+      GREPTIMEDB_ENDPOINT: http://greptimedb:4001
+      GREPTIMEDB_DATABASE: public
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    networks:
+      - demo-network
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: always
+
+  simulator:
+    build:
+      context: ./simulator
+    environment:
+      SIM_PLAYER_COUNT: ${SIM_PLAYER_COUNT:-50}
+      SIM_TICK_MS: ${SIM_TICK_MS:-250}
+      ANALYTICS_URL: http://analytics-server:8080
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://greptimedb:4000/v1/otlp/v1/metrics
+    networks:
+      - demo-network
+    depends_on:
+      analytics-server:
+        condition: service_healthy
+    restart: always
+
+  grafana:
+    image: docker.io/grafana/grafana:11.6.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_INSTALL_PLUGINS: >-
+        https://github.com/GreptimeTeam/greptimedb-grafana-datasource/releases/download/v2.0.7/info8fcc-greptimedb-datasource.zip;info8fcc-greptimedb-datasource
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: "info8fcc-greptimedb-datasource"
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    networks:
+      - demo-network
+    restart: always
+
+networks:
+  demo-network:

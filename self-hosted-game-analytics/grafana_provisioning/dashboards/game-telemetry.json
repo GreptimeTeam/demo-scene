@@ -1,0 +1,521 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "panels": [],
+      "title": "Overview",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] },
+          "unit": "none"
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(distinct session_id) AS active_sessions FROM game_events WHERE ts > now() - INTERVAL 5 MINUTE",
+          "refId": "A"
+        }
+      ],
+      "title": "Active sessions (last 5m)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "blue", "value": null } ] },
+          "unit": "none"
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) AS events_1m FROM game_events WHERE ts > now() - INTERVAL 1 MINUTE",
+          "refId": "A"
+        }
+      ],
+      "title": "Events (last 1m)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 1 },
+      "id": 3,
+      "options": {
+        "displayLabels": ["percent"],
+        "legend": { "displayMode": "list", "placement": "right", "showLegend": true },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": [], "fields": "", "values": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT platform AS metric, count(*) AS value FROM game_events WHERE $__timeFilter(ts) GROUP BY platform ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Events by platform",
+      "type": "piechart"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 1 },
+      "id": 4,
+      "options": {
+        "displayLabels": ["percent"],
+        "legend": { "displayMode": "list", "placement": "right", "showLegend": true },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": [], "fields": "", "values": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT event_type AS metric, count(*) AS value FROM game_events WHERE $__timeFilter(ts) GROUP BY event_type ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Events by type",
+      "type": "piechart"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": { "defaults": { "unit": "ops" } },
+      "gridPos": { "h": 4, "w": 12, "x": 0, "y": 5 },
+      "id": 5,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, event_type AS metric, count(*) AS value FROM game_events WHERE $__timeFilter(ts) GROUP BY time, event_type ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Events/min by type",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "id": 101,
+      "panels": [],
+      "title": "Client Performance (OTLP metrics)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "none", "min": 0 } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "id": 6,
+      "options": {
+        "legend": { "calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+          "expr": "avg by (platform) (game_fps)",
+          "legendFormat": "{{platform}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg FPS by platform",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "decmbytes", "min": 0 } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 },
+      "id": 7,
+      "options": {
+        "legend": { "calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+          "expr": "avg by (platform) (game_memory)",
+          "legendFormat": "{{platform}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg memory (MB) by platform",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms", "min": 0 } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 18 },
+      "id": 8,
+      "options": {
+        "legend": { "calcs": ["mean"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+          "expr": "histogram_quantile(0.5, sum by (le, platform) (rate(game_frame_time_bucket[2m])))",
+          "legendFormat": "p50 {{platform}}",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, platform) (rate(game_frame_time_bucket[2m])))",
+          "legendFormat": "p95 {{platform}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Frame time p50 / p95 by platform",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "none", "min": 0 } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 18 },
+      "id": 9,
+      "options": {
+        "legend": { "calcs": ["mean"], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "greptimedb-prometheus" },
+          "expr": "avg by (scene_name) (game_draw_calls)",
+          "legendFormat": "{{scene_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg draw calls by scene",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 },
+      "id": 102,
+      "panels": [],
+      "title": "Gameplay Funnel",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null },
+            { "color": "orange", "value": 40 },
+            { "color": "green", "value": 60 }
+          ] },
+          "unit": "percent",
+          "max": 100,
+          "min": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 27 },
+      "id": 10,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (sum(case when event_type='level_completed' then 1 else 0 end) * 100.0 / greatest(sum(case when event_type='level_started' then 1 else 0 end), 1)) AS completion_rate FROM game_events WHERE $__timeFilter(ts)",
+          "refId": "A"
+        }
+      ],
+      "title": "Level completion rate",
+      "type": "gauge"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 27 },
+      "id": 11,
+      "options": {
+        "displayMode": "gradient",
+        "legend": { "displayMode": "list", "placement": "right", "showLegend": true },
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT level_id AS metric, count(*) AS value FROM game_events WHERE event_type='level_started' AND level_id <> '' AND $__timeFilter(ts) GROUP BY level_id ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Level attempts",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": { "defaults": { "unit": "s" } },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 33 },
+      "id": 12,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "table", "placement": "right", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, level_id AS metric, avg(duration_ms)/1000.0 AS value FROM game_events WHERE event_type='level_completed' AND $__timeFilter(ts) GROUP BY time, level_id ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg level duration (completed)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 },
+      "id": 103,
+      "panels": [],
+      "title": "Death Analysis",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "gridPos": { "h": 8, "w": 14, "x": 0, "y": 42 },
+      "id": 13,
+      "options": {
+        "cellGap": 2,
+        "color": { "exponent": 0.5, "fill": "dark-orange", "mode": "scheme", "scale": "exponential", "scheme": "OrRd", "steps": 64 },
+        "legend": { "show": true },
+        "tooltip": { "show": true, "yHistogram": false }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT level_id AS x, reason AS y, count(*) AS value FROM game_events WHERE event_type='player_death' AND $__timeFilter(ts) GROUP BY level_id, reason ORDER BY level_id, reason",
+          "refId": "A"
+        }
+      ],
+      "title": "Deaths by level × reason",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "gridPos": { "h": 8, "w": 10, "x": 14, "y": 42 },
+      "id": 14,
+      "options": {
+        "displayLabels": ["percent", "name"],
+        "legend": { "displayMode": "list", "placement": "right", "showLegend": true },
+        "pieType": "pie",
+        "reduceOptions": { "calcs": [], "fields": "", "values": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT reason AS metric, count(*) AS value FROM game_events WHERE event_type='player_death' AND $__timeFilter(ts) GROUP BY reason ORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Death reasons",
+      "type": "piechart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 50 },
+      "id": 104,
+      "panels": [],
+      "title": "Monetization",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 51 },
+      "id": 15,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT coalesce(sum(amount_usd), 0) AS revenue_usd FROM game_events WHERE event_type='iap_purchase' AND $__timeFilter(ts)",
+          "refId": "A"
+        }
+      ],
+      "title": "Total revenue",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "blue", "value": null } ] },
+          "unit": "none"
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 51 },
+      "id": 16,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(distinct player_id) AS paying_users FROM game_events WHERE event_type='iap_purchase' AND $__timeFilter(ts)",
+          "refId": "A"
+        }
+      ],
+      "title": "Paying users",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 51 },
+      "id": 17,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "greptimedb-mysql" },
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, platform AS metric, sum(amount_usd) AS value FROM game_events WHERE event_type='iap_purchase' AND $__timeFilter(ts) GROUP BY time, platform ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "IAP revenue / minute by platform",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["greptimedb", "game", "telemetry", "analytics"],
+  "templating": { "list": [] },
+  "time": { "from": "now-30m", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Game Telemetry",
+  "uid": "game-telemetry",
+  "version": 1,
+  "weekStart": ""
+}
