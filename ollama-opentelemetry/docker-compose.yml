@@ -1,16 +1,35 @@
 include:
   - ../greptimedb-common.yml
+
 services:
+  ollama:
+    container_name: my-ollama
+    image: ollama/ollama
+    ports:
+      - 11434:11434
+    networks:
+      - demo-network
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
       - 13133:13133 # health_check extension
-      - 4317:4317 # OTLP gRPC receiver
-      - 4318:4318 # OTLP http receiver
+      - 4317:4317   # OTLP gRPC receiver
+      - 4318:4318   # OTLP http receiver
     networks:
       - demo-network
+
+  llm-joke-app:
+    build: .
+    depends_on:
+      - ollama
+      - otel-collector
+    networks:
+      - demo-network
+    profiles:
+      - run
 
 networks:
   demo-network:
