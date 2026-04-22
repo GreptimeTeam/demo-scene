@@ -50,7 +50,9 @@ export default {
     // Write runs on the background budget so the user's response returns
     // immediately. Verified to work end-to-end in `wrangler dev` local
     // mode — console.log inside the callback also reaches stdout.
-    ctx.waitUntil(logEvent(env, request, response.clone(), latencyMs));
+    // logEvent only reads res.status and res.headers — no body consumption,
+    // so we pass the response directly instead of paying for a body tee.
+    ctx.waitUntil(logEvent(env, request, response, latencyMs));
     return response;
   },
 } satisfies ExportedHandler<Env>;
@@ -79,7 +81,7 @@ async function logEvent(env: Env, req: Request, res: Response, latencyMs: number
     .tag("path_group", pathGroup)
     .intField("http_status", res.status)
     .floatField("latency_ms", latencyMs)
-    .intField("bytes_out", Number(res.headers.get("content-length") ?? 0))
+    .intField("bytes_out", parseBytesOut(res.headers.get("content-length")))
     .stringField("cf_ray", req.headers.get("cf-ray") ?? "")
     .stringField("ua", ua)
     .stringField("full_path", path.slice(0, 256))
@@ -101,9 +103,7 @@ async function logEvent(env: Env, req: Request, res: Response, latencyMs: number
 
   try {
     const r = await fetch(url, { method: "POST", headers, body: line });
-    if (r.ok) {
-      console.log("greptime write ok", r.status);
-    } else {
+    if (!r.ok) {
       console.error("greptime write failed", r.status, await r.text());
     }
   } catch (err) {
@@ -113,7 +113,11 @@ async function logEvent(env: Env, req: Request, res: Response, latencyMs: number
 
 async function handleStats(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
-  const windowMinutes = clamp(Number(url.searchParams.get("window")) || 5, 1, 60);
+  // Default to 5 minutes only when the param is absent or non-numeric.
+  // A valid `?window=0` falls through to clamp(1, 60) so it becomes 1, not 5.
+  const windowParam = url.searchParams.get("window");
+  const parsedWindow = windowParam == null ? NaN : Number(windowParam);
+  const windowMinutes = clamp(Number.isFinite(parsedWindow) ? parsedWindow : 5, 1, 60);
   const cf = request.cf;
   const requestedColo = url.searchParams.get("colo");
   const colo = requestedColo ?? (cf?.colo as string | undefined) ?? "DEV";
@@ -134,17 +138,18 @@ async function handleStats(request: Request, env: Env): Promise<Response> {
   // `to_timestamp_millis()` sidesteps both.
   const sinceMs = Date.now() - windowMinutes * 60_000;
 
-  // sql.unsafe() with no params uses simple-query protocol (a plain Query
-  // message), avoiding Parse/Bind. GreptimeDB's extended-query path
-  // rejects postgres.js's type OIDs with `unknown_parameter_type`, so
-  // simple-query is the safe option. Inputs are sanitized: windowMinutes
-  // is clamped to [1, 60] integer; colo is single-quote escaped; the
-  // table name (from env.MEASUREMENT, must match the write path) is
-  // validated against a strict identifier allowlist.
-  const escColo = colo.replace(/'/g, "''");
-  const table = sanitizeIdent(env.MEASUREMENT || "worker_events");
-
   try {
+    // sql.unsafe() with no params uses simple-query protocol (a plain
+    // Query message), avoiding Parse/Bind. GreptimeDB's extended-query
+    // path rejects postgres.js's type OIDs with `unknown_parameter_type`,
+    // so simple-query is the safe option. Inputs are sanitized:
+    // windowMinutes is clamped to [1, 60]; colo is single-quote escaped;
+    // the table name (from env.MEASUREMENT, must match the write path) is
+    // validated against a strict identifier allowlist. sanitizeIdent
+    // lives inside try{} so a bad MEASUREMENT returns a controlled 500
+    // via the catch and still runs the finally.
+    const escColo = colo.replace(/'/g, "''");
+    const table = sanitizeIdent(env.MEASUREMENT || "worker_events");
     const rows = await sql.unsafe(`
       SELECT
         path_group,
@@ -191,6 +196,15 @@ function normalizePathGroup(path: string): string {
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
+}
+
+// Content-Length isn't always a clean integer (missing, non-numeric, or
+// negative on weird origins). Coerce anything not a finite non-negative
+// integer back to 0 so the BIGINT column never sees NaN.
+function parseBytesOut(raw: string | null): number {
+  if (raw == null) return 0;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.trunc(n) : 0;
 }
 
 // MEASUREMENT is user-supplied via wrangler.toml; reject anything that

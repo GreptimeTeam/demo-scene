@@ -94,11 +94,12 @@ requires auth:
 
 ## What's in the code
 
-- **Writes** — [`@influxdata/influxdb-client-browser`][influx-js]. The
-  `-browser` package uses pure fetch (no `http`/`stream`/Node bindings),
-  so it runs natively in the Workers runtime. Per-request writes use
-  `batchSize: 1, flushInterval: 0` — no background buffer, each point
-  flushes immediately on `writeApi.close()`.
+- **Writes** — [`@influxdata/influxdb-client-browser`][influx-js]'s
+  `Point` builder handles tag/field escaping and line-protocol
+  serialization; we then POST the serialized line via raw `fetch`. We
+  don't use the SDK's `WriteApi` — it silently drops writes in Workers
+  (see the parent [README](../README.md#write-path--influxdb-v2-point-builder--raw-fetch)
+  for the rationale and the matching upstream issue).
 - **Reads** — [`postgres.js`][postgres-js] via Hyperdrive
   (`env.HYPERDRIVE.connectionString`). `max: 5` is CF-recommended.
   `fetch_types: false` skips the `pg_type` bootstrap round-trip
