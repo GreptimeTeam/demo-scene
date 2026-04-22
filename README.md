@@ -20,6 +20,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 * [Observability for Nginx on Logs & Metrics](nginx-log-metrics)
 * [Dify Monitoring with OpenTelemetry](dify-monitoring)
 * [Tesla EV Metrics with OpenTelemetry](ev-open-telemetry)
+* [Self-Hosted Game Analytics with .NET SDK](self-hosted-game-analytics)
 
 ### Observability
 
