@@ -100,6 +100,8 @@ Open Grafana: http://localhost:3000 (anonymous viewer by default). The
 **Edge Traffic (CF Workers → GreptimeDB)** dashboard is pre-provisioned
 with 8 panels.
 
+![Edge Traffic dashboard: request totals, p95 latency, error rate, active colos, per-colo and per-country traffic, p95 by route, top slow routes, recent errors](screenshots/dashboard.png)
+
 ## Iterating on Worker code
 
 Edit files under [`worker/src/`](worker/src/) and rebuild only the worker:
@@ -179,37 +181,42 @@ npx wrangler deploy
 
 ## How it works
 
-### Write path — InfluxDB v2 SDK, pure fetch
+### Write path — InfluxDB v2 `Point` builder + raw fetch
 
-The Worker builds a `Point` per request and flushes a single line-protocol
-record. `@influxdata/influxdb-client-browser` is a pure-fetch build —
-`FetchTransport` uses `fetch` + `AbortController` + `ReadableStream` only —
-so it runs in the Workers V8 isolate with zero Node compat shims on this
-path.
+The Worker uses `@influxdata/influxdb-client-browser`'s `Point` builder for
+line-protocol formatting (tag/field escaping, typed fields, timestamp
+precision), then POSTs the serialized line via `fetch`. We **don't** use
+the SDK's `WriteApi` (`getWriteApi` / `writePoint` / `close`) — it
+silently drops writes in Workers: the `close()` promise resolves
+successfully but no HTTP request hits the server. Confirmed empirically
+for this demo and matches
+[influxdata/influxdb-client-js#170](https://github.com/influxdata/influxdb-client-js/issues/170).
+The `Point` class is just data formatting, so using it directly while
+bypassing `WriteApi` is safe and gives us observable success/failure.
 
 ```ts
-import { InfluxDB, Point } from "@influxdata/influxdb-client-browser";
-
-const client = new InfluxDB({ url: `${base}/v1/influxdb`, token: "user:pass" });
-const writeApi = client.getWriteApi("greptime", "public", "ns", {
-  batchSize: 1, flushInterval: 0, maxRetries: 0,
-});
+import { Point } from "@influxdata/influxdb-client-browser";
 
 const point = new Point("worker_events")
   .tag("colo", "DFW")
   .tag("path_group", "/api/users/:id")
-  .intField("status", 200)
+  .intField("http_status", 200)
   .floatField("latency_ms", 42.5)
   .timestamp(BigInt(Date.now()) * 1_000_000n);
 
-writeApi.writePoint(point);
-await writeApi.close();
+const url = `${base}/v1/influxdb/api/v2/write?org=greptime&bucket=public&precision=ns`;
+await fetch(url, {
+  method: "POST",
+  headers: { "Content-Type": "text/plain; charset=utf-8" },
+  body: point.toLineProtocol(),
+});
 ```
 
 GreptimeDB's InfluxDB v2 compat:
-- URL: `${base}/v1/influxdb`
-- Token: `username:password` (org ignored — pass any string like `"greptime"`)
-- Bucket: your database name
+- URL: `${base}/v1/influxdb/api/v2/write`
+- Auth: `Authorization: token <username>:<password>` when the endpoint is secured
+- `org` is ignored — pass any string like `"greptime"`
+- `bucket` is your database name
 
 ### Read path — Hyperdrive + postgres.js
 

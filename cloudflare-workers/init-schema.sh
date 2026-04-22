@@ -29,13 +29,26 @@ sed 's/--.*$//' "$SQL_FILE" | tr '\n' ' ' | tr ';' '\n' > /tmp/stmts.txt
 while IFS= read -r stmt; do
     stmt=$(echo "$stmt" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     [ -z "$stmt" ] && continue
-    echo "  -> $(echo "$stmt" | cut -c1-80)..."
-    resp=$(curl -sf -X POST "${GREPTIME_URL}/v1/sql?db=${DB}" \
+    echo "  -> $(echo "$stmt" | cut -c1-120)..."
+    # Drop -f so we see GreptimeDB's error body on failure. Capture the
+    # HTTP status code alongside the response body for diagnostics.
+    http_code=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
+        -X POST "${GREPTIME_URL}/v1/sql?db=${DB}" \
         -H "Content-Type: application/x-www-form-urlencoded" \
-        --data-urlencode "sql=${stmt}" 2>&1) || {
-        echo "     FAILED: ${resp}"; exit 1
-    }
-    echo "     OK"
+        --data-urlencode "sql=${stmt}")
+    body=$(cat /tmp/resp.txt)
+    if [ "$http_code" != "200" ]; then
+        echo "     FAILED [HTTP ${http_code}]:"
+        echo "     ${body}"
+        exit 1
+    fi
+    # GreptimeDB returns 200 with JSON that may contain an error envelope.
+    case "$body" in
+      *'"error":'*|*'"code":1'*)
+        echo "     FAILED: ${body}"; exit 1 ;;
+      *)
+        echo "     OK: ${body}" ;;
+    esac
 done < /tmp/stmts.txt
 
 echo "==> schema applied."

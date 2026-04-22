@@ -96,7 +96,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN `status` >= 400 THEN 1 ELSE 0 END) / GREATEST(COUNT(*), 1), 2) AS error_rate FROM worker_events WHERE $__timeFilter(ts)",
+          "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN `http_status` >= 400 THEN 1 ELSE 0 END) / GREATEST(COUNT(*), 1), 2) AS error_rate FROM worker_events WHERE $__timeFilter(ts)",
           "format": "table",
           "refId": "A"
         }
@@ -177,7 +177,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, ROUND(100.0 * SUM(CASE WHEN `status` >= 400 THEN 1 ELSE 0 END) / GREATEST(COUNT(*), 1), 2) AS error_rate_pct FROM worker_events WHERE $__timeFilter(ts) GROUP BY time ORDER BY time",
+          "rawSql": "SELECT date_bin('1 minute'::INTERVAL, ts) AS time, ROUND(100.0 * SUM(CASE WHEN `http_status` >= 400 THEN 1 ELSE 0 END) / GREATEST(COUNT(*), 1), 2) AS error_rate_pct FROM worker_events WHERE $__timeFilter(ts) GROUP BY time ORDER BY time",
           "format": "time_series",
           "refId": "A"
         }
@@ -266,7 +266,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "rawSql": "SELECT ts, `status`, `colo`, `country`, `method`, `full_path`, `latency_ms`, `cf_ray` FROM worker_events WHERE $__timeFilter(ts) AND `status` >= 400 ORDER BY ts DESC LIMIT 50",
+          "rawSql": "SELECT ts, `http_status`, `colo`, `country`, `http_method`, `full_path`, `latency_ms`, `cf_ray` FROM worker_events WHERE $__timeFilter(ts) AND `http_status` >= 400 ORDER BY ts DESC LIMIT 50",
           "format": "table",
           "refId": "A"
         }

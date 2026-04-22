@@ -19,6 +19,14 @@ services:
       - demo-network
     restart: "no"
 
+  # A local httpbin clone used as the Worker's proxy target. Keeps the demo
+  # offline-capable and dodges outbound-TLS headaches in the Worker container.
+  # Default listen port is :8080.
+  origin:
+    image: docker.io/mccutchen/go-httpbin:v2.15.0
+    networks:
+      - demo-network
+
   # The Cloudflare Worker itself, running under `wrangler dev` in local mode
   # (workerd in-process). Reaches GreptimeDB by the in-network hostname
   # `greptimedb`. Port 8787 is published so you can curl from the host.
@@ -29,6 +37,8 @@ services:
     depends_on:
       init-schema:
         condition: service_completed_successfully
+      origin:
+        condition: service_started
     networks:
       - demo-network
     restart: unless-stopped

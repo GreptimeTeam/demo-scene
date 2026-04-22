@@ -39,9 +39,9 @@ LIMIT 20;
 SELECT
     date_bin('1 minute'::INTERVAL, ts) AS minute,
     count(*) AS total,
-    sum(CASE WHEN status >= 400 THEN 1 ELSE 0 END) AS errors,
+    sum(CASE WHEN http_status >= 400 THEN 1 ELSE 0 END) AS errors,
     round(
-      100.0 * sum(CASE WHEN status >= 400 THEN 1 ELSE 0 END) / count(*),
+      100.0 * sum(CASE WHEN http_status >= 400 THEN 1 ELSE 0 END) / count(*),
       2
     ) AS error_rate_pct
 FROM worker_events
@@ -85,15 +85,15 @@ ORDER BY requests DESC;
 -- 7. Drill into recent errors — useful when error_rate_pct spikes.
 SELECT
     ts,
-    status,
+    http_status,
     colo,
     country,
-    method,
+    http_method,
     full_path,
     latency_ms,
     cf_ray
 FROM worker_events
-WHERE status >= 400
+WHERE http_status >= 400
   AND ts > now() - INTERVAL '15 minutes'
 ORDER BY ts DESC
 LIMIT 50;

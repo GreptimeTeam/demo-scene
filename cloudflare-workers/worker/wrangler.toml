@@ -10,7 +10,7 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 GREPTIME_URL = "http://greptimedb:4000"
 GREPTIME_DB = "public"
-ORIGIN_URL = "https://httpbin.org"
+ORIGIN_URL = "http://origin:8080"
 MEASUREMENT = "worker_events"
 
 # Hyperdrive binding — the read path goes through this.

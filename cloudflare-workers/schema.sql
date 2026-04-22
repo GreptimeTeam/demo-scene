@@ -5,13 +5,13 @@ CREATE TABLE IF NOT EXISTS worker_events (
     ts          TIMESTAMP(9) TIME INDEX,
     colo        STRING,
     country     STRING,
-    method      STRING,
+    http_method STRING,
     path_group  STRING,
-    status      BIGINT,
+    http_status BIGINT,
     latency_ms  DOUBLE,
     bytes_out   BIGINT,
     cf_ray      STRING,
     ua          STRING,
     full_path   STRING,
-    PRIMARY KEY (colo, country, method, path_group)
+    PRIMARY KEY (colo, country, http_method, path_group)
 ) WITH (ttl = '30d');

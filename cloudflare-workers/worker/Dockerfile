@@ -2,11 +2,19 @@
 # alpine/musl can fail at runtime. slim is a good size/compat balance.
 FROM node:22-slim
 
+# workerd uses BoringSSL and does not auto-discover Debian's CA bundle.
+# Without this, outbound HTTPS from the Worker fails with "unable to get
+# local issuer certificate". ca-certificates is already installed by the
+# base image; we just need to point workerd at it.
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 WORKDIR /app
 
-# Install dependencies first for better layer caching.
-COPY package.json package-lock.json* ./
-RUN npm install --no-audit --no-fund --loglevel=error
+# Install dependencies first for better layer caching. package-lock.json
+# is committed for reproducible builds, so this works on both BuildKit
+# and the legacy docker builder.
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund --loglevel=error
 
 # Copy source. Keep this minimal — anything not needed at runtime is in
 # .dockerignore.

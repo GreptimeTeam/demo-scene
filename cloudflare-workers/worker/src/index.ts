@@ -10,7 +10,7 @@
 // paths and sidesteps the V8-isolate TCP restriction without Hyperdrive on
 // the hot write path.
 
-import { InfluxDB, Point } from "@influxdata/influxdb-client-browser";
+import { Point } from "@influxdata/influxdb-client-browser";
 import postgres from "postgres";
 
 export interface Env {
@@ -38,17 +38,18 @@ export default {
 
     let response: Response;
     try {
-      response = await fetch(origin.toString(), {
-        method: request.method,
-        headers: request.headers,
-        body: request.method === "GET" || request.method === "HEAD" ? undefined : request.body,
-        redirect: "manual",
-      });
+      // Canonical proxy pattern — new Request rebases URL while workerd
+      // handles header/body normalization (Host, Content-Length, etc.).
+      response = await fetch(new Request(origin.toString(), request));
     } catch (err) {
+      console.error("upstream fetch error", err);
       response = new Response(`upstream error: ${err}`, { status: 502 });
     }
 
     const latencyMs = Date.now() - start;
+    // Write runs on the background budget so the user's response returns
+    // immediately. Verified to work end-to-end in `wrangler dev` local
+    // mode — console.log inside the callback also reaches stdout.
     ctx.waitUntil(logEvent(env, request, response.clone(), latencyMs));
     return response;
   },
@@ -58,36 +59,25 @@ async function logEvent(env: Env, req: Request, res: Response, latencyMs: number
   const cf = req.cf;
   const colo = (cf?.colo as string | undefined) ?? "DEV";
   const country = (cf?.country as string | undefined) ?? "XX";
-  const method = req.method;
+  const httpMethod = req.method;
   const path = new URL(req.url).pathname;
   const pathGroup = normalizePathGroup(path);
   const ua = (req.headers.get("user-agent") ?? "").slice(0, 128);
 
-  // GreptimeDB's InfluxDB v2 compat accepts the org as arbitrary (it has no
-  // concept of orgs), so we pass a stable placeholder. The bucket maps to
-  // the target database.
-  const base = env.GREPTIME_URL.replace(/\/$/, "");
-  const clientOptions: { url: string; token?: string } = {
-    url: `${base}/v1/influxdb`,
-  };
-  if (env.GREPTIME_USERNAME && env.GREPTIME_PASSWORD) {
-    clientOptions.token = `${env.GREPTIME_USERNAME}:${env.GREPTIME_PASSWORD}`;
-  }
-  const client = new InfluxDB(clientOptions);
-  // batchSize=1 + flushInterval=0 makes each writePoint flush immediately —
-  // the right shape for a per-request Worker, not a long-lived server.
-  const writeApi = client.getWriteApi("greptime", env.GREPTIME_DB || "public", "ns", {
-    batchSize: 1,
-    flushInterval: 0,
-    maxRetries: 0,
-  });
-
+  // Use the InfluxDB SDK's Point builder for line-protocol formatting +
+  // tag/field escaping, but POST via raw fetch. The SDK's WriteApi
+  // (getWriteApi + writePoint + close) silently drops writes in Workers
+  // — the close() promise resolves but no HTTP request actually hits the
+  // server. Confirmed empirically against this demo and matches
+  // influxdata/influxdb-client-js#170. A direct POST avoids the
+  // WriteApi's async buffer/flush lifecycle and makes success/failure
+  // observable.
   const point = new Point(env.MEASUREMENT || "worker_events")
     .tag("colo", colo)
     .tag("country", country)
-    .tag("method", method)
+    .tag("http_method", httpMethod)
     .tag("path_group", pathGroup)
-    .intField("status", res.status)
+    .intField("http_status", res.status)
     .floatField("latency_ms", latencyMs)
     .intField("bytes_out", Number(res.headers.get("content-length") ?? 0))
     .stringField("cf_ray", req.headers.get("cf-ray") ?? "")
@@ -95,9 +85,27 @@ async function logEvent(env: Env, req: Request, res: Response, latencyMs: number
     .stringField("full_path", path.slice(0, 256))
     .timestamp(BigInt(Date.now()) * 1_000_000n);
 
+  const line = point.toLineProtocol();
+  if (!line) {
+    console.error("greptime: empty line protocol (point had no fields?)");
+    return;
+  }
+
+  const base = env.GREPTIME_URL.replace(/\/$/, "");
+  const db = encodeURIComponent(env.GREPTIME_DB || "public");
+  const url = `${base}/v1/influxdb/api/v2/write?org=greptime&bucket=${db}&precision=ns`;
+  const headers: Record<string, string> = { "Content-Type": "text/plain; charset=utf-8" };
+  if (env.GREPTIME_USERNAME && env.GREPTIME_PASSWORD) {
+    headers["Authorization"] = `token ${env.GREPTIME_USERNAME}:${env.GREPTIME_PASSWORD}`;
+  }
+
   try {
-    writeApi.writePoint(point);
-    await writeApi.close();
+    const r = await fetch(url, { method: "POST", headers, body: line });
+    if (r.ok) {
+      console.log("greptime write ok", r.status);
+    } else {
+      console.error("greptime write failed", r.status, await r.text());
+    }
   } catch (err) {
     console.error("greptime write error", err);
   }
@@ -120,20 +128,36 @@ async function handleStats(request: Request, env: Env): Promise<Response> {
     prepare: false,
   });
 
+  // Compute the window threshold in JS instead of doing interval arithmetic
+  // in SQL — GreptimeDB's pg wire accepts neither `make_interval(...)` nor
+  // `INTERVAL '1 minute' * n`. A plain epoch-ms bigint via
+  // `to_timestamp_millis()` sidesteps both.
+  const sinceMs = Date.now() - windowMinutes * 60_000;
+
+  // sql.unsafe() with no params uses simple-query protocol (a plain Query
+  // message), avoiding Parse/Bind. GreptimeDB's extended-query path
+  // rejects postgres.js's type OIDs with `unknown_parameter_type`, so
+  // simple-query is the safe option. Inputs are sanitized: windowMinutes
+  // is clamped to [1, 60] integer; colo is single-quote escaped; the
+  // table name (from env.MEASUREMENT, must match the write path) is
+  // validated against a strict identifier allowlist.
+  const escColo = colo.replace(/'/g, "''");
+  const table = sanitizeIdent(env.MEASUREMENT || "worker_events");
+
   try {
-    const rows = await sql`
+    const rows = await sql.unsafe(`
       SELECT
         path_group,
-        count(*)::int AS requests,
-        round(approx_percentile_cont(latency_ms, 0.95)::numeric, 1) AS p95_ms,
-        sum(CASE WHEN status >= 400 THEN 1 ELSE 0 END)::int AS errors
-      FROM worker_events
-      WHERE ts > now() - make_interval(mins => ${windowMinutes})
-        AND colo = ${colo}
+        count(*) AS requests,
+        approx_percentile_cont(latency_ms, 0.95) AS p95_ms,
+        sum(CASE WHEN http_status >= 400 THEN 1 ELSE 0 END) AS errors
+      FROM ${table}
+      WHERE ts > to_timestamp_millis(${sinceMs})
+        AND colo = '${escColo}'
       GROUP BY path_group
-      ORDER BY p95_ms DESC NULLS LAST
+      ORDER BY p95_ms DESC
       LIMIT 20
-    `;
+    `);
     return Response.json({ colo, window_minutes: windowMinutes, rows });
   } catch (err) {
     console.error("stats query error", err);
@@ -167,4 +191,13 @@ function normalizePathGroup(path: string): string {
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
+}
+
+// MEASUREMENT is user-supplied via wrangler.toml; reject anything that
+// isn't a plain identifier so we can safely interpolate into SQL.
+function sanitizeIdent(s: string): string {
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(s)) {
+    throw new Error(`invalid MEASUREMENT table name: ${JSON.stringify(s)}`);
+  }
+  return s;
 }
