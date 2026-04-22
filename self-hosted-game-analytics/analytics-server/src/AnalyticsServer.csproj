@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GreptimeDB.Ingester" Version="0.1.*" />
+    <PackageReference Include="GreptimeDB.Ingester" Version="0.1.1" />
   </ItemGroup>
 
 </Project>

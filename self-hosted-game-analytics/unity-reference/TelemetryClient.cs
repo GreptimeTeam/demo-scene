@@ -7,7 +7,7 @@
 //
 // Usage:
 //   1. Create an empty GameObject in your first scene and attach TelemetryClient
-//      as a component. Fill in `analyticsUrl` in the inspector (or via env).
+//      as a component. Fill in `analyticsUrl` in the inspector.
 //   2. Call Telemetry.Track("level_started", ...) etc. from your gameplay code.
 //   3. The client batches events in memory and flushes every flushInterval
 //      seconds or when the buffer fills, whichever comes first.

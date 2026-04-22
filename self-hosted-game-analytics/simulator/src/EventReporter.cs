@@ -106,12 +106,16 @@ public sealed class EventReporter : IAsyncDisposable
     {
         try
         {
-            using var resp = await _http.PostAsJsonAsync(_endpoint, batch, SerializerOptions);
+            using var resp = await _http.PostAsJsonAsync(_endpoint, batch, SerializerOptions, _cts.Token);
             if (!resp.IsSuccessStatusCode)
             {
-                var body = await resp.Content.ReadAsStringAsync();
+                var body = await resp.Content.ReadAsStringAsync(_cts.Token);
                 _log.LogWarning("events POST failed: {Status} {Body}", resp.StatusCode, body);
             }
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
+            // shutdown in progress — drop silently
         }
         catch (Exception ex)
         {
