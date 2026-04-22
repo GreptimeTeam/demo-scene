@@ -5,9 +5,9 @@ game events to the analytics server used in this demo.
 
 ## Requirements
 
-- Unity 2022 LTS or newer (verified on 2022.3 / Unity 6000.3)
+- Unity 2022 LTS or newer (Unity 6000.x should also work — not tested)
 - API Compatibility Level: **.NET Standard 2.1** (Unity default; no changes needed)
-- No external packages required — only `UnityEngine` and `UnityEngine.Networking`
+- No external packages required — only `UnityEngine` (for `JsonUtility`) and `UnityEngine.Networking` (for `UnityWebRequest`)
 
 ## Install
 
@@ -47,6 +47,23 @@ Telemetry.Track(
 By default the client also emits a `perf_sample` event every 2 seconds
 containing FPS and managed heap size, so the Grafana dashboards have
 something to show without requiring a full OpenTelemetry SDK integration.
+
+## Reliability
+
+- Events are batched in memory and flushed when any of these happen:
+  - `maxBatchSize` (default 50) is reached
+  - `flushInterval` seconds (default 2s) elapse
+  - **the app goes to background** (`OnApplicationPause(true)`)
+- Backgrounding is the most reliable "player leaves" boundary on mobile
+  — the OS can kill the process afterwards without ever invoking
+  `OnApplicationQuit`.
+- Flush on quit is **best-effort only**. Unity typically tears the
+  player down before a coroutine completes, and a hard crash / `kill -9`
+  bypasses `OnApplicationQuit` entirely. For guaranteed delivery across
+  crashes, OS kills, and unclean quits, persist the pending buffer to
+  `PlayerPrefs` (or a file) on pause/quit and replay it on next `Awake`.
+  This reference client keeps things in-memory to stay minimal — wire
+  persistence in when you fork it for production.
 
 ## Why not the GreptimeDB .NET SDK directly?
 
