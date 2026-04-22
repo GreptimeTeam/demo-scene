@@ -43,6 +43,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 ### Integrations
 
 * [PostgreSQL Foreign Data Wrapper for GreptimeDB](postgres-fdw)
+* [Cloudflare Workers + GreptimeDB: edge event storage](cloudflare-workers)
 
 ### Data Migrations
 

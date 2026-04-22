@@ -1,0 +1,54 @@
+include:
+  - ../greptimedb-common.yml
+
+services:
+  # Apply schema.sql once GreptimeDB is healthy (idempotent via IF NOT EXISTS).
+  init-schema:
+    image: docker.io/curlimages/curl:8.12.1
+    volumes:
+      - ./init-schema.sh:/init-schema.sh:ro
+      - ./schema.sql:/schema.sql:ro
+    entrypoint: ["/bin/sh", "/init-schema.sh"]
+    environment:
+      GREPTIME_URL: http://greptimedb:4000
+      GREPTIME_DB: public
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    networks:
+      - demo-network
+    restart: "no"
+
+  # The Cloudflare Worker itself, running under `wrangler dev` in local mode
+  # (workerd in-process). Reaches GreptimeDB by the in-network hostname
+  # `greptimedb`. Port 8787 is published so you can curl from the host.
+  worker:
+    build: ./worker
+    ports:
+      - "8787:8787"
+    depends_on:
+      init-schema:
+        condition: service_completed_successfully
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+  grafana:
+    image: docker.io/grafana/grafana:11.6.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    networks:
+      - demo-network
+
+networks:
+  demo-network:
