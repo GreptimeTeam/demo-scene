@@ -30,8 +30,7 @@ while IFS= read -r stmt; do
     stmt=$(echo "$stmt" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     [ -z "$stmt" ] && continue
     echo "  -> $(echo "$stmt" | cut -c1-120)..."
-    # Drop -f so we see GreptimeDB's error body on failure. Capture the
-    # HTTP status code alongside the response body for diagnostics.
+    # Drop curl -f so GreptimeDB's error body comes back on failure.
     http_code=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
         -X POST "${GREPTIME_URL}/v1/sql?db=${DB}" \
         -H "Content-Type: application/x-www-form-urlencoded" \
@@ -42,7 +41,7 @@ while IFS= read -r stmt; do
         echo "     ${body}"
         exit 1
     fi
-    # GreptimeDB returns 200 with JSON that may contain an error envelope.
+    # GreptimeDB can return 200 with a JSON error envelope — check body.
     case "$body" in
       *'"error":'*|*'"code":1'*)
         echo "     FAILED: ${body}"; exit 1 ;;

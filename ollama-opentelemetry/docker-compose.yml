@@ -4,20 +4,20 @@ include:
 services:
   ollama:
     container_name: my-ollama
-    image: ollama/ollama
+    image: ollama/ollama:0.17.7
     ports:
-      - 11434:11434
+      - "127.0.0.1:11434:11434"
     networks:
       - demo-network
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib
+    image: docker.io/otel/opentelemetry-collector-contrib:0.120.0
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
-      - 13133:13133 # health_check extension
-      - 4317:4317   # OTLP gRPC receiver
-      - 4318:4318   # OTLP http receiver
+      - "127.0.0.1:13133:13133" # health_check extension
+      - "127.0.0.1:4317:4317"   # OTLP gRPC receiver
+      - "127.0.0.1:4318:4318"   # OTLP http receiver
     networks:
       - demo-network
 
@@ -33,3 +33,4 @@ services:
 
 networks:
   demo-network:
+    driver: bridge
