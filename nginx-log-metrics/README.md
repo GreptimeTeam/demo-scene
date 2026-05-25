@@ -55,8 +55,11 @@ The data plane includes:
 The observability plane includes:
 
 - GreptimeDB, of course, as the storage of all data
-- Vector, Prometheus, and its exporter for moving logs and metrics to
-  GreptimeDB
+- Vector for shipping Nginx access logs to GreptimeDB
+- Prometheus and `nginx-prometheus-exporter` for scraping Nginx and the Python
+  server's `/metrics` endpoint, then remote-writing to GreptimeDB
+- The Python server itself, which posts per-request structured logs directly
+  to GreptimeDB's `/v1/events/logs` API (no collector in the middle)
 - Grafana for dashboarding
 - Some one-shot containers for initialization
 
@@ -75,10 +78,11 @@ flowchart LR
   grafana --> greptimedb
   nginx_exporter -.-> nginx
   prometheus --> nginx_exporter
+  prometheus -.-> server
   prometheus --> greptimedb
   vector -.-> nginx
-  vector -.-> server
   vector --> greptimedb
+  server --> greptimedb
   end
 
   classDef dataplane fill:#fdfae4,stroke:#867a22
@@ -89,11 +93,15 @@ flowchart LR
 
 All of those logs and metrics are stored in GreptimeDB, with the following:
 
-- A pipeline to fashioning the Nginx access log. The config file is at
-  [greptime_pipeline.yaml](./config_data/greptime_pipeline.yaml)
-  - string decomposition, field parsing or renaming, etc. can be defined in
-    pipeline process the semi-structured log
-  - regex match and remapping
+- Two pipelines to shape the incoming logs:
+  - [greptime_pipeline.yaml](./config_data/greptime_pipeline.yaml) is registered
+    as `demo_pipeline` and handles the Nginx access log shipped by Vector:
+    string decomposition (dissect), field parsing or renaming, and regex
+    matching to extract `endpoint` and `trace_id` out of the request URI.
+  - [server_log_pipeline.yaml](./config_data/server_log_pipeline.yaml) is
+    registered as `server_log` and handles the per-request JSON logs that the
+    Python server posts directly. It declares a fulltext index on `trace_id`,
+    which powers the namespace search in the analysis dashboard.
 - A continuous aggregation over metrics. The config file is at
   [init_database.sql](./config_data/init_database.sql)
   - we can do other aggregation on top of partial-aggregated data to accelerate
