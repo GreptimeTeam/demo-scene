@@ -1316,7 +1316,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "with top10 as (\n    select *\n    from server_log\n    where $__timeFilter(timestamp)\n      AND matches(trace_id, '$requestLike')\n    order by delay desc\n    limit 10\n)\nselect access_time, top10.trace_id, client, ua_platform, referer, method, endpoint, protocol, status, size, agent, payload_size, delay\nfrom ngx_access_log\n    right join top10\n    on ngx_access_log.trace_id = top10.trace_id\norder by top10.delay desc;",
+                    "rawSql": "with top10 as (\n    select *\n    from server_log\n    where $__timeFilter(timestamp)\n      AND matches_term(trace_id, '$requestLike')\n    order by delay desc\n    limit 10\n)\nselect access_time, top10.trace_id, client, ua_platform, referer, method, endpoint, protocol, status, size, agent, payload_size, delay\nfrom ngx_access_log\n    right join top10\n    on ngx_access_log.trace_id = top10.trace_id\norder by top10.delay desc;",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -1353,21 +1353,21 @@
             {
                 "current": {
                     "selected": false,
-                    "text": "/",
-                    "value": "/"
+                    "text": "sleepify",
+                    "value": "sleepify"
                 },
-                "description": "Affects security rules treemap. Enter text to find in security rules string. Use % as wildcard.  e.g.:  %BOT%",
+                "description": "Full-text term to search inside trace_id (matches_term). Enter a single namespace word, e.g. sleepify.",
                 "hide": 0,
-                "label": "requestLike",
+                "label": "traceIdTerm",
                 "name": "requestLike",
                 "options": [
                     {
-                        "selected": false,
+                        "selected": true,
                         "text": "sleepify",
                         "value": "sleepify"
                     }
                 ],
-                "query": "/",
+                "query": "sleepify",
                 "skipUrlSync": false,
                 "type": "textbox"
             }
