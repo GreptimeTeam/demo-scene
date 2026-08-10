@@ -1,0 +1,21 @@
+[sources.datadog]
+type = "datadog_agent"
+address = "0.0.0.0:8000"
+multiple_outputs = true
+
+[sinks.my_greptimedb_metrics]
+inputs = ["datadog.metrics"]
+type = "greptimedb_metrics"
+endpoint = "greptimedb:4001"
+dbname = "public"
+username = ""
+password = ""
+new_naming=true
+#tls = {}
+
+[sinks.my_greptimedb_logs]
+inputs = ["datadog.logs"]
+type = "greptimedb_logs"
+table = "demo_logs"
+compression = "gzip"
+endpoint = "http://greptimedb:4000"
