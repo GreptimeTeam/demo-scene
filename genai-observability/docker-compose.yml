@@ -14,7 +14,7 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
       GF_INSTALL_PLUGINS: >-
-        https://github.com/GreptimeTeam/greptimedb-grafana-datasource/releases/download/v2.0.7/info8fcc-greptimedb-datasource.zip;info8fcc-greptimedb-datasource
+        https://github.com/GreptimeTeam/greptimedb-grafana-datasource/releases/download/v3.0.3/info8fcc-greptimedb-datasource.zip;info8fcc-greptimedb-datasource
       GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: "info8fcc-greptimedb-datasource"
     depends_on:
       greptimedb:
