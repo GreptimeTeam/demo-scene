@@ -19,7 +19,7 @@
   "links": [],
   "time": { "from": "now-15m", "to": "now" },
   "refresh": "30s",
-  "title": "GenAI Observability (GreptimeDB Plugin)",
+  "title": "GenAI Observability",
   "uid": "genai-observability-greptimedb",
   "templating": {
     "list": [
