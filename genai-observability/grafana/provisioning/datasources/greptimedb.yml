@@ -24,9 +24,23 @@ datasources:
     jsonData:
       host: http://greptimedb:4000
       defaultDatabase: public
+      logs:
+        defaultDatabase: public
+        defaultTable: genai_conversations
+        otelEnabled: true
+        timeColumn: timestamp
+        messageColumn: body
+        levelColumn: severity_text
+        traceIdColumn: trace_id
+        selectContextColumns: true
+        contextColumns:
+          - trace_id
+          - span_id
+          - scope_name
       traces:
         defaultDatabase: public
         defaultTable: opentelemetry_traces
+        otelEnabled: true
         traceIdColumn: trace_id
         spanIdColumn: span_id
         parentSpanIdColumn: parent_span_id
