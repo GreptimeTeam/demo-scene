@@ -1,0 +1,141 @@
+{
+  "uid": "todo-api-trace-v2",
+  "title": "TODO API — Trace V2",
+  "schemaVersion": 41,
+  "version": 1,
+  "tags": [
+    "greptimedb",
+    "trace-v2",
+    "json2"
+  ],
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "TODO API requests",
+      "description": "Request volume and average latency grouped by JSON2 HTTP attributes. The client deliberately requests a missing TODO in about 10% of actions.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "PE59989CBDF1A001C"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "PE59989CBDF1A001C"
+          },
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  span_attributes.\"http.route\"::STRING AS route,\n  span_attributes.\"http.request.method\"::STRING AS method,\n  span_attributes.\"http.response.status_code\"::BIGINT AS status_code,\n  COUNT(*) AS requests,\n  AVG(duration_nano) / 1000000.0 AS avg_latency_ms\nFROM web_trace_demo_v2\nWHERE $__timeFilter(\"timestamp\")\n  AND scope_name = 'opentelemetry.instrumentation.django'\nGROUP BY route, method, status_code\nORDER BY status_code DESC, requests DESC"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_latency_ms"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      }
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Failed requests → trace",
+      "description": "Latest 100 HTTP responses with status >= 400. Click a trace ID to inspect the client, Django and SQLite spans in Explore.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "PE59989CBDF1A001C"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "PE59989CBDF1A001C"
+          },
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  \"timestamp\" AS time,\n  span_attributes.\"http.request.method\"::STRING AS method,\n  span_attributes.\"url.path\"::STRING AS path,\n  span_attributes.\"http.response.status_code\"::BIGINT AS status_code,\n  duration_nano / 1000000.0 AS latency_ms,\n  trace_id\nFROM web_trace_demo_v2\nWHERE $__timeFilter(\"timestamp\")\n  AND scope_name = 'opentelemetry.instrumentation.django'\n  AND span_attributes.\"http.response.status_code\"::BIGINT >= 400\nORDER BY \"timestamp\" DESC\nLIMIT 100"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latency_ms"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trace_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View trace",
+                    "url": "/explore?schemaVersion=1&panes=%7B%22trace%22%3A%7B%22datasource%22%3A%22PCC4B9E3C4F7D05EA%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22jaeger%22%2C%22uid%22%3A%22PCC4B9E3C4F7D05EA%22%7D%2C%22query%22%3A%22${__value.raw}%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      }
+    }
+  ]
+}

@@ -1,14 +1,20 @@
 apiVersion: 2
 datasources:
   - name: greptimedb-jaeger
+    # Stable Grafana data source ID referenced by the dashboard's trace links.
+    # Retains the original instance's UID for compatibility; not a credential.
+    uid: PCC4B9E3C4F7D05EA
     type: jaeger
     access: proxy
     url: http://greptimedb:4000/v1/jaeger
     jsonData:
       httpHeaderName1: x-greptime-trace-table-name
     secureJsonData:
-      httpHeaderValue1: web_trace_demo
+      httpHeaderValue1: web_trace_demo_v2
   - name: greptimedb_pg
+    # Stable Grafana data source ID referenced by the dashboard's SQL panels.
+    # Retains the original instance's UID for compatibility; not a credential.
+    uid: PE59989CBDF1A001C
     type: postgres
     url: greptimedb:4003
     jsonData:
