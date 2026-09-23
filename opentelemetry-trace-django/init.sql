@@ -14,7 +14,7 @@ SELECT
     span_name,
     uddsketch_state(128, 0.01, "duration_nano") AS "latency_sketch",
     date_bin('30 seconds'::INTERVAL, "timestamp") as "time_window",
-FROM web_trace_demo
+FROM web_trace_demo_v2
 WHERE
     scope_name = 'opentelemetry.instrumentation.django'
 GROUP BY

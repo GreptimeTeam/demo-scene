@@ -24,7 +24,7 @@ trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(console_export
 # Add OTLP HTTP Exporter if endpoint is provided
 otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 if otlp_endpoint:
-    headers = {"x-greptime-log-pipeline-name": "greptime_trace_v1", "x-greptime-trace-table-name": "web_trace_demo"}
+    headers = {"x-greptime-log-pipeline-name": "greptime_trace_v2", "x-greptime-trace-table-name": "web_trace_demo_v2"}
     otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint, headers=headers)
     trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter))
     logger.info(f"OTLP Exporter enabled with endpoint: {otlp_endpoint}")
@@ -74,8 +74,8 @@ def update_todo(todo_id):
 def generate_traffic():
     while True:
         try:
-            # Randomly choose an action: create, read, or update
-            action = random.choice(["create", "read", "update"])
+            # About 10% of actions request a missing TODO to demonstrate 404 traces.
+            action = random.choices(["create", "read", "update", "missing"], weights=[3, 3, 3, 1])[0]
 
             if action == "create":
                 create_todo()
@@ -86,6 +86,10 @@ def generate_traffic():
                 if todos:
                     todo_id = random.choice(todos)["id"]
                     update_todo(todo_id)
+            elif action == "missing":
+                # Auto-generated "TODO" IDs start at 1.
+                response = requests.get(f"{TODO_API_URL}0/", timeout=10)
+                print(f"Missing TODO: expected 404, got {response.status_code}")
         except Exception as e:
             print(f"Failed to request server: {e}")
 
