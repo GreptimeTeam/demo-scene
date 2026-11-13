@@ -1,6 +1,17 @@
 include:
   - ../greptimedb-common.yml
 services:
+  grafana-router:
+    extends:
+      file: ../grafana-common/compose.yml
+      service: grafana-router
+    ports:
+      - "3000:3000"
+    environment:
+      DASHBOARD_UID: bdwetcv3dtssge
+    networks:
+      - demo-network
+
   ingester:
     build:
       context: ./ingester
@@ -8,21 +19,22 @@ services:
     networks:
       - demo-network
     environment:
-      - ICAO_AIRPORT_CODE=${ICAO_AIRPORT_CODE:-KSFO}
-      - OPENSKY_USERNAME=${OPENSKY_USERNAME}
-      - OPENSKY_PASSWORD=${OPENSKY_PASSWORD}
+      - OPENSKY_BBOX=${OPENSKY_BBOX:-37,-123,38,-121}
+      - OPENSKY_CLIENT_ID=${OPENSKY_CLIENT_ID:-}
+      - OPENSKY_CLIENT_SECRET=${OPENSKY_CLIENT_SECRET:-}
     depends_on:
       greptimedb:
-        condition: service_started
+        condition: service_healthy
 
   grafana:
     image: docker.io/grafana/grafana:11.2.0
-    ports:
-      - 3000:3000
     networks:
       - demo-network
     volumes:
       - ./grafana_provisioning:/etc/grafana/provisioning
+
+    environment:
+      GF_USERS_DEFAULT_LANGUAGE: detect
 
 networks:
   demo-network:

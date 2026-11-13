@@ -11,7 +11,7 @@ services:
         condition: service_healthy
     volumes:
       - ./configs/greptimedb:/configs
-    command: sh -c "sleep 5 && curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/nginx-logs-pipeline' -F 'file=@/configs/nginx-logs-pipeline.yml' -v"
+    command: sh -c "curl -fsS -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/nginx-logs-pipeline' -F 'file=@/configs/nginx-logs-pipeline.yml' -v"
     init: true
 
   nginx-log-generator:
@@ -34,6 +34,8 @@ services:
     networks:
       - demo-network
     depends_on:
+      create-nginx-logs-pipeline:
+        condition: service_completed_successfully
       nginx-log-generator:
         condition: service_healthy
     volumes:

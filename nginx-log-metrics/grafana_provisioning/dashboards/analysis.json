@@ -18,7 +18,24 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "links": [],
+    "links": [
+      {
+        "title": "English",
+        "type": "link",
+        "url": "/d/c9bb5c35-4581-4950-9638-a8bb266eb9b1",
+        "includeVars": true,
+        "keepTime": true,
+        "targetBlank": false
+      },
+      {
+        "title": "简体中文",
+        "type": "link",
+        "url": "/d/c9bb5c35-4581-4950-9638-a8bb266eb9b1-zh",
+        "includeVars": true,
+        "keepTime": true,
+        "targetBlank": false
+      }
+    ],
     "liveNow": false,
     "panels": [
         {

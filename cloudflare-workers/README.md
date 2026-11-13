@@ -40,14 +40,15 @@ required for the demo itself.
 ## Quick Start
 
 ```bash
-cd cloudflare-workers
+git clone https://github.com/GreptimeTeam/demo-scene.git
+cd demo-scene/cloudflare-workers
 docker compose up -d
 ```
 
-Five services: `greptimedb` (HTTP :4000, pg wire :4003, MySQL :4002),
+Six services: `greptimedb` (HTTP :4000, pg wire :4003, MySQL :4002),
 `init-schema` (applies [`schema.sql`](schema.sql) then exits), `origin`
 (local httpbin clone used as the Worker's proxy target), `worker` (Worker
-under `wrangler dev`, :8787), `grafana` (:3000).
+under `wrangler dev`, :8787), `grafana`, and `grafana-router` (:3000).
 
 Generate traffic and query it back:
 

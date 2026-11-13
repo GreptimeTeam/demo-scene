@@ -10,14 +10,13 @@ services:
         condition: service_healthy
     volumes:
       - ./init:/init
-    command: psql -h greptimedb -p 4003 -d public -f /init/init_database.sql
+    command: psql -v ON_ERROR_STOP=1 -h greptimedb -p 4003 -d public -f /init/init_database.sql
     environment:
       PGSSLMODE: disable
     init: true
 
   kafka:
     image: docker.io/greptime/kafka:3.6.0
-    container_name: kafka
     ports:
       - 9092
     networks:
@@ -30,22 +29,29 @@ services:
       KAFKA_CFG_PROCESS_ROLES: broker,controller
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@127.0.0.1:2181
       # Listeners
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:2181
       ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_BROKER_ID: "1"
+    healthcheck:
+      test: ["CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   kafka-init:
     image: docker.io/greptime/kafka:3.6.0
     networks:
       - demo-network
-    command: >
-      /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic nginx_access_log --bootstrap-server kafka:9092
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - >-
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic nginx_access_log --bootstrap-server kafka:9092
     depends_on:
       kafka:
-        condition: service_started
+        condition: service_healthy
 
   msg_gen:
     build:
@@ -61,8 +67,8 @@ services:
 
   flink-demo:
     build:
-      context: ./flink-demo
-      dockerfile: ./Dockerfile
+      context: .
+      dockerfile: flink-demo/Dockerfile
     ports:
       - "8081:8081"
     networks:

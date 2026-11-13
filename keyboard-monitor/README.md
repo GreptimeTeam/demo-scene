@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-* [Python 3](https://www.python.org/downloads/)
+* [Python 3.11](https://www.python.org/downloads/)
 
 Other dependencies can be installed by:
 
@@ -71,7 +71,7 @@ GROUP BY hits
 ORDER BY times DESC limit 10;
 ```
 
-### Calculate hits per minute
+### Calculate hits per hour
 
 Read more about GreptimeDB's powerful [RANGE QUERY](https://docs.greptime.com/reference/sql/range).
 

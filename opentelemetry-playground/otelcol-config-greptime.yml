@@ -1,0 +1,44 @@
+# 作为 otelcol-config-extras.yml 叠加在 demo 的基础配置上。
+# Collector 合并配置时数组是替换而非追加，所以 pipelines 里的 receivers / exporters 要写全。
+processors:
+  transform/http_body_sizes:
+    error_mode: propagate
+    trace_statements:
+      - context: span
+        statements:
+          # PHP instrumentation emits Content-Length as strings, including "" for unknown lengths.
+          - delete_key(attributes, "http.request.body.size") where attributes["http.request.body.size"] == ""
+          - delete_key(attributes, "http.response.body.size") where attributes["http.response.body.size"] == ""
+          - set(attributes["http.request.body.size"], Int(attributes["http.request.body.size"])) where IsString(attributes["http.request.body.size"]) and IsMatch(attributes["http.request.body.size"], "^[0-9]+$")
+          - set(attributes["http.response.body.size"], Int(attributes["http.response.body.size"])) where IsString(attributes["http.response.body.size"]) and IsMatch(attributes["http.response.body.size"], "^[0-9]+$")
+
+exporters:
+  otlphttp/traces:
+    endpoint: http://greptimedb:4000/v1/otlp
+    headers:
+      x-greptime-pipeline-name: greptime_trace_v1
+      x-greptime-hints: ttl=7d
+    tls:
+      insecure: true
+  otlphttp/logs:
+    endpoint: http://greptimedb:4000/v1/otlp
+    tls:
+      insecure: true
+  otlphttp/metrics:
+    endpoint: http://greptimedb:4000/v1/otlp
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource_detection, memory_limiter, transform/sanitize_spans, gen_ai_normalizer, transform/redact_sensitive_data, transform/http_body_sizes]
+      exporters: [otlphttp/traces, span_metrics]
+    metrics:
+      # 去掉了基础配置里的 host_metrics：主机指标改由 node_exporter + Prometheus pull 提供
+      receivers: [docker_stats, http_check/frontend-proxy, nginx, otlp, redis, postgresql, span_metrics]
+      exporters: [otlphttp/metrics]
+    logs:
+      receivers: [otlp]
+      exporters: [otlphttp/logs]

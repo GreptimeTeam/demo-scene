@@ -22,7 +22,9 @@ services:
       - demo-network
 
   llm-joke-app:
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile
     depends_on:
       - ollama
       - otel-collector

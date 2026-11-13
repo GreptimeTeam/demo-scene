@@ -1,0 +1,51 @@
+include:
+  - ../greptimedb-common.yml
+
+services:
+  init-schema:
+    image: curlimages/curl:8.12.1
+    entrypoint: ["/bin/sh", "/init-schema.sh"]
+    volumes:
+      - ../cloudflare-workers/init-schema.sh:/init-schema.sh:ro
+      - ./schema.sql:/schema.sql:ro
+    environment:
+      GREPTIME_URL: http://greptimedb:4000
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    networks: [demo-network]
+
+  app:
+    build: ./app
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      GREPTIME_URL: http://greptimedb:4000
+    depends_on:
+      init-schema:
+        condition: service_completed_successfully
+    networks: [demo-network]
+
+  grafana:
+    image: grafana/grafana:12.3.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_DEFAULT_LANGUAGE: detect
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks: [demo-network]
+
+  grafana-router:
+    extends:
+      file: ../grafana-common/compose.yml
+      service: grafana-router
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      DASHBOARD_UID: vibration-lab
+    networks: [demo-network]
+
+networks:
+  demo-network:

@@ -1,0 +1,594 @@
+{
+  "title": "Astronomy Shop · 服务",
+  "uid": "astronomy-services-zh",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": [
+    "greptimedb",
+    "astronomy-shop"
+  ],
+  "editable": true,
+  "timezone": "browser",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "refresh": "15s",
+  "timepicker": {
+    "refresh_intervals": [
+      "15s",
+      "30s",
+      "1m",
+      "5m"
+    ]
+  },
+  "links": [
+    {
+      "title": "概览",
+      "url": "/d/astronomy-shop-greptimedb-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "服务",
+      "url": "/d/astronomy-services-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "日志与调用链",
+      "url": "/d/astronomy-logs-traces-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "主机指标",
+      "url": "/d/astronomy-host-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "English",
+      "url": "/d/astronomy-services",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "label": "服务",
+        "type": "query",
+        "datasource": {
+          "type": "info8fcc-greptimedb-datasource",
+          "uid": "greptimedb"
+        },
+        "query": {
+          "refId": "var",
+          "queryType": "sql",
+          "rawSql": "SELECT DISTINCT service_name FROM opentelemetry_traces WHERE \"resource_attributes.service.namespace\" = 'opentelemetry-demo' ORDER BY service_name"
+        },
+        "refresh": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [],
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "服务性能",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "选择一个或多个服务。请求量和错误率只统计 server spans；点击 Trace ID 查看完整调用链。"
+      }
+    },
+    {
+      "id": 2,
+      "title": "每分钟请求量",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqpm",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "timeseries",
+          "format": 0,
+          "rawSql": "SELECT date_bin(INTERVAL '1 minute', \"timestamp\") AS time, service_name, COUNT(*) AS requests FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER' GROUP BY time, service_name ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "延迟 · P50 / P95 / P99",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "timeseries",
+          "format": 0,
+          "rawSql": "SELECT date_bin(INTERVAL '1 minute', \"timestamp\") AS time, approx_percentile_cont(0.50) WITHIN GROUP (ORDER BY duration_nano) / 1e6 AS p50, approx_percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_nano) / 1e6 AS p95, approx_percentile_cont(0.99) WITHIN GROUP (ORDER BY duration_nano) / 1e6 AS p99 FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER' GROUP BY time ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "操作统计",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 24,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT service_name, span_name AS operation, COUNT(*) AS requests, SUM(CASE WHEN span_status_code = 'STATUS_CODE_ERROR' THEN 1 ELSE 0 END) AS errors, approx_percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_nano) / 1e6 AS p95_ms FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER' GROUP BY service_name, operation ORDER BY p95_ms DESC LIMIT 50"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "慢请求 · 选择调用链",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 24,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trace_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "查看调用链",
+                    "url": "/d/astronomy-logs-traces-zh?var-trace_id=${__value.raw}&var-service=%24__all&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT \"timestamp\" AS time, service_name, span_name, duration_nano / 1e6 AS duration_ms, span_status_code AS status, trace_id FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER' ORDER BY duration_nano DESC LIMIT 50"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "客户端等待与服务端处理",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trace_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "查看调用链",
+                    "url": "/d/astronomy-logs-traces-zh?var-trace_id=${__value.raw}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "description": "同一 trace 中，按 parent_span_id 匹配直接相连的 client/server spans。耗时差还包含网络、序列化和排队，不能直接视为网络延迟。",
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT c.trace_id, c.service_name AS client, s.service_name AS server, s.span_name, c.duration_nano / 1e6 AS client_ms, s.duration_nano / 1e6 AS server_ms\nFROM opentelemetry_traces c JOIN opentelemetry_traces s ON s.trace_id = c.trace_id AND s.parent_span_id = c.span_id\nWHERE c.span_kind = 'SPAN_KIND_CLIENT' AND s.span_kind = 'SPAN_KIND_SERVER' AND c.\"timestamp\" >= $__fromTime AND c.\"timestamp\" <= $__toTime AND c.\"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND (c.service_name IN (${service:sqlstring}) OR s.service_name IN (${service:sqlstring})) ORDER BY client_ms DESC LIMIT 30"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Docker 主机 · 容器内存",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 37,
+        "w": 12,
+        "h": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "包含同一 Docker host 上所有项目的容器，不随服务筛选变化。",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "greptimedb-promql"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "expr": "container_memory_usage_total_bytes",
+          "legendFormat": "{{container_name}}",
+          "range": true,
+          "instant": false,
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "PostgreSQL 连接数",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 37,
+        "w": 12,
+        "h": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "greptimedb-promql"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "expr": "postgresql_backends",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "instant": false,
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "最近请求 · 错误优先",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 24,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trace_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "查看调用链",
+                    "url": "/d/astronomy-logs-traces-zh?var-trace_id=${__value.raw}&var-service=%24__all&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT \"timestamp\" AS time, service_name, span_name, span_status_code,\n       duration_nano / 1e6 AS duration_ms, trace_id\nFROM opentelemetry_traces\nWHERE $__timeFilter(\"timestamp\")\n  AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo'\n  AND service_name IN (${service:sqlstring})\n  AND span_kind = 'SPAN_KIND_SERVER'\nORDER BY CASE WHEN span_status_code = 'STATUS_CODE_ERROR' THEN 1 ELSE 0 END DESC,\n         \"timestamp\" DESC\nLIMIT 50"
+        }
+      ],
+      "description": "错误请求优先，同类请求按时间倒序。点击 Trace ID 查看调用链及关联日志。"
+    }
+  ]
+}

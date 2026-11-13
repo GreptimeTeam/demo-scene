@@ -2,12 +2,23 @@ include:
   - ./dify/docker-compose.yaml
 
 services:
+  grafana-router:
+    extends:
+      file: ../grafana-common/compose.yml
+      service: grafana-router
+    ports:
+      - "3000:3000"
+    environment:
+      DASHBOARD_UID: dify-monitoring
+    networks:
+      - dify-monitoring
+
   greptimedb:
-    image: docker.io/greptime/greptimedb:v1.0.0
+    image: docker.io/greptime/greptimedb:v1.3.0
     command: >
       standalone start
       --http-addr=0.0.0.0:4000
-      --rpc-addr=0.0.0.0:4001
+      --grpc-bind-addr=0.0.0.0:4001
       --mysql-addr=0.0.0.0:4002
       --postgres-addr=0.0.0.0:4003
     ports:
@@ -16,7 +27,7 @@ services:
       - "4002:4002"
       - "4003:4003"
     volumes:
-      - greptimedb-data:/tmp/greptimedb
+      - greptimedb-data:/greptimedb_data
     networks:
       - dify-monitoring
     healthcheck:
@@ -41,12 +52,11 @@ services:
 
   grafana:
     image: docker.io/grafana/grafana:11.6.0
-    ports:
-      - "3000:3000"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     environment:
+      GF_USERS_DEFAULT_LANGUAGE: detect
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer

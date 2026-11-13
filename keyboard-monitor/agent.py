@@ -90,9 +90,10 @@ if __name__ == '__main__':
                 except sqlalchemy.exc.OperationalError as e:
                     if retries >= 10:
                         log.error(f'Retry exceeds. Operational error: {e}')
-                        pending_hits.put(hits)
-                        continue
+                        raise
 
+                    retries += 1
+                    time.sleep(1)
                     if e.connection_invalidated:
                         log.warning(f'Connection invalidated: {e}')
                         pending_hits.put(hits)
@@ -111,8 +112,6 @@ if __name__ == '__main__':
                         continue
 
                     raise e
-                finally:
-                    retries += 1
 
     def listener_thread():
         with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:

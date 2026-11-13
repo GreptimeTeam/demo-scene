@@ -77,9 +77,9 @@ Now, import data to GreptimeDB via the HTTP API:
 
 ```shell
 for file in influxdb_export_slice.*; do
-    curl -i -H "Authorization: token $GREPTIME_USERNAME:$GREPTIME_PASSWORD" \
-        -X POST "https://${GREPTIME_HOST}/v1/influxdb/api/v2/write?db=$GREPTIME_DB" \
-        --data-binary @${file}
+    curl --fail-with-body -i -H "Authorization: token $GREPTIME_USERNAME:$GREPTIME_PASSWORD" \
+        -X POST "https://${GREPTIME_HOST}/v1/influxdb/api/v2/write?db=$GREPTIME_DATABASE" \
+        --data-binary "@${file}" || break
     sleep 1
 done
 ```

@@ -5,9 +5,10 @@ driving metrics with OpenTelemetry and Python in GreptimeDB.
 
 ## How to run this demo
 
-Ensure you have installed `git`, `docker` and `docker-compose` 22.4 or newer.
+Ensure you have installed `git`, `docker` and Docker Compose 2.24 or newer.
 
-You also must have a valid Tesla Login with a registered vehicle.
+For live data, a Tesla account with a registered vehicle and working Owner API access is required.
+To run with simulated data, use `IS_MOCK=true docker compose up -d`; no Tesla account is required.
 This project uses [TeslaPy](https://github.com/tdorssers/TeslaPy)
 which leverages the Tesla Owner API to gather the vehicle metrics.
 
@@ -22,11 +23,9 @@ waits for the app container to start up.
 git clone https://github.com/GreptimeTeam/demo-scene.git
 cd demo-scene/ev-open-telemetry
 
-TESLA_USER_EMAIL=<Your_Tesla_Email> docker compose up -d && \
-while [ "$(docker inspect -f '{{.State.Running}}' ev-open-telemetry-ev_observer-1)" != "true" ]; do
-  echo "Waiting for container ev-open-telemetry-ev_observer-1 to be up..."
-  sleep 1
-done && docker logs ev-open-telemetry-ev_observer-1 & docker attach ev-open-telemetry_ev_observer_1
+export TESLA_USER_EMAIL="<Your_Tesla_Email>"
+docker compose up -d
+docker compose attach ev_observer
 ```
 
 **Authenticate to Tesla**

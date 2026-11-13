@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS nginx_access_log (
   uri STRING,
   protocol STRING,
   "status" UINT16,
-  size DOUBLE,
+  "size" DOUBLE,
   agent STRING,
 )
 WITH (

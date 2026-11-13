@@ -2,14 +2,24 @@ include:
   - ../greptimedb-common.yml
 
 services:
-  grafana:
-    image: docker.io/grafana/grafana:11.6.0
+  grafana-router:
+    extends:
+      file: ../grafana-common/compose.yml
+      service: grafana-router
     ports:
       - "3000:3000"
+    environment:
+      DASHBOARD_UID: genai-observability-greptimedb
+    networks:
+      - demo-network
+
+  grafana:
+    image: docker.io/grafana/grafana:11.6.0
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     environment:
+      GF_USERS_DEFAULT_LANGUAGE: detect
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer

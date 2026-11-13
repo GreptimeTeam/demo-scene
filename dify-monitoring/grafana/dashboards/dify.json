@@ -2,7 +2,24 @@
   "annotations": { "list": [] },
   "editable": true,
   "graphTooltip": 1,
-  "links": [],
+  "links": [
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/dify-monitoring",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/dify-monitoring-zh",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    }
+  ],
   "panels": [
     {
       "type": "row",

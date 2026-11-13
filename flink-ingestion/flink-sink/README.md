@@ -40,7 +40,7 @@ If you prefer to run the demo manually, you can follow the steps below.
         uri STRING,
         protocol STRING,
         "status" UINT16,
-        size DOUBLE,
+        "size" DOUBLE,
         agent STRING,
       )
       WITH (

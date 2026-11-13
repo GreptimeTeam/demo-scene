@@ -1,0 +1,44 @@
+apiVersion: 1
+datasources:
+  - name: GreptimeDB
+    type: info8fcc-greptimedb-datasource
+    uid: greptimedb
+    url: http://greptimedb:4000
+    access: proxy
+    isDefault: true
+    jsonData:
+      host: http://greptimedb:4000
+      defaultDatabase: public
+      logs:
+        defaultDatabase: public
+        defaultTable: opentelemetry_logs
+        otelEnabled: true
+        otelVersion: latest
+        timeColumn: timestamp
+        messageColumn: body
+        levelColumn: severity_text
+        traceIdColumn: trace_id
+      traces:
+        defaultDatabase: public
+        defaultTable: opentelemetry_traces
+        otelEnabled: true
+        otelVersion: latest
+        traceIdColumn: trace_id
+        spanIdColumn: span_id
+        parentSpanIdColumn: parent_span_id
+        serviceNameColumn: service_name
+        operationNameColumn: span_name
+        durationColumn: duration_nano
+        durationUnit: nanoseconds
+        startTimeColumn: timestamp
+  - name: GreptimeDB-PromQL
+    type: prometheus
+    uid: greptimedb-promql
+    url: http://greptimedb:4000/v1/prometheus
+    access: proxy
+  - name: GreptimeDB-MySQL
+    type: mysql
+    uid: greptimedb-mysql
+    url: greptimedb:4002
+    database: public
+    user: ""

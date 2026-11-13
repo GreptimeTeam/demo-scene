@@ -137,5 +137,23 @@
         "showHeader": true
       }
     }
+  ],
+  "links": [
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/todo-api-trace-v2",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/todo-api-trace-v2-zh",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    }
   ]
 }

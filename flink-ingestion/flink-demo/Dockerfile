@@ -1,17 +1,10 @@
-FROM adoptopenjdk/openjdk11:jdk-11.0.9.1_1 AS builder
-
-RUN apt-get update && \
-    apt-get install -y git maven
-
+FROM maven:3.9-eclipse-temurin-11 AS builder
 WORKDIR /build
-
-RUN git clone https://github.com/GreptimeTeam/flink-demo.git . && \
-    mvn package
-
+COPY flink-sink/pom.xml ./
+COPY flink-sink/src ./src
+RUN mvn -B package
 
 FROM flink:1.20.1-java11
-
 COPY --from=builder /build/target/flink-demo-0.1.0.jar flink-demo.jar
-COPY run.sh .
-
+COPY flink-demo/run.sh .
 CMD ["sh", "./run.sh"]

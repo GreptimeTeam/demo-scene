@@ -30,6 +30,8 @@ OpenTelemetry GenAI semantic conventions (`gen_ai.*`) and GreptimeDB.
 
 ## Quick Start
 
+Requires Docker Compose 2.24 or later. Run the commands from `demo-scene/genai-observability` after cloning this repository. API-provider options require a valid API key; the Ollama option requires a local model download.
+
 ### Option A: OpenAI API (recommended)
 
 ```bash

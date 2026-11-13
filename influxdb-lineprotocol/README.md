@@ -7,7 +7,7 @@
 ## Prerequisites
 
 * [Docker](https://docs.docker.com/get-docker/) or [OrbStack](https://orbstack.dev/)
-* [Python 3.7 or later](https://www.python.org/downloads/)
+* [Python 3.11 or later](https://www.python.org/downloads/)
 
 Other dependencies can be installed by:
 

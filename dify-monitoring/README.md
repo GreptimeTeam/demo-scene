@@ -42,7 +42,11 @@ docker-compose.yml (single project, includes dify/docker-compose.yaml)
 
 ## Quick Start
 
+Requires Docker Compose 2.24 or later, Git, curl, and tar.
+
 ```bash
+git clone https://github.com/GreptimeTeam/demo-scene.git
+cd demo-scene/dify-monitoring
 ./setup.sh
 ```
 

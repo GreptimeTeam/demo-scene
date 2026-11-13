@@ -113,7 +113,7 @@ You can also open your browser at http://localhost:4000/dashboard for the Web UI
 
 ## Run in GreptimeCloud
 
-By default, this example writes data into a GreptimeDB instance within the docker compose. It's also possible to write to your own GreptimeCloud instance by creating a `greptime.env` file from our sample `greptime.env.sample` and providing your host, dbname and authentication information. Then use `docker compose down` and `docker compose up` to recreate the compose cluster and apply new settings.
+By default, this example writes data into a GreptimeDB instance within the docker compose. It's also possible to write to your own GreptimeCloud instance by creating a `greptime.env` file from our sample `greptime.env.sample` and providing your host, dbname and authentication information. Then use `docker compose --env-file greptime.env down` and `docker compose --env-file greptime.env up` to recreate the compose cluster and apply new settings.
 
 ## How it works
 

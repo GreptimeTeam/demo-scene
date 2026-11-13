@@ -1,0 +1,450 @@
+{
+  "title": "Astronomy Shop · 日志与调用链",
+  "uid": "astronomy-logs-traces-zh",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": [
+    "greptimedb",
+    "astronomy-shop"
+  ],
+  "editable": true,
+  "timezone": "browser",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "refresh": "15s",
+  "timepicker": {
+    "refresh_intervals": [
+      "15s",
+      "30s",
+      "1m",
+      "5m"
+    ]
+  },
+  "links": [
+    {
+      "title": "概览",
+      "url": "/d/astronomy-shop-greptimedb-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "服务",
+      "url": "/d/astronomy-services-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "日志与调用链",
+      "url": "/d/astronomy-logs-traces-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "主机指标",
+      "url": "/d/astronomy-host-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "English",
+      "url": "/d/astronomy-logs-traces",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "label": "服务",
+        "type": "query",
+        "datasource": {
+          "type": "info8fcc-greptimedb-datasource",
+          "uid": "greptimedb"
+        },
+        "query": {
+          "refId": "var",
+          "queryType": "sql",
+          "rawSql": "SELECT DISTINCT service_name FROM opentelemetry_traces WHERE \"resource_attributes.service.namespace\" = 'opentelemetry-demo' ORDER BY service_name"
+        },
+        "refresh": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [],
+        "sort": 1
+      },
+      {
+        "name": "level",
+        "label": "级别",
+        "type": "custom",
+        "query": "All,TRACE,DEBUG,INFO,WARN,ERROR,FATAL,UNSPECIFIED",
+        "current": {
+          "text": "All",
+          "value": "All"
+        },
+        "options": []
+      },
+      {
+        "name": "search",
+        "label": "日志文本",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "options": []
+      },
+      {
+        "name": "trace_id",
+        "label": "Trace ID",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "日志与调用链详情",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "按服务、级别和文本搜索日志。输入 Trace ID 后，显示该调用链的 spans 和关联日志；Trace ID 为空时，瀑布图不加载。\n\n[从慢请求选择 Trace ID](/d/astronomy-services-zh)"
+      }
+    },
+    {
+      "id": 2,
+      "title": "各级别日志量",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 24,
+        "h": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "timeseries",
+          "format": 0,
+          "rawSql": "SELECT date_bin(INTERVAL '1 minute', \"timestamp\") AS time, CASE WHEN severity_number >= 21 THEN 'FATAL' WHEN severity_number >= 17 THEN 'ERROR' WHEN severity_number >= 13 THEN 'WARN' WHEN severity_number >= 9 THEN 'INFO' WHEN severity_number >= 5 THEN 'DEBUG' WHEN severity_number >= 1 THEN 'TRACE' ELSE 'UNSPECIFIED' END AS level, COUNT(*) AS lines FROM opentelemetry_logs WHERE $__timeFilter(\"timestamp\") AND json_get_string(resource_attributes, '[\"service.namespace\"]') = 'opentelemetry-demo' AND json_get_string(resource_attributes, '[\"service.name\"]') IN (${service:sqlstring}) AND (${level:sqlstring} = 'All' OR (CASE WHEN severity_number >= 21 THEN 'FATAL' WHEN severity_number >= 17 THEN 'ERROR' WHEN severity_number >= 13 THEN 'WARN' WHEN severity_number >= 9 THEN 'INFO' WHEN severity_number >= 5 THEN 'DEBUG' WHEN severity_number >= 1 THEN 'TRACE' ELSE 'UNSPECIFIED' END) = ${level:sqlstring}) AND (${search:sqlstring} = '' OR strpos(lower(body), lower(${search:sqlstring})) > 0) AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) GROUP BY time, level ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "日志 · 最新优先",
+      "type": "logs",
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 24,
+        "h": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "logs",
+          "format": 2,
+          "rawSql": "SELECT \"timestamp\" AS timestamp, body, CASE WHEN severity_number >= 21 THEN 'FATAL' WHEN severity_number >= 17 THEN 'ERROR' WHEN severity_number >= 13 THEN 'WARN' WHEN severity_number >= 9 THEN 'INFO' WHEN severity_number >= 5 THEN 'DEBUG' WHEN severity_number >= 1 THEN 'TRACE' ELSE 'UNSPECIFIED' END AS level, json_get_string(resource_attributes, '[\"service.name\"]') AS service_name, trace_id FROM opentelemetry_logs WHERE $__timeFilter(\"timestamp\") AND json_get_string(resource_attributes, '[\"service.namespace\"]') = 'opentelemetry-demo' AND json_get_string(resource_attributes, '[\"service.name\"]') IN (${service:sqlstring}) AND (${level:sqlstring} = 'All' OR (CASE WHEN severity_number >= 21 THEN 'FATAL' WHEN severity_number >= 17 THEN 'ERROR' WHEN severity_number >= 13 THEN 'WARN' WHEN severity_number >= 9 THEN 'INFO' WHEN severity_number >= 5 THEN 'DEBUG' WHEN severity_number >= 1 THEN 'TRACE' ELSE 'UNSPECIFIED' END) = ${level:sqlstring}) AND (${search:sqlstring} = '' OR strpos(lower(body), lower(${search:sqlstring})) > 0) AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) ORDER BY \"timestamp\" DESC LIMIT 200"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "日志中的 Trace 链接",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 24,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trace_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "查看调用链",
+                    "url": "/d/astronomy-logs-traces-zh?var-trace_id=${__value.raw}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT \"timestamp\" AS timestamp, body, CASE WHEN severity_number >= 21 THEN 'FATAL' WHEN severity_number >= 17 THEN 'ERROR' WHEN severity_number >= 13 THEN 'WARN' WHEN severity_number >= 9 THEN 'INFO' WHEN severity_number >= 5 THEN 'DEBUG' WHEN severity_number >= 1 THEN 'TRACE' ELSE 'UNSPECIFIED' END AS level, json_get_string(resource_attributes, '[\"service.name\"]') AS service_name, trace_id FROM opentelemetry_logs WHERE $__timeFilter(\"timestamp\") AND json_get_string(resource_attributes, '[\"service.namespace\"]') = 'opentelemetry-demo' AND json_get_string(resource_attributes, '[\"service.name\"]') IN (${service:sqlstring}) AND (${level:sqlstring} = 'All' OR (CASE WHEN severity_number >= 21 THEN 'FATAL' WHEN severity_number >= 17 THEN 'ERROR' WHEN severity_number >= 13 THEN 'WARN' WHEN severity_number >= 9 THEN 'INFO' WHEN severity_number >= 5 THEN 'DEBUG' WHEN severity_number >= 1 THEN 'TRACE' ELSE 'UNSPECIFIED' END) = ${level:sqlstring}) AND (${search:sqlstring} = '' OR strpos(lower(body), lower(${search:sqlstring})) > 0) AND (${trace_id:sqlstring} = '' OR trace_id = ${trace_id:sqlstring}) AND trace_id IS NOT NULL AND trace_id <> '' ORDER BY \"timestamp\" DESC LIMIT 200"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "调用链瀑布图",
+      "type": "traces",
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 24,
+        "h": 14
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "traces",
+          "format": 3,
+          "rawSql": "SELECT * FROM opentelemetry_traces WHERE trace_id <> '' AND trace_id = ${trace_id:sqlstring} ORDER BY \"timestamp\"",
+          "builderOptions": {
+            "database": "public",
+            "table": "opentelemetry_traces",
+            "queryType": "traces",
+            "columns": [
+              {
+                "name": "trace_id",
+                "hint": "trace_id"
+              },
+              {
+                "name": "span_id",
+                "hint": "trace_span_id"
+              },
+              {
+                "name": "parent_span_id",
+                "hint": "trace_parent_span_id"
+              },
+              {
+                "name": "service_name",
+                "hint": "trace_service_name"
+              },
+              {
+                "name": "span_name",
+                "hint": "trace_operation_name"
+              },
+              {
+                "name": "timestamp",
+                "hint": "time"
+              },
+              {
+                "name": "duration_nano",
+                "hint": "trace_duration_time"
+              },
+              {
+                "name": "span_status_code",
+                "hint": "trace_status_code"
+              }
+            ],
+            "filters": [],
+            "orderBy": [],
+            "limit": 1000,
+            "meta": {
+              "traceDurationUnit": "nanoseconds",
+              "isTraceIdMode": true,
+              "otelEnabled": true,
+              "otelVersion": "latest"
+            }
+          }
+        }
+      ],
+      "description": "按 Trace ID 加载全部已存储的 spans，不受大盘时间范围限制。"
+    },
+    {
+      "id": 5,
+      "title": "所选调用链 · Span 明细",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 24,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "traces",
+          "format": 1,
+          "rawSql": "SELECT \"timestamp\" AS time, service_name, span_name, duration_nano / 1e6 AS duration_ms, span_kind, span_status_code, span_id, parent_span_id FROM opentelemetry_traces WHERE trace_id <> '' AND trace_id = ${trace_id:sqlstring} ORDER BY \"timestamp\""
+        }
+      ],
+      "description": "按 Trace ID 加载全部已存储的 spans，不受大盘时间范围限制。"
+    }
+  ]
+}

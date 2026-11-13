@@ -43,6 +43,22 @@
       "title": "Grafana",
       "type": "link",
       "url": "https://grafana.com/grafana/dashboards/1860"
+    },
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/rYdddlPWk",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/rYdddlPWk-zh",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
     }
   ],
   "liveNow": false,

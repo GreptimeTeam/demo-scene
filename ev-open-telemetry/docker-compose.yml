@@ -9,7 +9,7 @@ services:
       - demo-network
     environment:
       - SCRAPE_INTERVAL_SEC=${SCRAPE_INTERVAL_SEC:-300}
-      - TESLA_USER_EMAIL=${TESLA_USER_EMAIL}
+      - TESLA_USER_EMAIL=${TESLA_USER_EMAIL:-}
       - IS_MOCK=${IS_MOCK:-false}
       - GREPTIME_HOST=${GREPTIME_HOST:-greptimedb}
     env_file:
@@ -19,7 +19,7 @@ services:
     tty: true
     depends_on:
       greptimedb:
-        condition: service_started
+        condition: service_healthy
 
   envsubst:
     image: docker.io/widerplan/envsubst
@@ -40,9 +40,7 @@ services:
       - 3000:3000
     networks:
       - demo-network
-    user: "$UID:$GID"
     volumes:
-      - provisioning:/etc/grafana/provisioning
       - datasource:/etc/grafana/provisioning/datasources
     depends_on:
       envsubst:
@@ -53,9 +51,3 @@ networks:
   demo-network:
 volumes:
   datasource:
-  provisioning:
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: ./grafana_provisioning

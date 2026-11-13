@@ -1,11 +1,11 @@
-CREATE TABLE "django_http_request_latency" (
+CREATE TABLE IF NOT EXISTS "django_http_request_latency" (
     "span_name" STRING NULL,
     "latency_sketch" BINARY,
     "time_window" TIMESTAMP time index,
     PRIMARY KEY ("span_name")
 );
 
-CREATE FLOW django_http_request_latency_flow
+CREATE FLOW IF NOT EXISTS django_http_request_latency_flow
 SINK TO django_http_request_latency
 EXPIRE AFTER '30m'
 COMMENT 'Aggregate latency using uddsketch'

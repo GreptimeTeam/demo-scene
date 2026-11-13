@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Latency Lab</title>
+<style>body{background:#101820;color:#e6f0ee;font:18px system-ui;margin:8vh auto;max-width:760px;padding:24px}h1{font-size:48px;letter-spacing:-2px}small{color:#71e3bc}p{line-height:1.7;color:#b8cbc7}button,a{font:inherit;padding:14px 22px;border:1px solid #71e3bc;border-radius:6px;background:transparent;color:#71e3bc;cursor:pointer;margin:0 10px 10px 0;display:inline-block}button[aria-pressed=true]{background:#71e3bc;color:#101820}#state{font-family:monospace}a{text-decoration:none}</style>
+<small>GREPTIMEDB / SIGNAL LAB</small><h1>Latency Lab</h1><p id="description">Real HTTP requests. Measured latency. Native histograms.</p><section id="controls"></section><p id="state" role="status"></p><a id="dashboard">Open dashboard ↗</a>
+<script>
+const zh=navigator.language.toLowerCase().startsWith('zh');
+const modes=[["normal", "Normal", "\u6b63\u5e38"], ["long-tail", "Long tail", "\u957f\u5c3e"], ["burst", "Burst", "\u7a81\u53d1"]];
+document.documentElement.lang=zh?'zh-CN':'en';
+document.querySelector('h1').textContent=zh?"\u5ef6\u8fdf\u5b9e\u9a8c\u5ba4":"Latency Lab";
+document.querySelector('#description').textContent=zh?"\u771f\u5b9e HTTP \u8bf7\u6c42\u3001\u5b9e\u9645\u8017\u65f6\u3001\u539f\u751f\u76f4\u65b9\u56fe\u3002":"Real HTTP requests. Measured latency. Native histograms.";
+const dashboard=document.querySelector('#dashboard');const target=new URL(location.href);target.port='3000';target.pathname='/';target.search='';dashboard.href=target;dashboard.textContent=zh?'打开大盘 ↗':'Open dashboard ↗';
+const state=document.querySelector('#state');
+async function refresh(){try{const r=await fetch('/state');if(!r.ok)throw Error(r.status);const data=await r.json();state.textContent=(zh?'当前场景：':'Current scenario: ')+data.scenario;for(const b of document.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.mode===data.scenario));}catch(e){state.textContent=String(e)}}
+for(const [mode,en,cn] of modes){const b=document.createElement('button');b.textContent=zh?cn:en;b.dataset.mode=mode;b.onclick=async()=>{b.disabled=true;try{const r=await fetch('/scenario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scenario:mode})});if(!r.ok)throw Error(r.status);await refresh()}catch(e){state.textContent=String(e)}finally{b.disabled=false}};document.querySelector('#controls').append(b)}
+refresh();setInterval(refresh,3000);
+</script></html>

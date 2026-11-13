@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: greptimedb
+    folder: GreptimeDB
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

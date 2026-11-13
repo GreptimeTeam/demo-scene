@@ -1,0 +1,938 @@
+{
+  "title": "Astronomy Shop · Overview",
+  "uid": "astronomy-shop-greptimedb",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": [
+    "greptimedb",
+    "astronomy-shop"
+  ],
+  "editable": true,
+  "timezone": "browser",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "refresh": "15s",
+  "timepicker": {
+    "refresh_intervals": [
+      "15s",
+      "30s",
+      "1m",
+      "5m"
+    ]
+  },
+  "links": [
+    {
+      "title": "Overview",
+      "url": "/d/astronomy-shop-greptimedb",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "Services",
+      "url": "/d/astronomy-services",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "Logs & traces",
+      "url": "/d/astronomy-logs-traces",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "Host metrics",
+      "url": "/d/astronomy-host",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    },
+    {
+      "title": "简体中文",
+      "url": "/d/astronomy-shop-greptimedb-zh",
+      "type": "link",
+      "keepTime": true,
+      "includeVars": true
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "label": "Service",
+        "type": "query",
+        "datasource": {
+          "type": "info8fcc-greptimedb-datasource",
+          "uid": "greptimedb"
+        },
+        "query": {
+          "refId": "var",
+          "queryType": "sql",
+          "rawSql": "SELECT DISTINCT service_name FROM opentelemetry_traces WHERE \"resource_attributes.service.namespace\" = 'opentelemetry-demo' ORDER BY service_name"
+        },
+        "refresh": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [],
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Astronomy Shop on GreptimeDB",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Requests, logs, traces, and host metrics. Select a service, open **Services** from the service table, and follow a trace ID to **Logs & traces**.\n\n[Host metrics](/d/astronomy-host) · [Services](/d/astronomy-services) · [Logs & traces](/d/astronomy-logs-traces)"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Server requests",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT COUNT(*) AS value FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER'"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Error rate",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT SUM(CASE WHEN span_status_code = 'STATUS_CODE_ERROR' THEN 1 ELSE 0 END) * 1.0 / NULLIF(COUNT(*),0) AS value FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER'"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "P95 latency",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT approx_percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_nano) / 1e6 AS value FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER'"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Active services",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT COUNT(DISTINCT service_name) AS value FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER'"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Requests per minute",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqpm",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "timeseries",
+          "format": 0,
+          "rawSql": "SELECT date_bin(INTERVAL '1 minute', \"timestamp\") AS time, service_name, COUNT(*) AS requests FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER' GROUP BY time, service_name ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Error rate by service · Flow",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 7,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Flow updates every 30 seconds. Counts for the current minute are incomplete.",
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "timeseries",
+          "format": 0,
+          "rawSql": "SELECT time_window AS time, service_name, errors * 1.0 / NULLIF(total,0) AS error_rate FROM service_error_rate_1m WHERE $__timeFilter(time_window) AND service_name IN (${service:sqlstring}) ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Services · select a service",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 24,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "service_name"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Service details",
+                    "url": "/d/astronomy-services?var-service=${__value.raw}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error_rate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95_ms"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT service_name, COUNT(*) AS requests, SUM(CASE WHEN span_status_code = 'STATUS_CODE_ERROR' THEN 1 ELSE 0 END) AS errors, SUM(CASE WHEN span_status_code = 'STATUS_CODE_ERROR' THEN 1 ELSE 0 END) * 1.0 / NULLIF(COUNT(*),0) AS error_rate, approx_percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_nano) / 1e6 AS p95_ms FROM opentelemetry_traces WHERE $__timeFilter(\"timestamp\") AND \"resource_attributes.service.namespace\" = 'opentelemetry-demo' AND service_name IN (${service:sqlstring}) AND span_kind = 'SPAN_KIND_SERVER' GROUP BY service_name ORDER BY requests DESC"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Scrape targets",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 8,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "greptimedb-promql"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "expr": "up{job=~\"node|greptimedb|ad\"}",
+          "legendFormat": "{{job}}",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Host CPU busy",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 8,
+        "y": 24,
+        "w": 8,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "greptimedb-promql"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "expr": "1 - avg(rate(node_cpu_seconds_total{job=\"node\",mode=\"idle\"}[5m]))",
+          "legendFormat": "CPU",
+          "range": true,
+          "instant": false,
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Host memory used",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 24,
+        "w": 8,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "greptimedb-promql"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "expr": "1 - node_memory_MemAvailable_bytes{job=\"node\"} / node_memory_MemTotal_bytes{job=\"node\"}",
+          "legendFormat": "Memory",
+          "range": true,
+          "instant": false,
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Telemetry freshness",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeAsIso",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "description": "The latest write time for each signal, used to identify absent traffic and ingestion interruptions.",
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "SELECT 'traces' AS signal, MAX(\"timestamp\") AS last_seen FROM opentelemetry_traces WHERE \"resource_attributes.service.namespace\" = 'opentelemetry-demo' UNION ALL SELECT 'logs', MAX(\"timestamp\") FROM opentelemetry_logs WHERE json_get_string(resource_attributes, '[\"service.namespace\"]') = 'opentelemetry-demo' UNION ALL SELECT 'host metrics', MAX(greptime_timestamp) FROM node_cpu_seconds_total"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Collector export throughput",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 30,
+        "w": 12,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Spans, log records, and metric points exported per second by the Collector.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "greptimedb-promql"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "expr": "sum(rate(otelcol_exporter_sent_spans_total[5m]))",
+          "legendFormat": "Spans / s",
+          "range": true,
+          "instant": false,
+          "format": "time_series"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "expr": "sum(rate(otelcol_exporter_sent_log_records_total[5m]))",
+          "legendFormat": "Logs / s",
+          "range": true
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "expr": "sum(rate(otelcol_exporter_sent_metric_points_total[5m]))",
+          "legendFormat": "Metric points / s",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Unified SQL · requests, logs, host",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 24,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "service_name"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Service details",
+                    "url": "/d/astronomy-services?var-service=${__value.raw}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error_rate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "vm_available_memory_bytes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "datasource": {
+        "type": "info8fcc-greptimedb-datasource",
+        "uid": "greptimedb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "info8fcc-greptimedb-datasource",
+            "uid": "greptimedb"
+          },
+          "editorType": "sql",
+          "queryType": "table",
+          "format": 1,
+          "rawSql": "WITH logs_by_minute AS (\n  SELECT date_bin(INTERVAL '1 minute', \"timestamp\") AS minute,\n         json_get_string(resource_attributes, '[\"service.name\"]') AS service_name,\n         COUNT(*) AS log_records,\n         SUM(CASE WHEN severity_number >= 17 THEN 1 ELSE 0 END) AS error_logs,\n         SUM(CASE WHEN severity_number BETWEEN 13 AND 16 THEN 1 ELSE 0 END) AS warning_logs\n  FROM opentelemetry_logs\n  WHERE $__timeFilter(\"timestamp\")\n    AND json_get_string(resource_attributes, '[\"service.namespace\"]') = 'opentelemetry-demo'\n  GROUP BY minute, service_name\n), host_by_minute AS (\n  SELECT date_bin(INTERVAL '1 minute', greptime_timestamp) AS minute,\n         AVG(greptime_value) AS vm_available_memory_bytes\n  FROM \"node_memory_MemAvailable_bytes\"\n  WHERE $__timeFilter(greptime_timestamp) AND job = 'node'\n  GROUP BY minute\n)\nSELECT f.time_window, f.service_name, f.total AS server_requests, f.errors AS server_errors,\n       f.errors * 1.0 / NULLIF(f.total, 0) AS error_rate,\n       l.log_records, l.warning_logs, l.error_logs, h.vm_available_memory_bytes\nFROM service_error_rate_1m f\nLEFT JOIN logs_by_minute l ON f.time_window = l.minute AND f.service_name = l.service_name\nLEFT JOIN host_by_minute h ON f.time_window = h.minute\nWHERE f.time_window >= $__fromTime AND f.time_window <= $__toTime\n  AND f.service_name IN (${service:sqlstring})\nORDER BY f.time_window DESC, f.errors DESC\nLIMIT 100"
+        }
+      ],
+      "description": "Joins trace Flow, application logs, and host metrics by minute. Available host memory describes the entire Docker VM; temporal correlation does not establish causation."
+    }
+  ]
+}
