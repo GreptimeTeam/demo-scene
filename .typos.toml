@@ -1,0 +1,5 @@
+[type.pardig-attribution]
+extend-glob = ["pardig-attributions.txt"]
+
+[type.pardig-attribution.extend-words]
+GES = "GES"

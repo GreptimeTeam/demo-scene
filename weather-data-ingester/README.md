@@ -6,6 +6,16 @@ The default import contains **18,297,840 observations** from East Asia and the S
 
 The dashboard includes precipitation and infrared maps, regional time series, distance filtering around a city, and a SQL join between precipitation and satellite observations. The entry page selects English or Chinese from the browser's preferred language. The dashboard links switch languages while retaining filters and time ranges.
 
+## Screenshots
+
+East Asia precipitation and infrared observations in the English dashboard.
+
+![English dashboard showing precipitation and infrared maps for East Asia](screenshots/overview.png)
+
+Regional time series, rainfall within 200 km of Shanghai, and precipitation joined with satellite observations.
+
+![English dashboard showing time series, distance-filtered rainfall, and satellite joins](screenshots/spatial-query.png)
+
 ## Run
 
 Requires Docker with Compose v2 and network access to Docker Hub, PyPI, Google Cloud Storage, and OpenStreetMap. The database, Grafana, and Python 3.11 importer run in containers. Public data access does not require a Google account or API key in this tested setup.
