@@ -60,8 +60,6 @@ Docker-based demos use GreptimeDB v1.3.0 and require Docker Compose 2.24 or late
 
 Open Grafana at its root URL to select the dashboard language from the browser's preferred language. Dashboard links switch between English and 简体中文, preserving time ranges and filters. The shared translation generator is documented in [grafana-common](grafana-common).
 
-Verification coverage and remaining limits: [v1.3 audit](AUDIT.md).
-
 Hosted demos: [Global](http://live.greptime.cloud/) · [China](http://live.cloud.greptime.cn/).
 
 ## Feedback & Questions
