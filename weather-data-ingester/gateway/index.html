@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weather Observatory · 气象观测台</title>
+<style>body{background:#101217;color:#e6edf3;font:18px system-ui;padding:12vh 8vw}a{color:#6ddcff;margin-right:2rem}</style>
+<h1>Weather Observatory · 气象观测台</h1>
+<p><a href="/d/weather-observatory">English</a><a href="/d/weather-observatory-zh">简体中文</a></p>
+<script>
+const language = navigator.languages?.[0] || navigator.language || 'en';
+const dashboard = language.toLowerCase().startsWith('zh') ? 'weather-observatory-zh' : 'weather-observatory';
+location.replace('/d/' + dashboard + location.search);
+</script>
+</html>

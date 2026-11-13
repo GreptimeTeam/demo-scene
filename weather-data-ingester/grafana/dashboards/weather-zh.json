@@ -1,0 +1,2902 @@
+{
+  "uid": "weather-observatory-zh",
+  "title": "气象观测台 · PARDIG × SatWeave",
+  "tags": [
+    "GreptimeDB",
+    "weather",
+    "geospatial"
+  ],
+  "schemaVersion": 41,
+  "version": 1,
+  "editable": true,
+  "style": "dark",
+  "timezone": "utc",
+  "time": {
+    "from": "2026-09-01T00:00:00.000Z",
+    "to": "2026-09-01T23:59:59.999Z"
+  },
+  "refresh": "",
+  "templating": {
+    "list": [
+      {
+        "name": "region",
+        "label": "区域",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "weather-pg"
+        },
+        "query": "SELECT CASE region_id WHEN 'east-asia' THEN '东亚' WHEN 'bay-area' THEN '旧金山湾区' ELSE region_name END AS __text, region_id AS __value FROM weather_regions ORDER BY region_id",
+        "definition": "SELECT CASE region_id WHEN 'east-asia' THEN '东亚' WHEN 'bay-area' THEN '旧金山湾区' ELSE region_name END AS __text, region_id AS __value FROM weather_regions ORDER BY region_id",
+        "refresh": 2,
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "east-asia",
+          "value": "east-asia"
+        },
+        "sort": 0
+      },
+      {
+        "name": "center_lat",
+        "label": "Center Lat",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "weather-pg"
+        },
+        "query": "SELECT center_lat FROM weather_regions WHERE region_id=${region:sqlstring}",
+        "definition": "SELECT center_lat FROM weather_regions WHERE region_id=${region:sqlstring}",
+        "refresh": 2,
+        "hide": 2,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "31.2304",
+          "value": "31.2304"
+        },
+        "sort": 0
+      },
+      {
+        "name": "center_lon",
+        "label": "Center Lon",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "weather-pg"
+        },
+        "query": "SELECT center_lon FROM weather_regions WHERE region_id=${region:sqlstring}",
+        "definition": "SELECT center_lon FROM weather_regions WHERE region_id=${region:sqlstring}",
+        "refresh": 2,
+        "hide": 2,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "121.4737",
+          "value": "121.4737"
+        },
+        "sort": 0
+      },
+      {
+        "name": "snapshot",
+        "label": "快照 · UTC",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "weather-pg"
+        },
+        "query": "SELECT DISTINCT CAST(ts AS STRING) AS __text, CAST(ts AS BIGINT) AS __value FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) ORDER BY __value",
+        "definition": "SELECT DISTINCT CAST(ts AS STRING) AS __text, CAST(ts AS BIGINT) AS __value FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) ORDER BY __value",
+        "refresh": 2,
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "1788220800000",
+          "value": "1788220800000"
+        },
+        "sort": 0
+      },
+      {
+        "name": "radius",
+        "label": "半径 · km",
+        "type": "custom",
+        "query": "50,100,200,500",
+        "current": {
+          "text": "200",
+          "value": "200"
+        },
+        "options": [
+          {
+            "text": "50",
+            "value": "50",
+            "selected": false
+          },
+          {
+            "text": "100",
+            "value": "100",
+            "selected": false
+          },
+          {
+            "text": "200",
+            "value": "200",
+            "selected": true
+          },
+          {
+            "text": "500",
+            "value": "500",
+            "selected": false
+          }
+        ]
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "气象观测台 / GreptimeDB",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 5
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### 用 SQL 查看一天的降水与云层\n**PARDIG + SatWeave** · 0.1° 原始网格 · GreptimeDB **v1.3.0** · InfluxDB 写入 → PostgreSQL 查询 → Grafana\n\n选择**区域**、历史**时间范围**与**快照**。地图显示快照，曲线显示所选时段；**半径**只作用于中心点周边降水图。时间均为 UTC。"
+      }
+    },
+    {
+      "id": 2,
+      "title": "已存储观测数",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "cyan"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT sum(n) AS observations FROM (SELECT count(*) AS n FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) UNION ALL SELECT count(*) AS n FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts))"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "峰值降水率",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 5,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:mm/h",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT max(rain_mm_h) AS peak FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts)"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "最低红外亮温",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kelvin",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT min(brightness_k) AS coldest FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts)"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "降雨网格占比 · 快照",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 5,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT 100.0 * sum(CASE WHEN rain_mm_h >= 1 THEN 1 ELSE 0 END) / nullif(count(rain_mm_h),0) AS rainy FROM pardig WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP)"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "降水分布 / 0.5° 网格最大值",
+      "type": "geomap",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 13
+      },
+      "description": "仅对地图显示做空间聚合，数据库保留 0.1° 原始网格。悬停查看数值。红外亮温不是地面气温。",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:mm/h",
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "custom": {},
+          "min": 0,
+          "max": 25
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "basemap": {
+          "name": "OpenStreetMap",
+          "type": "osm-standard",
+          "config": {},
+          "opacity": 0.7
+        },
+        "controls": {
+          "showZoom": true,
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showScale": true
+        },
+        "view": {
+          "id": "fit",
+          "allLayers": true,
+          "padding": 15,
+          "lat": 30,
+          "lon": 120,
+          "zoom": 12
+        },
+        "tooltip": {
+          "mode": "details"
+        },
+        "layers": [
+          {
+            "name": "降水分布 / 0.5° 网格最大值",
+            "type": "markers",
+            "location": {
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
+            },
+            "tooltip": true,
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "field": "rain_mm_h",
+                  "fixed": "blue"
+                },
+                "opacity": 0.7,
+                "size": {
+                  "field": "rain_mm_h",
+                  "fixed": 4,
+                  "min": 0,
+                  "max": 12
+                },
+                "symbol": {
+                  "mode": "fixed",
+                  "fixed": "img/icons/marker/square.svg"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT floor(latitude * 2) / 2 + 0.25 AS latitude, floor(longitude * 2) / 2 + 0.25 AS longitude, max(rain_mm_h) AS rain_mm_h FROM pardig WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP) GROUP BY floor(latitude * 2), floor(longitude * 2)"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "红外亮温 / 0.5° 网格平均值",
+      "type": "geomap",
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 12,
+        "h": 13
+      },
+      "description": "仅对地图显示做空间聚合，数据库保留 0.1° 原始网格。悬停查看数值。红外亮温不是地面气温。",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kelvin",
+          "color": {
+            "mode": "continuous-BlPu"
+          },
+          "custom": {},
+          "min": 200,
+          "max": 310
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "basemap": {
+          "name": "OpenStreetMap",
+          "type": "osm-standard",
+          "config": {},
+          "opacity": 0.7
+        },
+        "controls": {
+          "showZoom": true,
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showScale": true
+        },
+        "view": {
+          "id": "fit",
+          "allLayers": true,
+          "padding": 15,
+          "lat": 30,
+          "lon": 120,
+          "zoom": 12
+        },
+        "tooltip": {
+          "mode": "details"
+        },
+        "layers": [
+          {
+            "name": "红外亮温 / 0.5° 网格平均值",
+            "type": "markers",
+            "location": {
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
+            },
+            "tooltip": true,
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "field": "brightness_k",
+                  "fixed": "blue"
+                },
+                "opacity": 0.7,
+                "size": {
+                  "fixed": 4,
+                  "min": 3,
+                  "max": 10
+                },
+                "symbol": {
+                  "mode": "fixed",
+                  "fixed": "img/icons/marker/square.svg"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT floor(latitude * 2) / 2 + 0.25 AS latitude, floor(longitude * 2) / 2 + 0.25 AS longitude, avg(brightness_k) AS brightness_k FROM satweave WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP) GROUP BY floor(latitude * 2), floor(longitude * 2)"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "区域降水率 · 每 15 分钟",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "description": "瞬时降水率，不是累计降水量。平均值为网格点算术平均，未做面积加权。",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:mm/h",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time, avg(rain_mm_h) AS mean_rate, max(rain_mm_h) AS peak_rate FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) GROUP BY ts ORDER BY ts"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "区域亮温 · 每小时",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "description": "卫星观测的大气顶亮温，不是地面气温。",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kelvin",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time, min(brightness_k) AS coldest, avg(brightness_k) AS mean_brightness FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) GROUP BY ts ORDER BY ts"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "中心点 ${radius} km 内的降水率",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "description": "使用 WKT 点和 st_distance_sphere_m 计算球面距离。东亚中心为上海，湾区中心为旧金山；城市参数使用该城市中心。只统计已导入网格。",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:mm/h",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time, avg(rain_mm_h) AS local_mean, max(rain_mm_h) AS local_peak FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) AND st_distance_sphere_m(wkt_point_from_latlng(latitude,longitude), wkt_point_from_latlng(${center_lat},${center_lon})) <= ${radius} * 1000 GROUP BY ts ORDER BY ts"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "降水热点 × 卫星观测",
+      "type": "table",
+      "gridPos": {
+        "x": 12,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "description": "按相同 UTC 时间、区域和原始网格精确关联，不插值。空间关联不表示因果关系。",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:mm/h"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-BlYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kelvin"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT p.latitude, p.longitude, p.rain_mm_h, s.brightness_k,\nround(st_distance_sphere_m(wkt_point_from_latlng(p.latitude,p.longitude),wkt_point_from_latlng(${center_lat},${center_lon}))/1000,1) AS distance_km\nFROM pardig p JOIN satweave s ON p.region_id=s.region_id AND p.grid_id=s.grid_id AND p.ts=s.ts\nWHERE p.region_id=${region:sqlstring} AND s.region_id=${region:sqlstring}\nAND p.ts=CAST(${snapshot} AS TIMESTAMP) AND s.ts=CAST(${snapshot} AS TIMESTAMP)\nORDER BY p.rain_mm_h DESC, p.grid_id LIMIT 15"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "数据来源、加工与许可",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 24,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "observations"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "观测数"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "coldest"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "最低亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rainy"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降雨占比"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "峰值降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean_brightness"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "平均亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内平均值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "local_peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "半径内峰值"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "纬度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "longitude"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "经度"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "降水率"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "红外亮温"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "距离（km）"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**数据：**[PARDIG](https://developers.google.cn/weathernext/guides/pardig) 与 [SatWeave](https://developers.google.cn/weathernext/guides/satweave)，Google DeepMind / Google Research。[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)。PARDIG：[Shalev 等，2026](https://arxiv.org/abs/2611.13941)。上游来源包括 ECMWF、NASA、JAXA、NOAA、EUMETSAT 和 JMA；完整署名见 ATTRIBUTION.txt 与 pardig-attributions.txt。\n\n**加工：**区域与时间裁剪、m/h 转 mm/h、经度归一化、SQL 聚合及可视化。缺失值保留为 NULL。**实验数据，不属于官方气象预报或预警。**不代表数据提供方背书。地图底图：© OpenStreetMap contributors。"
+      }
+    }
+  ],
+  "links": [
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/weather-observatory",
+      "includeVars": true,
+      "keepTime": true
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/weather-observatory-zh",
+      "includeVars": true,
+      "keepTime": true
+    }
+  ]
+}

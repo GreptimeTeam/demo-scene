@@ -1,0 +1,42 @@
+{
+  "2": {
+    "title": "Stored observations",
+    "sql": "SELECT sum(n) AS observations FROM (SELECT count(*) AS n FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) UNION ALL SELECT count(*) AS n FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts))"
+  },
+  "3": {
+    "title": "Peak precipitation rate",
+    "sql": "SELECT max(rain_mm_h) AS peak FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts)"
+  },
+  "4": {
+    "title": "Coldest infrared pixel",
+    "sql": "SELECT min(brightness_k) AS coldest FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts)"
+  },
+  "5": {
+    "title": "Rainy cells \u00b7 snapshot",
+    "sql": "SELECT 100.0 * sum(CASE WHEN rain_mm_h >= 1 THEN 1 ELSE 0 END) / nullif(count(rain_mm_h),0) AS rainy FROM pardig WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP)"
+  },
+  "6": {
+    "title": "PRECIPITATION  /  0.5\u00b0 cell maxima",
+    "sql": "SELECT floor(latitude * 2) / 2 + 0.25 AS latitude, floor(longitude * 2) / 2 + 0.25 AS longitude, max(rain_mm_h) AS rain_mm_h FROM pardig WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP) GROUP BY floor(latitude * 2), floor(longitude * 2)"
+  },
+  "7": {
+    "title": "INFRARED  /  0.5\u00b0 cell means",
+    "sql": "SELECT floor(latitude * 2) / 2 + 0.25 AS latitude, floor(longitude * 2) / 2 + 0.25 AS longitude, avg(brightness_k) AS brightness_k FROM satweave WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP) GROUP BY floor(latitude * 2), floor(longitude * 2)"
+  },
+  "8": {
+    "title": "Rainfall envelope \u00b7 every 15 minutes",
+    "sql": "SELECT ts AS time, avg(rain_mm_h) AS mean_rate, max(rain_mm_h) AS peak_rate FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) GROUP BY ts ORDER BY ts"
+  },
+  "9": {
+    "title": "Cloud temperature envelope \u00b7 hourly",
+    "sql": "SELECT ts AS time, min(brightness_k) AS coldest, avg(brightness_k) AS mean_brightness FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) GROUP BY ts ORDER BY ts"
+  },
+  "10": {
+    "title": "Rainfall within ${radius} km of the selected center",
+    "sql": "SELECT ts AS time, avg(rain_mm_h) AS local_mean, max(rain_mm_h) AS local_peak FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) AND st_distance_sphere_m(wkt_point_from_latlng(latitude,longitude), wkt_point_from_latlng(${center_lat},${center_lon})) <= ${radius} * 1000 GROUP BY ts ORDER BY ts"
+  },
+  "11": {
+    "title": "Rain hotspots \u00d7 satellite observations",
+    "sql": "SELECT p.latitude, p.longitude, p.rain_mm_h, s.brightness_k,\nround(st_distance_sphere_m(wkt_point_from_latlng(p.latitude,p.longitude),wkt_point_from_latlng(${center_lat},${center_lon}))/1000,1) AS distance_km\nFROM pardig p JOIN satweave s ON p.region_id=s.region_id AND p.grid_id=s.grid_id AND p.ts=s.ts\nWHERE p.region_id=${region:sqlstring} AND s.region_id=${region:sqlstring}\nAND p.ts=CAST(${snapshot} AS TIMESTAMP) AND s.ts=CAST(${snapshot} AS TIMESTAMP)\nORDER BY p.rain_mm_h DESC, p.grid_id LIMIT 15"
+  }
+}

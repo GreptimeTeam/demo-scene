@@ -34,6 +34,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ### Data Pipelines
 
+* [Weather Observatory: PARDIG + SatWeave + Grafana](weather-data-ingester)
 * [Vector + GreptimeDB](vector-ingestion)
 * [Kafka + Vector + GreptimeDB](kafka-ingestion)
 * [Apache Flink + GreptimeDB](flink-ingestion)

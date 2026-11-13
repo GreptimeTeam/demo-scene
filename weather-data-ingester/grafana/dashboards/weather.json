@@ -1,0 +1,875 @@
+{
+  "uid": "weather-observatory",
+  "title": "Weather Observatory · PARDIG × SatWeave",
+  "tags": [
+    "GreptimeDB",
+    "weather",
+    "geospatial"
+  ],
+  "schemaVersion": 41,
+  "version": 1,
+  "editable": true,
+  "style": "dark",
+  "timezone": "utc",
+  "time": {
+    "from": "2026-09-01T00:00:00.000Z",
+    "to": "2026-09-01T23:59:59.999Z"
+  },
+  "refresh": "",
+  "templating": {
+    "list": [
+      {
+        "name": "region",
+        "label": "Region",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "weather-pg"
+        },
+        "query": "SELECT region_name AS __text, region_id AS __value FROM weather_regions ORDER BY region_id",
+        "definition": "SELECT region_name AS __text, region_id AS __value FROM weather_regions ORDER BY region_id",
+        "refresh": 2,
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "east-asia",
+          "value": "east-asia"
+        },
+        "sort": 0
+      },
+      {
+        "name": "center_lat",
+        "label": "Center Lat",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "weather-pg"
+        },
+        "query": "SELECT center_lat FROM weather_regions WHERE region_id=${region:sqlstring}",
+        "definition": "SELECT center_lat FROM weather_regions WHERE region_id=${region:sqlstring}",
+        "refresh": 2,
+        "hide": 2,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "31.2304",
+          "value": "31.2304"
+        },
+        "sort": 0
+      },
+      {
+        "name": "center_lon",
+        "label": "Center Lon",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "weather-pg"
+        },
+        "query": "SELECT center_lon FROM weather_regions WHERE region_id=${region:sqlstring}",
+        "definition": "SELECT center_lon FROM weather_regions WHERE region_id=${region:sqlstring}",
+        "refresh": 2,
+        "hide": 2,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "121.4737",
+          "value": "121.4737"
+        },
+        "sort": 0
+      },
+      {
+        "name": "snapshot",
+        "label": "Snapshot · UTC",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "weather-pg"
+        },
+        "query": "SELECT DISTINCT CAST(ts AS STRING) AS __text, CAST(ts AS BIGINT) AS __value FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) ORDER BY __value",
+        "definition": "SELECT DISTINCT CAST(ts AS STRING) AS __text, CAST(ts AS BIGINT) AS __value FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) ORDER BY __value",
+        "refresh": 2,
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "1788220800000",
+          "value": "1788220800000"
+        },
+        "sort": 0
+      },
+      {
+        "name": "radius",
+        "label": "Radius · km",
+        "type": "custom",
+        "query": "50,100,200,500",
+        "current": {
+          "text": "200",
+          "value": "200"
+        },
+        "options": [
+          {
+            "text": "50",
+            "value": "50",
+            "selected": false
+          },
+          {
+            "text": "100",
+            "value": "100",
+            "selected": false
+          },
+          {
+            "text": "200",
+            "value": "200",
+            "selected": true
+          },
+          {
+            "text": "500",
+            "value": "500",
+            "selected": false
+          }
+        ]
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "WEATHER OBSERVATORY  /  GreptimeDB",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 5
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### A day of rain and clouds, in SQL\n**PARDIG + SatWeave** · 0.1° source grid · GreptimeDB **v1.3.0** · InfluxDB writes → PostgreSQL queries → Grafana\n\nChoose a **region**, a historical **time range**, and a **snapshot**. Maps show the snapshot; charts follow the time range. **Radius** applies to the local rainfall chart. All times are UTC."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Stored observations",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "cyan"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT sum(n) AS observations FROM (SELECT count(*) AS n FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) UNION ALL SELECT count(*) AS n FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts))"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Peak precipitation rate",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 5,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:mm/h",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT max(rain_mm_h) AS peak FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts)"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Coldest infrared pixel",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kelvin",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT min(brightness_k) AS coldest FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts)"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Rainy cells · snapshot",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 5,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT 100.0 * sum(CASE WHEN rain_mm_h >= 1 THEN 1 ELSE 0 END) / nullif(count(rain_mm_h),0) AS rainy FROM pardig WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP)"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "PRECIPITATION  /  0.5° cell maxima",
+      "type": "geomap",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 13
+      },
+      "description": "Display-only spatial aggregation. Original 0.1° data remains in GreptimeDB. Hover for values. Brightness temperature is not surface air temperature.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:mm/h",
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "custom": {},
+          "min": 0,
+          "max": 25
+        },
+        "overrides": []
+      },
+      "options": {
+        "basemap": {
+          "name": "OpenStreetMap",
+          "type": "osm-standard",
+          "config": {},
+          "opacity": 0.7
+        },
+        "controls": {
+          "showZoom": true,
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showScale": true
+        },
+        "view": {
+          "id": "fit",
+          "allLayers": true,
+          "padding": 15,
+          "lat": 30,
+          "lon": 120,
+          "zoom": 12
+        },
+        "tooltip": {
+          "mode": "details"
+        },
+        "layers": [
+          {
+            "name": "PRECIPITATION  /  0.5° cell maxima",
+            "type": "markers",
+            "location": {
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
+            },
+            "tooltip": true,
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "field": "rain_mm_h",
+                  "fixed": "blue"
+                },
+                "opacity": 0.7,
+                "size": {
+                  "field": "rain_mm_h",
+                  "fixed": 4,
+                  "min": 0,
+                  "max": 12
+                },
+                "symbol": {
+                  "mode": "fixed",
+                  "fixed": "img/icons/marker/square.svg"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT floor(latitude * 2) / 2 + 0.25 AS latitude, floor(longitude * 2) / 2 + 0.25 AS longitude, max(rain_mm_h) AS rain_mm_h FROM pardig WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP) GROUP BY floor(latitude * 2), floor(longitude * 2)"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "INFRARED  /  0.5° cell means",
+      "type": "geomap",
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 12,
+        "h": 13
+      },
+      "description": "Display-only spatial aggregation. Original 0.1° data remains in GreptimeDB. Hover for values. Brightness temperature is not surface air temperature.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kelvin",
+          "color": {
+            "mode": "continuous-BlPu"
+          },
+          "custom": {},
+          "min": 200,
+          "max": 310
+        },
+        "overrides": []
+      },
+      "options": {
+        "basemap": {
+          "name": "OpenStreetMap",
+          "type": "osm-standard",
+          "config": {},
+          "opacity": 0.7
+        },
+        "controls": {
+          "showZoom": true,
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showScale": true
+        },
+        "view": {
+          "id": "fit",
+          "allLayers": true,
+          "padding": 15,
+          "lat": 30,
+          "lon": 120,
+          "zoom": 12
+        },
+        "tooltip": {
+          "mode": "details"
+        },
+        "layers": [
+          {
+            "name": "INFRARED  /  0.5° cell means",
+            "type": "markers",
+            "location": {
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
+            },
+            "tooltip": true,
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "field": "brightness_k",
+                  "fixed": "blue"
+                },
+                "opacity": 0.7,
+                "size": {
+                  "fixed": 4,
+                  "min": 3,
+                  "max": 10
+                },
+                "symbol": {
+                  "mode": "fixed",
+                  "fixed": "img/icons/marker/square.svg"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT floor(latitude * 2) / 2 + 0.25 AS latitude, floor(longitude * 2) / 2 + 0.25 AS longitude, avg(brightness_k) AS brightness_k FROM satweave WHERE region_id = ${region:sqlstring} AND ts = CAST(${snapshot} AS TIMESTAMP) GROUP BY floor(latitude * 2), floor(longitude * 2)"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Rainfall envelope · every 15 minutes",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Instantaneous rates, not accumulated rainfall. Mean is unweighted across grid points.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:mm/h",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time, avg(rain_mm_h) AS mean_rate, max(rain_mm_h) AS peak_rate FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) GROUP BY ts ORDER BY ts"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Cloud temperature envelope · hourly",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Measured top-of-atmosphere brightness temperature; not surface air temperature.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kelvin",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time, min(brightness_k) AS coldest, avg(brightness_k) AS mean_brightness FROM satweave WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) GROUP BY ts ORDER BY ts"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Rainfall within ${radius} km of the selected center",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Uses st_distance_sphere_m on WKT points. East Asia center: Shanghai; Bay Area: San Francisco; city selections: that city. Only imported cells contribute.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:mm/h",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time, avg(rain_mm_h) AS local_mean, max(rain_mm_h) AS local_peak FROM pardig WHERE region_id = ${region:sqlstring} AND $__timeFilter(ts) AND st_distance_sphere_m(wkt_point_from_latlng(latitude,longitude), wkt_point_from_latlng(${center_lat},${center_lon})) <= ${radius} * 1000 GROUP BY ts ORDER BY ts"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Rain hotspots × satellite observations",
+      "type": "table",
+      "gridPos": {
+        "x": 12,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Exact timestamp + original grid-cell join. No interpolation. Spatial association does not establish causation.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rain_mm_h"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:mm/h"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-BlYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brightness_k"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kelvin"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "weather-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "weather-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT p.latitude, p.longitude, p.rain_mm_h, s.brightness_k,\nround(st_distance_sphere_m(wkt_point_from_latlng(p.latitude,p.longitude),wkt_point_from_latlng(${center_lat},${center_lon}))/1000,1) AS distance_km\nFROM pardig p JOIN satweave s ON p.region_id=s.region_id AND p.grid_id=s.grid_id AND p.ts=s.ts\nWHERE p.region_id=${region:sqlstring} AND s.region_id=${region:sqlstring}\nAND p.ts=CAST(${snapshot} AS TIMESTAMP) AND s.ts=CAST(${snapshot} AS TIMESTAMP)\nORDER BY p.rain_mm_h DESC, p.grid_id LIMIT 15"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Sources, transformations & license",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 24,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Data:** [PARDIG](https://developers.google.cn/weathernext/guides/pardig) and [SatWeave](https://developers.google.cn/weathernext/guides/satweave), Google DeepMind / Google Research. [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). PARDIG: [Shalev et al., 2026](https://arxiv.org/abs/2611.13941). Upstream providers include ECMWF, NASA, JAXA, NOAA, EUMETSAT and JMA; full notices are in the demo ATTRIBUTION.txt and pardig-attributions.txt.\n\n**Changes:** regional/time subsetting, m/h → mm/h, longitude normalization, SQL aggregation and visualization. Missing observations remain NULL. **Experimental data, not official weather guidance.** No endorsement implied. Map tiles: © OpenStreetMap contributors."
+      }
+    }
+  ],
+  "links": [
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/weather-observatory",
+      "includeVars": true,
+      "keepTime": true
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/weather-observatory-zh",
+      "includeVars": true,
+      "keepTime": true
+    }
+  ]
+}

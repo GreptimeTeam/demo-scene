@@ -1,0 +1,44 @@
+PARDIG and SatWeave — Google DeepMind / Google Research.
+Data license: Creative Commons Attribution 4.0 International (CC BY 4.0).
+https://creativecommons.org/licenses/by/4.0/
+
+Sources:
+https://developers.google.cn/weathernext/guides/pardig
+https://developers.google.cn/weathernext/guides/satweave
+PARDIG paper: Shalev et al. (2026), PARDIG: Global Precipitation Estimates
+Learned from Sparse Satellite Observations. https://arxiv.org/abs/2611.13941
+
+Exact source URLs, attributes, selected regions and times are retained in
+user-generated data/cache/*.json and data/run-*.json.
+
+Modifications: selected time intervals and regional bounding boxes; selected
+SatWeave's 11.2 micrometer band; converted precipitation from m/h to mm/h;
+normalized longitudes; flattened grids to table rows; represented missing
+values as SQL NULL; performed SQL joins and display-only spatial aggregations.
+
+The data is experimental and provided as-is. It does not constitute official
+weather observations, forecasts, watches, or warnings. It must not be the sole
+source for protection of life or property. Consult official meteorological
+services and emergency authorities. No endorsement by Google or any upstream
+provider is implied.
+
+Full PARDIG upstream acknowledgements are preserved in pardig-attributions.txt,
+extracted without content changes from Google's official document:
+https://storage.googleapis.com/weathernext-public/pardig-attributions-acknowledgements.pdf
+
+SatWeave upstream sources:
+- Meteosat: EUMETSAT calibrated satellite observations under CC BY 4.0.
+  https://data.eumetsat.int/
+  Google incorporated the data into the global SatWeave mosaic.
+- GOES-R: NOAA GOES via Google Cloud Public Datasets.
+  https://console.cloud.google.com/marketplace/product/noaa-public/goes
+- Himawari: Meteorological Satellite Center, Japan Meteorological Agency (JMA),
+  via NOAA NODD on Google Cloud.
+  https://console.cloud.google.com/marketplace/product/bigquery-public-data/himawari
+  Google incorporated the data into the global SatWeave mosaic.
+
+Keep this file and pardig-attributions.txt with redistributed samples and
+visualizations. Third-party source materials may have separate terms; this demo
+uses Google's published datasets, not separately downloaded raw inputs.
+
+Map tiles: OpenStreetMap, https://www.openstreetmap.org/copyright
