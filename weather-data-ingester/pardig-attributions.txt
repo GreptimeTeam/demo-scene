@@ -1,0 +1,56 @@
+PARDIG Dataset Attributions & Acknowledgements
+The following data sources were used in training the PARDIG model and/or are used in
+operationalizing its precipitation estimates:
+Copernicus ERA5 Reanalysis
+Copernicus Climate Change Service, Climate Data Store, (2023): ERA5 hourly data from 1959 to
+present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). DOI:
+10.24381/cds.adbb2d47. (Accessed on 05-05-2026.)
+Generated using or contains modified Copernicus Climate Change Service information.
+Neither the European Commission nor ECMWF is responsible for any use that may be made of
+the Copernicus information or data it contains.
+ECMWF HRES Analysis
+ECMWF HRES datasets (available at www.ecmwf.int). Copyright 2023 ECMWF. ECMWF open
+data is published under CC BY 4.0.
+Source: European Centre for Medium-Range Weather Forecasts (ECMWF). Contains modified
+data from ECMWF. Neither ECMWF nor the European Commission is responsible for any use
+that may be made of the information or data it contains.
+NOAA GridSat-B1
+NOAA Fundamental Climate Data Records (FCDR) first accessed on September 2024 from
+https://registry.opendata.aws/noaa-cdr-fundamental.
+NOAA AMSU-A Brightness Temperature Climate Data Record (CDR)
+Zou, Cheng-Zhi; Wang, Wenhui; and NOAA CDR Program (2013): NOAA Fundamental
+
+Climate Data Record (FCDR) of AMSU-A Level 1c Brightness Temperature, Version 1.0.
+NOAA National Climatic Data Center. doi:10.7289/V5X63JT2 [Accessed September 2024].
+EUMETSAT EARS-ATMS (Advanced Technology Microwave Sounder)
+EUMETSAT (2012): EARS-ATMS - Suomi-NPP and JPSS. EUMETSAT Data Store. Collection ID:
+EO:EUM:DAT:MULT:EARS-ATMS.
+EUMETSAT Metop MHS (Microwave Humidity Sounder)
+EUMETSAT (2020): MHS Microwave Humidity Sounder Climate Data Record Release 1 - Metop
+and NOAA, Version 1.0. EUMETSAT. doi:10.15770/EUM_SEC_CLM_0045.
+NASA GPM CORRA 2B
+
+Olson, William S., and GPM Combined Radar-Radiometer Algorithm Team (2022): GPM DPR
+and GMI Combined Precipitation L2B 1.5 hours 5 km V07 (GPM_2BCMB). Greenbelt, MD, NASA
+Goddard Earth Sciences Data and Information Services Center (GES DISC) [accessed March
+2026] https://doi.org/10.5067/GPM/DPRGMI/CMB/2B/07.
+Meteosat (1st, 2nd, and 3rd Generation)
+Includes calibrated satellite observations supplied by EUMETSAT under the Creative Commons
+Attribution 4.0 International (CC BY 4.0) license (https://data.eumetsat.int/). Modification:
+Google incorporated the data into a global coverage geostationary satellite mosaic
+(SatWeave).
+GOES-R Series (16, 17, 18, and 19)
+NOAA Geostationary Operational Environmental Satellites (GOES) is accessed on an ongoing
+basis from https://console.cloud.google.com/marketplace/product/noaa-public/goes.
+Himawari (8 and 9)
+Source: Meteorological Satellite Center of Japan Meteorological Agency (JMA) via NOAA
+NODD
+(https://console.cloud.google.com/marketplace/product/bigquery-public-data/himawari).
+Modification: Google incorporated the data into a global coverage geostationary satellite
+mosaic (SatWeave).
+MTSAT Series (1R and 2)
+MTSAT geostationary satellite data provided by the Japan Meteorological Agency (JMA) and
+distributed by the NASA Langley Research Center Atmospheric Science Data Center (ASDC)
+CERES project.
+
+

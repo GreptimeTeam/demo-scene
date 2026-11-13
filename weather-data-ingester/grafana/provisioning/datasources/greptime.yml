@@ -1,0 +1,14 @@
+apiVersion: 1
+datasources:
+  - name: GreptimeDB Weather
+    uid: weather-pg
+    type: postgres
+    access: proxy
+    url: greptimedb:4003
+    user: greptime
+    isDefault: true
+    jsonData:
+      database: weather
+      sslmode: disable
+      postgresVersion: 1400
+      timescaledb: false
