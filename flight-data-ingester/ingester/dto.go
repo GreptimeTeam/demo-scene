@@ -4,30 +4,17 @@ import "time"
 
 type FlightMetric struct {
 	Icao24       string    `greptime:"tag;column:icao24;type:string"`
-	Longitude    *float64  `greptime:"tag;column:longitude;type:float64"`
-	Latitude     *float64  `greptime:"tag;column:latitude;type:float64"`
-	Velocity     *float64  `greptime:"tag;column:velocity;type:float64"`
-	BaroAltitude *float64  `greptime:"tag;column:baro_altitude;type:float64"`
-	GeoAltitude  *float64  `greptime:"tag;column:geo_altitude;type:float64"`
-	TimePosition *int64    `greptime:"tag;column:time_position;type:int64"`
+	Longitude    *float64  `greptime:"field;column:longitude;type:float64"`
+	Latitude     *float64  `greptime:"field;column:latitude;type:float64"`
+	Velocity     *float64  `greptime:"field;column:velocity;type:float64"`
+	BaroAltitude *float64  `greptime:"field;column:baro_altitude;type:float64"`
+	GeoAltitude  *float64  `greptime:"field;column:geo_altitude;type:float64"`
+	TimePosition *int64    `greptime:"field;column:time_position;type:int64"`
 	Timestamp    time.Time `greptime:"timestamp;column:ts;type:timestamp;precision:millisecond"`
 }
 
 func (FlightMetric) TableName() string {
 	return "icao24_state"
-}
-
-type Flight struct {
-	Icao24                          string `json:"icao24"`
-	FirstSeen                       int64  `json:"firstSeen"`
-	EstDepartureAirport             string `json:"estDepartureAirport"`
-	LastSeen                        int64  `json:"lastSeen"`
-	EstArrivalAirport               string `json:"estArrivalAirport"`
-	CallSign                        string `json:"callsign"`
-	EstDepartureTime                int64  `json:"estDepartureTime"`
-	EstArrivalTime                  int64  `json:"estArrivalTime"`
-	DepartureAirportCandidatesCount int    `json:"departureAirportCandidatesCount"`
-	ArrivalAirportCandidatesCount   int    `json:"arrivalAirportCandidatesCount"`
 }
 
 type StateResponse struct {

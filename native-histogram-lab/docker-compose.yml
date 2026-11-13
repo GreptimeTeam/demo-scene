@@ -1,0 +1,38 @@
+include:
+  - ../greptimedb-common.yml
+
+services:
+  app:
+    build: ./app
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://greptimedb:4000/v1/otlp/v1/metrics
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    networks: [demo-network]
+
+  grafana:
+    image: grafana/grafana:12.3.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_DEFAULT_LANGUAGE: detect
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks: [demo-network]
+
+  grafana-router:
+    extends:
+      file: ../grafana-common/compose.yml
+      service: grafana-router
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      DASHBOARD_UID: native-histogram-lab
+    networks: [demo-network]
+
+networks:
+  demo-network:

@@ -1,0 +1,160 @@
+{
+  "uid": "todo-api-trace-v2-zh",
+  "title": "TODO API — Trace V2（中文）",
+  "schemaVersion": 41,
+  "version": 1,
+  "tags": [
+    "greptimedb",
+    "trace-v2",
+    "json2"
+  ],
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "TODO API 请求",
+      "description": "按 JSON2 HTTP 属性统计请求量和平均延迟。客户端约 10% 的操作会请求不存在的 TODO。",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "PE59989CBDF1A001C"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "PE59989CBDF1A001C"
+          },
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  span_attributes.\"http.route\"::STRING AS route,\n  span_attributes.\"http.request.method\"::STRING AS method,\n  span_attributes.\"http.response.status_code\"::BIGINT AS status_code,\n  COUNT(*) AS requests,\n  AVG(duration_nano) / 1000000.0 AS avg_latency_ms\nFROM web_trace_demo_v2\nWHERE $__timeFilter(\"timestamp\")\n  AND scope_name = 'opentelemetry.instrumentation.django'\nGROUP BY route, method, status_code\nORDER BY status_code DESC, requests DESC"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_latency_ms"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      }
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "失败请求 → 调用链",
+      "description": "最近 100 条状态码不小于 400 的 HTTP 响应。点击 Trace ID，在 Explore 中查看客户端、Django 与 SQLite spans。",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "PE59989CBDF1A001C"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "PE59989CBDF1A001C"
+          },
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  \"timestamp\" AS time,\n  span_attributes.\"http.request.method\"::STRING AS method,\n  span_attributes.\"url.path\"::STRING AS path,\n  span_attributes.\"http.response.status_code\"::BIGINT AS status_code,\n  duration_nano / 1000000.0 AS latency_ms,\n  trace_id\nFROM web_trace_demo_v2\nWHERE $__timeFilter(\"timestamp\")\n  AND scope_name = 'opentelemetry.instrumentation.django'\n  AND span_attributes.\"http.response.status_code\"::BIGINT >= 400\nORDER BY \"timestamp\" DESC\nLIMIT 100"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latency_ms"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trace_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "查看调用链",
+                    "url": "/explore?schemaVersion=1&panes=%7B%22trace%22%3A%7B%22datasource%22%3A%22PCC4B9E3C4F7D05EA%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22jaeger%22%2C%22uid%22%3A%22PCC4B9E3C4F7D05EA%22%7D%2C%22query%22%3A%22${__value.raw}%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      }
+    }
+  ],
+  "links": [
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/todo-api-trace-v2",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/todo-api-trace-v2-zh",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    }
+  ],
+  "id": null
+}

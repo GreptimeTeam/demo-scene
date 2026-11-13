@@ -1,6 +1,17 @@
 include:
   - ../greptimedb-common.yml
 services:
+  grafana-router:
+    extends:
+      file: ../grafana-common/compose.yml
+      service: grafana-router
+    ports:
+      - "3000:3000"
+    environment:
+      DASHBOARD_UID: rYdddlPWk
+    networks:
+      - demo-network
+
   envsubst:
     image: docker.io/widerplan/envsubst
     command: "-i /config_input/config.alloy.tpl -o /config_output/config.alloy"
@@ -14,12 +25,13 @@ services:
 
   grafana:
     image: docker.io/grafana/grafana:11.2.0
-    ports:
-      - 3000:3000
     networks:
       - demo-network
     volumes:
       - ./grafana_provisioning:/etc/grafana/provisioning
+
+    environment:
+      GF_USERS_DEFAULT_LANGUAGE: detect
 
   alloy:
     image: docker.io/grafana/alloy:v1.4.1

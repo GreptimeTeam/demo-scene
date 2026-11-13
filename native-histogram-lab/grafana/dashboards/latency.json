@@ -1,0 +1,204 @@
+{
+  "uid": "native-histogram-lab",
+  "title": "Latency Lab",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Mean vs P99",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "Mean",
+          "expr": "histogram_avg(rate(lab_request_duration_seconds[1m]))",
+          "legendFormat": "Mean {{scenario}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "range": true
+        },
+        {
+          "refId": "P99",
+          "expr": "histogram_quantile(0.99, rate(lab_request_duration_seconds[1m]))",
+          "legendFormat": "P99 {{scenario}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Latency percentiles",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "P50",
+          "expr": "histogram_quantile(0.5, rate(lab_request_duration_seconds[1m]))",
+          "legendFormat": "P50 {{scenario}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "range": true
+        },
+        {
+          "refId": "P95",
+          "expr": "histogram_quantile(0.95, rate(lab_request_duration_seconds[1m]))",
+          "legendFormat": "P95 {{scenario}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "range": true
+        },
+        {
+          "refId": "P99",
+          "expr": "histogram_quantile(0.99, rate(lab_request_duration_seconds[1m]))",
+          "legendFormat": "P99 {{scenario}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Requests per second",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "RPS",
+          "expr": "histogram_count(rate(lab_request_duration_seconds[1m]))",
+          "legendFormat": "RPS {{scenario}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Requests within 100 ms",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "SLO",
+          "expr": "histogram_fraction(0, 0.1, rate(lab_request_duration_seconds[1m]))",
+          "legendFormat": "SLO {{scenario}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "greptimedb-promql"
+          },
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/native-histogram-lab",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/native-histogram-lab-zh",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    }
+  ]
+}

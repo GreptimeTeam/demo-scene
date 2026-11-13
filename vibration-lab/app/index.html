@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vibration Lab</title>
+<style>body{background:#101820;color:#e6f0ee;font:18px system-ui;margin:8vh auto;max-width:760px;padding:24px}h1{font-size:48px;letter-spacing:-2px}small{color:#71e3bc}p{line-height:1.7;color:#b8cbc7}button,a{font:inherit;padding:14px 22px;border:1px solid #71e3bc;border-radius:6px;background:transparent;color:#71e3bc;cursor:pointer;margin:0 10px 10px 0;display:inline-block}button[aria-pressed=true]{background:#71e3bc;color:#101820}#state{font-family:monospace}a{text-decoration:none}</style>
+<small>GREPTIMEDB / SIGNAL LAB</small><h1>Vibration Lab</h1><p id="description">Synthetic signal · 1024 Hz · 30 Hz rotation. An experiment, not a machine diagnosis.</p><section id="controls"></section><p id="state" role="status"></p><a id="dashboard">Open dashboard ↗</a>
+<script>
+const zh=navigator.language.toLowerCase().startsWith('zh');
+const modes=[["normal", "Normal", "\u6b63\u5e38"], ["imbalance", "Imbalance", "\u504f\u5fc3"], ["looseness", "Looseness", "\u677e\u52a8"]];
+document.documentElement.lang=zh?'zh-CN':'en';
+document.querySelector('h1').textContent=zh?"\u632f\u52a8\u5b9e\u9a8c\u5ba4":"Vibration Lab";
+document.querySelector('#description').textContent=zh?"\u5408\u6210\u4fe1\u53f7 \u00b7 1024 Hz \u91c7\u6837 \u00b7 30 Hz \u8f6c\u9891\u3002\u7528\u4e8e\u5b9e\u9a8c\uff0c\u4e0d\u4ee3\u8868\u8bbe\u5907\u8bca\u65ad\u3002":"Synthetic signal \u00b7 1024 Hz \u00b7 30 Hz rotation. An experiment, not a machine diagnosis.";
+const dashboard=document.querySelector('#dashboard');const target=new URL(location.href);target.port='3000';target.pathname='/';target.search='';dashboard.href=target;dashboard.textContent=zh?'打开大盘 ↗':'Open dashboard ↗';
+const state=document.querySelector('#state');
+async function refresh(){try{const r=await fetch('/state');if(!r.ok)throw Error(r.status);const data=await r.json();state.textContent=(zh?'当前场景：':'Current scenario: ')+data.scenario;for(const b of document.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.mode===data.scenario));}catch(e){state.textContent=String(e)}}
+for(const [mode,en,cn] of modes){const b=document.createElement('button');b.textContent=zh?cn:en;b.dataset.mode=mode;b.onclick=async()=>{b.disabled=true;try{const r=await fetch('/scenario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scenario:mode})});if(!r.ok)throw Error(r.status);await refresh()}catch(e){state.textContent=String(e)}finally{b.disabled=false}};document.querySelector('#controls').append(b)}
+refresh();setInterval(refresh,3000);
+</script></html>

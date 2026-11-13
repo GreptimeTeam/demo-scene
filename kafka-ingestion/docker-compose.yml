@@ -3,7 +3,6 @@ include:
 services:
   kafka:
     image: docker.io/greptime/kafka:3.6.0
-    container_name: kafka
     ports:
       - 9092
     networks:
@@ -16,23 +15,30 @@ services:
       KAFKA_CFG_PROCESS_ROLES: broker,controller
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@127.0.0.1:2181
       # Listeners
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:2181
       ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_BROKER_ID: "1"
+    healthcheck:
+      test: ["CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   kafka-init:
     image: docker.io/greptime/kafka:3.6.0
     networks:
       - demo-network
-    command: >
-      /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic test_log_topic --bootstrap-server kafka:9092
-      && /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic test_metric_topic --bootstrap-server kafka:9092
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - >-
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic test_log_topic --bootstrap-server kafka:9092
+        && /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic test_metric_topic --bootstrap-server kafka:9092
     depends_on:
       kafka:
-        condition: service_started
+        condition: service_healthy
 
   msg_gen:
     build:
@@ -56,7 +62,7 @@ services:
         condition: service_healthy
     volumes:
       - ./config_data:/config_data
-    command: sh -c "curl -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/pipeline.yaml' -v"
+    command: sh -c "curl -fsS -X 'POST' 'http://greptimedb:4000/v1/events/pipelines/demo_pipeline' -F 'file=@/config_data/pipeline.yaml' -v"
 
   vector:
     image: docker.io/timberio/vector:0.41.X-alpine
@@ -66,6 +72,8 @@ services:
       - ./config_data/:/config_data
     depends_on:
       kafka-init:
+        condition: service_completed_successfully
+      init_pipeline:
         condition: service_completed_successfully
     command: "-c /config_data/vector.toml"
 

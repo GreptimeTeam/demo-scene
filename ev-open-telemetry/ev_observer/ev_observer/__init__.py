@@ -19,7 +19,7 @@ db_user = os.getenv("GREPTIME_USERNAME") or ""
 db_password = os.getenv("GREPTIME_PASSWORD") or ""
 
 scrape_interval = int(os.getenv("SCRAPE_INTERVAL_SEC", "60"))
-is_mock = bool(os.getenv("IS_MOCK", False))
+is_mock = os.getenv("IS_MOCK", "false").lower() == "true"
 
 # Uncomment below lines to use basic auth
 auth = f"{db_user}:{db_password}"

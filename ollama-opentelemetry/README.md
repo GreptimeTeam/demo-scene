@@ -2,14 +2,14 @@
 
 ## Prerequisites
 
-Ensure you have installed `git`, `docker` and `docker-compose` 22.4 or newer.
+Ensure you have installed `git`, `docker` and Docker Compose 2.24 or newer.
 
 ## Step 1: Start All Services
 
 All services are managed by Docker Compose. Start GreptimeDB, the OpenTelemetry
 Collector, and Ollama with a single command:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 This will start the following containers:
@@ -72,10 +72,10 @@ service:
 
 Run the joke app as a one-off container on the same Docker network:
 ```bash
-docker-compose run --rm llm-joke-app
+docker compose run --rm llm-joke-app
 ```
 
-The container will build automatically from the existing `Dockerfile`, execute
+The container will build automatically from the existing `dockerfile`, execute
 `joke.py`, print a joke to the terminal, then exit and clean itself up.
 
 The core logic in `joke.py` is straightforward:

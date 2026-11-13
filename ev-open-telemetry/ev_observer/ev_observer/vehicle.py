@@ -107,6 +107,7 @@ class MockMetricFetcher(AbstractVehicleDataFetcher):
             self.battery_level = max(0, self.battery_level - random.uniform(0.05, 0.5))
 
         return ChargeState(
+            battery_level=round(self.battery_level),
             charging_state=(
                 ChargingStateEnum.CHARGING if self.charging else ChargingStateEnum.DISCONNECTED
             ),

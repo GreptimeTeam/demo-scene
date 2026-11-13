@@ -1,0 +1,104 @@
+# Compose override rendered by demo.py against the pinned upstream checkout.
+services:
+  grafana-router:
+    extends:
+      file: ${GRAFANA_ROUTER_COMPOSE:?Run python3 demo.py up}
+      service: grafana-router
+    ports:
+      - "13000:3000"
+    environment:
+      DASHBOARD_UID: astronomy-shop-greptimedb
+
+  greptimedb:
+    image: greptime/greptimedb:v1.3.0
+    container_name: greptimedb
+    command:
+      - standalone
+      - start
+      - --http-addr=0.0.0.0:4000
+      - --grpc-bind-addr=0.0.0.0:4001
+      - --mysql-addr=0.0.0.0:4002
+      - --postgres-addr=0.0.0.0:4003
+    environment:
+      - GREPTIMEDB_STANDALONE__OTLP__EXPERIMENTAL_ENABLE_RESOURCE_INFO=true
+    ports:
+      - "4000:4000"
+      - "4001:4001"
+      - "4002:4002"
+      - "4003:4003"
+    volumes:
+      - greptimedb-data:/greptimedb_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  # 让 collector 等 GreptimeDB 起来；exporter 配置在 otelcol-config-greptime.yml
+  otel-collector:
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+
+  # Prometheus 只做 pull：抓 node_exporter 和 GreptimeDB 自身的 /metrics，
+  # 抓到的样本通过 remote write 写进 GreptimeDB，本地 TSDB 只保留 2 小时。
+  prometheus:
+    image: ${PROMETHEUS_IMAGE}
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=2h
+    volumes:
+      - ./greptime/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.9.1
+    container_name: node-exporter
+    command:
+      - --path.rootfs=/host
+    pid: host
+    network_mode: host
+    volumes:
+      - /:/host:ro,rslave
+    restart: unless-stopped
+
+  # 建 Flow：每分钟每个服务的服务端 span 数与错误数，面板和告警读 sink 表
+  init-flows:
+    image: curlimages/curl:8.10.1
+    volumes:
+      - ./greptime/init:/init:ro
+    entrypoint: ["/bin/sh", "/init/create-flows.sh"]
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+
+  grafana:
+    image: greptime/grafana-greptimedb@sha256:7cce656cdd395ca6a4fa5769f8479b766a7024a093136129f953596b7bebc3b2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_USERS_DEFAULT_LANGUAGE=detect
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/astronomy-shop.json
+    volumes:
+      - ./greptime/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./greptime/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+      init-flows:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  greptimedb-data:

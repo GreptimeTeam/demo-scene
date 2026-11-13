@@ -2,6 +2,17 @@ include:
   - ../greptimedb-common.yml
 
 services:
+  grafana-router:
+    extends:
+      file: ../grafana-common/compose.yml
+      service: grafana-router
+    ports:
+      - "3000:3000"
+    environment:
+      DASHBOARD_UID: game-telemetry
+    networks:
+      - demo-network
+
   analytics-server:
     build:
       context: ./analytics-server
@@ -40,9 +51,8 @@ services:
 
   grafana:
     image: docker.io/grafana/grafana:11.6.0
-    ports:
-      - "3000:3000"
     environment:
+      GF_USERS_DEFAULT_LANGUAGE: detect
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer

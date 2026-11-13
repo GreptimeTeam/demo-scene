@@ -1,0 +1,217 @@
+{
+  "uid": "vibration-lab-zh",
+  "title": "振动实验室 — 合成信号",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "加速度 RMS 与峰值",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT greptime_timestamp AS time, rms, peak FROM vibration_features WHERE device = 'motor-01' AND $__timeFilter(greptime_timestamp) ORDER BY greptime_timestamp",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "datasource": {
+            "type": "postgres",
+            "uid": "greptimedb-sql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accG"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "峰值因子",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT greptime_timestamp AS time, crest_factor FROM vibration_features WHERE device = 'motor-01' AND $__timeFilter(greptime_timestamp) ORDER BY greptime_timestamp",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "datasource": {
+            "type": "postgres",
+            "uid": "greptimedb-sql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "原始波形 — 最近 2 秒",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT greptime_timestamp AS time, acceleration FROM vibration_raw WHERE device = 'motor-01' AND greptime_timestamp > now() - INTERVAL '2 seconds' ORDER BY greptime_timestamp",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "datasource": {
+            "type": "postgres",
+            "uid": "greptimedb-sql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accG"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "频谱 — 最新窗口（Hz）",
+      "type": "barchart",
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT frequency, amplitude FROM vibration_spectrum WHERE device = 'motor-01' AND greptime_timestamp = (SELECT max(greptime_timestamp) FROM vibration_spectrum WHERE device = 'motor-01') AND CAST(frequency AS BIGINT) <= 150 ORDER BY CAST(frequency AS BIGINT)",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "datasource": {
+            "type": "postgres",
+            "uid": "greptimedb-sql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accG"
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "frequency",
+        "orientation": "vertical",
+        "showValue": "never",
+        "legend": {
+          "displayMode": "hidden"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "场景历史",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT greptime_timestamp, scenario, rms, peak, crest_factor FROM vibration_features WHERE device = 'motor-01' AND $__timeFilter(greptime_timestamp) ORDER BY greptime_timestamp DESC LIMIT 30",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "datasource": {
+            "type": "postgres",
+            "uid": "greptimedb-sql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/vibration-lab",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/vibration-lab-zh",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    }
+  ],
+  "id": null
+}

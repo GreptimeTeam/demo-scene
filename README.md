@@ -16,6 +16,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ### Applications
 
+* [Vibration Lab](vibration-lab) — synthetic motor vibration, FFT, and condition features
 * [Keyboard Monitor](keyboard-monitor) ([✍️ blog](https://greptime.com/blogs/2024-03-19-keyboard-monitoring))
 * [Observability for Nginx on Logs & Metrics](nginx-log-metrics)
 * [Dify Monitoring with OpenTelemetry](dify-monitoring)
@@ -24,6 +25,8 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ### Observability
 
+* [Native Histogram Lab](native-histogram-lab) — switch latency scenarios and compare mean with P99
+* [OpenTelemetry Observability Playground](opentelemetry-playground) — Astronomy Shop, metrics, logs, traces, and bilingual Grafana dashboards
 * [GenAI Observability with OpenTelemetry](genai-observability)
 * [Ollama + OpenTelemetry + GreptimeDB](ollama-opentelemetry)
 * [Django Tracing with OpenTelemetry](opentelemetry-trace-django)
@@ -50,6 +53,16 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 * [From InfluxDB v2 to GreptimeDB](influxdb-v2-to-greptime) ([🎥 tutorial](https://www.youtube.com/watch?v=jiwZoRMzYis) / [✍️ blog](https://greptime.com/blogs/2024-04-16-migrate-data-from-influxdbv2))
 * [From InfluxDB v1 to GreptimeDB](influxdb-v1-to-greptime)
+
+## Running the demos
+
+Docker-based demos use GreptimeDB v1.3.0 and require Docker Compose 2.24 or later. Most share ports; run one demo at a time. Follow each demo's README for credentials and additional requirements.
+
+Open Grafana at its root URL to select the dashboard language from the browser's preferred language. Dashboard links switch between English and 简体中文, preserving time ranges and filters. The shared translation generator is documented in [grafana-common](grafana-common).
+
+Verification coverage and remaining limits: [v1.3 audit](AUDIT.md).
+
+Hosted demos: [Global](http://live.greptime.cloud/) · [China](http://live.cloud.greptime.cn/).
 
 ## Feedback & Questions
 
