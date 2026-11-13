@@ -2,8 +2,14 @@
 set -e
 GT=${GREPTIMEDB_HTTP:-http://greptimedb:4000}
 sql() {
-  curl --fail-with-body --silent --show-error --connect-timeout 5 --max-time 30 \
-    -X POST "$GT/v1/sql" --data-urlencode "sql=$1"
+  response=$(curl --fail-with-body --silent --show-error --connect-timeout 5 --max-time 30 \
+    -X POST "$GT/v1/sql" --data-urlencode "sql=$1") || return $?
+  case "$response" in
+    *'"error":'*)
+      printf '%s\n' "$response" >&2
+      return 1 ;;
+  esac
+  printf '%s\n' "$response"
 }
 
 # Wait for the business namespace column, which may arrive after the first span.
