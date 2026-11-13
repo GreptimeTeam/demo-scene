@@ -152,7 +152,9 @@ def extract(dataset, instant, regions, cache):
     temporary = path.with_suffix(".tmp")
     frame.to_csv(temporary, index=False, compression="gzip")
     temporary.replace(path)
-    meta.write_text(json.dumps(metadata, indent=2))
+    temporary_meta = meta.with_suffix(".json.tmp")
+    temporary_meta.write_text(json.dumps(metadata, indent=2))
+    temporary_meta.replace(meta)
     return frame, metadata, False
 
 

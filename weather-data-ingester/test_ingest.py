@@ -2,15 +2,83 @@
 
 import datetime as dt
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import numpy as np
 import xarray as xr
 
-from ingest import crop, parse_time, timestamps
-from regions import city_region, validate_bbox
+from ingest import crop, extract, parse_time, timestamps
+from regions import city_region, select_regions, validate_bbox
 
 
 class ExtractionTests(unittest.TestCase):
+    def test_city_ids_distinguish_crops_across_grid_boundary(self):
+        small_id, small = city_region("Shanghai", 63.3367077)
+        large_id, large = city_region("Shanghai", 63.3367277)
+        data = xr.DataArray(
+            [[1.0], [2.0]],
+            coords={"latitude": [31.7, 31.8], "longitude": [121.5]},
+            dims=["latitude", "longitude"],
+        )
+        self.assertEqual(len(crop(data, {small_id: small}, "brightness_k")), 1)
+        self.assertEqual(len(crop(data, {large_id: large}, "brightness_k")), 2)
+        self.assertNotEqual(small_id, large_id)
+
+    def test_bbox_ids_distinguish_crops_across_grid_boundary(self):
+        selections = [
+            select_regions(
+                SimpleNamespace(region=[], city=[], bbox=[west, 31, 122, 32])
+            )
+            for west in [121.09999, 121.10001]
+        ]
+        data = xr.DataArray(
+            [[1.0, 2.0]],
+            coords={"latitude": [31.2], "longitude": [121.1, 121.2]},
+            dims=["latitude", "longitude"],
+        )
+        self.assertEqual(
+            [len(crop(data, s, "brightness_k")) for s in selections], [2, 1]
+        )
+        self.assertNotEqual(next(iter(selections[0])), next(iter(selections[1])))
+
+    def test_metadata_write_interruption_allows_retry(self):
+        instant = parse_time("2026-09-01T00:00:00Z")
+        source = xr.Dataset(
+            {"precipitation": (("time", "latitude", "longitude"), [[[0.001]]])},
+            coords={
+                "time": [np.datetime64("2026-09-01T00:00:00")],
+                "latitude": [31.2],
+                "longitude": [121.5],
+            },
+        )
+        source.precipitation.attrs["units"] = "m h**-1"
+        regions = {"test": {"bbox": [121, 31, 122, 32]}}
+        write_text = Path.write_text
+
+        def interrupt(path, content, *args, **kwargs):
+            write_text(path, content[:5], *args, **kwargs)
+            raise OSError("Interrupted metadata write")
+
+        with (
+            TemporaryDirectory() as directory,
+            patch("ingest.xr.open_zarr", return_value=source) as opened,
+        ):
+            cache = Path(directory)
+            with (
+                patch.object(Path, "write_text", interrupt),
+                self.assertRaises(OSError),
+            ):
+                extract("pardig", instant, regions, cache)
+            frame, _, cached = extract("pardig", instant, regions, cache)
+            self.assertFalse(cached)
+            self.assertEqual(frame.rain_mm_h.tolist(), [1.0])
+            _, _, cached = extract("pardig", instant, regions, cache)
+            self.assertTrue(cached)
+            self.assertEqual(opened.call_count, 2)
+
     def test_western_longitude_descending_latitude_and_missing_value(self):
         data = xr.DataArray(
             [[1.0, np.nan], [3.0, 4.0]],

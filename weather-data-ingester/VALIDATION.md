@@ -19,3 +19,7 @@ The extraction regression suite covers reversed latitude order, western longitud
 See [PERFORMANCE.md](PERFORMANCE.md) for the schema/index experiments and their adoption status. In particular, candidate spatial-query timings must not be attributed to the deployed dashboard schema.
 
 Final container checks passed: four extraction regression tests, three SQL query checks for each region, and 20 Grafana panel queries per region (10 data panels in each language), for 40 successful datasource queries.
+
+A fresh clone of the PR branch was also checked with an empty database volume and download cache. The README's 30-minute Bay Area import downloaded three source frames and verified 5,043 observations. Repeating the command used all three cached frames and retained the same row count. All three SQL checks and 20 bilingual Grafana panel queries passed. City aliases, custom bounding boxes, and the three-day row estimate were checked with `--plan`. Docker image layers were reused; this was not an uncached image-build test. The local Docker address pool was exhausted, so this isolated run used a temporary explicit subnet and separate ports.
+
+Seven extraction regression tests pass, including interrupted metadata writes and distinct city/bounding-box inputs on opposite sides of a grid boundary. The three added regressions failed before their corresponding fixes.

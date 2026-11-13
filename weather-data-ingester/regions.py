@@ -53,7 +53,7 @@ def city_region(name, radius):
     dlat = math.degrees(angle)
     dlon = math.degrees(math.asin(math.sin(angle) / math.cos(math.radians(lat))))
     bbox = validate_bbox([lon - dlon, lat - dlat, lon + dlon, lat + dlat])
-    return f"{key}-{radius:g}km", {
+    return f"{key}-{radius:.17g}km", {
         "name": f"{key.replace('-', ' ').title()} / {radius:g} km",
         "bbox": bbox,
         "center": [lat, lon],
@@ -69,7 +69,7 @@ def select_regions(args):
         selected[key] = region
     if args.bbox:
         bbox = validate_bbox(args.bbox)
-        key = "bbox-" + "-".join(f"{v:g}" for v in bbox)
+        key = "bbox-" + "-".join(f"{v:.17g}" for v in bbox)
         selected[key] = {
             "name": "Custom bounding box",
             "bbox": bbox,
