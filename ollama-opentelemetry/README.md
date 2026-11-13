@@ -9,6 +9,8 @@ Ensure you have installed `git`, `docker` and Docker Compose 2.24 or newer.
 All services are managed by Docker Compose. Start GreptimeDB, the OpenTelemetry
 Collector, and Ollama with a single command:
 ```bash
+git clone https://github.com/GreptimeTeam/demo-scene.git
+cd demo-scene/ollama-opentelemetry
 docker compose up -d
 ```
 

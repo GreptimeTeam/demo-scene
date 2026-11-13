@@ -129,6 +129,8 @@ GreptimeCloud Visualization
 
 Grafana Dashboard
 
+The default container exports its available Linux metrics. Host pressure and root-filesystem panels can show `No data` or `N/A` when those metrics are not exposed to the container.
+
 ![grafana dashboard](media/grafana-dashboard.png)
 
 Grafana Alloy Topology Graph

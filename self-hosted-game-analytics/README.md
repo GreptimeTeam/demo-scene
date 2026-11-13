@@ -56,7 +56,7 @@ collapses the middle three into one GreptimeDB:
 │  (simulator in  │ ─────► │  ASP.NET Core, .NET 8│  gRPC   ┌────────────┐
 │   docker; Unity │ /api/  │                      │ ──────► │            │
 │   reference .cs │ events │  GreptimeDB .NET SDK │         │ GreptimeDB │
-│   in unity-     │        │  TableBuilder → write│         │   v1.0.0   │
+│   in unity-     │        │  TableBuilder → write│         │   v1.3.0   │
 │   reference/)   │  OTLP  │                      │         │            │
 │                 │ ────────────────────────────────────────│            │
 └─────────────────┘ /v1/otlp/v1/metrics                     └─────┬──────┘
@@ -97,6 +97,8 @@ The client side is intentionally thin and protocol-agnostic: any engine
 ## How to run
 
 ```bash
+git clone https://github.com/GreptimeTeam/demo-scene.git
+cd demo-scene/self-hosted-game-analytics
 docker compose up --build -d
 ```
 

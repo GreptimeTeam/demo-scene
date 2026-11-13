@@ -37,7 +37,9 @@ efficient way to ingest large volume of data into GreptimeDB, since its version 
    > (exposed) by GreptimeDB and Apache Flink in this docker-compose.
 
    ```bash
-   docker compose up
+   git clone https://github.com/GreptimeTeam/demo-scene.git
+   cd demo-scene/flink-ingestion
+   docker compose up --build
    ```
 
 2. **Check the data in GreptimeDB:**

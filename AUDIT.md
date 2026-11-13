@@ -18,19 +18,19 @@ Audit date: 2026-11-13. Local container tests used GreptimeDB v1.3.0, isolated C
 
 | Demo | Verified | Remaining limit |
 | --- | --- | --- |
-| OTel playground (imported) | Shop checkout, traces/logs/metrics, Flow output, datasource health, 80/80 bilingual data panels, trace selection outside the time range, log filters | Browser visual/click testing not run |
+| OTel playground (imported) | Shop checkout, traces/logs/metrics, Flow output, datasource health, 80/80 bilingual data panels, trace selection outside the time range, log filters | Headless Chrome language navigation and screenshots verified |
 | Native Histogram Lab (new) | OTLP exponential histogram ingestion, all 8 bilingual panels, scenario change; observed long-tail mean ≈76 ms and P99 ≈1.15 s | Measurements vary with random delays and host load |
 | Vibration Lab (new) | Ingestion into all three tables, 513 spectrum bins/window, all 10 bilingual panels, scenario change, FFT amplitude/frequency and fault-feature tests | Synthetic signal, no hardware validation |
 | Kafka | Stack startup; log and CPU metric tables created | No external Kafka cluster tested |
 | Flink | Maven test and Java 11 container build; job submission; 47,001 ingested rows observed | Single local job |
 | Vector | Pipeline registration and collector startup; 21 tables created | Cloud credentials not tested |
-| Nginx | Stack startup; log, metric, and aggregate tables created | Browser interactions not tested |
+| Nginx | Stack startup; log, metric, and aggregate tables created | Headless Chrome dashboard screenshot verified |
 | Elasticsearch ingestion | Logstash stack startup and Nginx log table creation | Local generated logs |
 | Node Exporter | Prometheus scraping; 607 tables created | Host is the Docker Linux VM |
-| Grafana Alloy | Collector startup; 529 metric/log tables created | Browser interactions not tested |
+| Grafana Alloy | Collector startup; 529 metric/log tables created | Headless Chrome dashboard screenshot verified |
 | PostgreSQL FDW | Foreign-table query returned 531 rows | Local connection |
 | Cloudflare Workers | Local Worker proxy request, event ingestion, and `/_stats` query | Cloud deployment/Hyperdrive credentials not tested |
-| Django tracing | Fresh 404 request → JSON2 summary/filter → trace link → Django/SQLite spans | Browser interactions not tested |
+| Django tracing | Fresh 404 request → JSON2 summary/filter → trace link → Django/SQLite spans | Headless Chrome dashboard screenshot verified |
 | Self-hosted game analytics | Stack startup and event/metric table creation | Unity client not run |
 | EV telemetry | Complete mock stack startup and 20 metric tables; observer image build | Real Tesla account/API not tested |
 | Flight ingestion | OAuth cache/refresh and bounding-box tests; Go SDK wrote a state row; actual DDL has only `icao24` as primary key | No OpenSky credentials for live polling |
@@ -44,7 +44,7 @@ Audit date: 2026-11-13. Local container tests used GreptimeDB v1.3.0, isolated C
 
 All 18 Compose demo definitions parse. OTel playground's rendered configuration starts separately. The translation generator verifies 11 dashboard pairs; playground checks its four pairs independently. HTTP checks cover Chinese/English routing and preservation of query parameters, including the non-default playground port. `git diff --check` passes.
 
-The browser tool reported no available browser, so HTTP/API checks do not constitute visual acceptance. Live demo sites were not modified. No deployment was performed.
+Headless Chrome verified English/Chinese default routing, language links preserving service/time filters, and both lab scenario controls. Screenshots were refreshed for the playground, both labs, Django, Nginx, Cloudflare Workers, game analytics, and Alloy. Vibration waveform time bounds and spectrum legend options were corrected after visual inspection. External-account screenshots were retained and were not revalidated. A clean checkout of the playground successfully fetched the pinned upstream revision and rendered its Compose configuration. Local README links resolve. Live demo sites were not modified. No deployment was performed.
 
 ## Schema review
 

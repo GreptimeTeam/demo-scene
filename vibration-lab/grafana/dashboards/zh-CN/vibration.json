@@ -115,7 +115,9 @@
           "displayMode": "list",
           "placement": "bottom"
         }
-      }
+      },
+      "timeFrom": "2s",
+      "hideTimeOverride": false
     },
     {
       "id": 4,
@@ -144,15 +146,31 @@
         "defaults": {
           "unit": "accG"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "frequency"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "hertz"
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "xField": "frequency",
         "orientation": "vertical",
         "showValue": "never",
         "legend": {
-          "displayMode": "hidden"
-        }
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "xTickLabelSpacing": 100
       }
     },
     {

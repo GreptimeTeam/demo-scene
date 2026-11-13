@@ -2,11 +2,17 @@
 
 A synthetic rotating-machine signal experiment: switch between normal operation, imbalance, and looseness, then inspect the waveform, frequency spectrum, RMS, peak acceleration, and crest factor in Grafana.
 
+![Dashboard](screenshots/dashboard.png)
+
+[Chinese dashboard](screenshots/dashboard-zh.png) · [Scenario controls](screenshots/controls.png)
+
 ## Run
 
 Requires Docker Compose 2.24 or later. Run one demo at a time: the default ports are shared with other demos.
 
 ```sh
+git clone https://github.com/GreptimeTeam/demo-scene.git
+cd demo-scene/vibration-lab
 docker compose up -d --build --wait
 ```
 

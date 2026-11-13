@@ -99,7 +99,7 @@ It refreshes every 10 seconds and initially shows the last 15 minutes.
    Click a `trace_id`, then **View trace**, to open that request in Grafana Explore
    using the Jaeger data source. Inspect the client HTTP, Django, and SQLite spans.
 
-![screenshot3](screenshot3.png)
+![TODO API requests and failed traces](screenshots/dashboard.png)
 
 Expect successful GET/200, POST/201, and PUT/200 requests alongside GET/404
 requests for the `todos/<int:pk>/` route. The failed-request list shows the

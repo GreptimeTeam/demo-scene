@@ -2,11 +2,17 @@
 
 An HTTP latency experiment using GreptimeDB v1.3, OTLP exponential histograms, and Grafana PromQL.
 
+![Dashboard](screenshots/dashboard.png)
+
+[Chinese dashboard](screenshots/dashboard-zh.png) · [Scenario controls](screenshots/controls.png)
+
 ## Run
 
 Requires Docker Compose 2.24 or later. Run one demo at a time: the default ports are shared with other demos.
 
 ```sh
+git clone https://github.com/GreptimeTeam/demo-scene.git
+cd demo-scene/native-histogram-lab
 docker compose up -d --build --wait
 ```
 

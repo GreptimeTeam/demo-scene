@@ -6,6 +6,8 @@ OpenTelemetry Astronomy Shop with metrics, logs, and traces stored in GreptimeDB
 
 The Overview dashboard includes a SQL query that joins request counts, application logs, and host memory by minute. Flow computes per-service request and error counts every 30 seconds.
 
+![Grafana dashboard](screenshots/dashboard.png)
+
 ## Run
 
 Requires Docker with Compose, Git, and Python 3.11+. Start Docker, then run:

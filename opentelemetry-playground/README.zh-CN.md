@@ -6,6 +6,8 @@
 
 概览大盘包含一条 SQL，按分钟关联请求量、应用日志和主机内存。Flow 每 30 秒计算各服务的请求数和错误数。
 
+![Grafana dashboard](screenshots/dashboard-zh.png)
+
 ## 运行
 
 需要 Docker（含 Compose）、Git 和 Python 3.11+。启动 Docker 后执行：
