@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-13",
+  "archives": [
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-11-13.zip",
+      "sha256": "b6f16d63c9fb5dba371c2ca005fcc8a0bf1e5d3bbc271932f54055c7d2ee4634"
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/trades/BTCUSDT/BTCUSDT-trades-2026-11-13.zip",
+      "sha256": "bedacb2e278f1fd8fedd49948def6efcb9050818d77b41f5789839b8181e5b8d"
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-11-13.zip",
+      "sha256": "f83d1901e9daa8e591fafe6b6b39429c7cb0fe5e0da813f55feef7f73cdaca90"
+    },
+    {
+      "url": "https://data.binance.vision/data/spot/daily/trades/ETHUSDT/ETHUSDT-trades-2026-11-13.zip",
+      "sha256": "c8f945753ad9baea773be0ef422e65c0567784cb0f2cd5af2d95476fe04bb25c"
+    }
+  ]
+}

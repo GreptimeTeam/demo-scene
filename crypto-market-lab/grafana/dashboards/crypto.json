@@ -1,0 +1,932 @@
+{
+  "uid": "crypto-market",
+  "title": "Crypto Market Lab",
+  "id": null,
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": [
+    "GreptimeDB",
+    "crypto"
+  ],
+  "timezone": "utc",
+  "editable": false,
+  "refresh": "5s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "1s",
+      "5s",
+      "10s",
+      "30s",
+      "1m"
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "dataset",
+        "label": "Dataset",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "crypto-pg"
+        },
+        "query": "SELECT DISTINCT dataset FROM candles_1m ORDER BY dataset",
+        "refresh": 1,
+        "current": {
+          "text": "market",
+          "value": "market"
+        },
+        "includeAll": false,
+        "multi": false
+      },
+      {
+        "name": "symbol",
+        "label": "Symbol",
+        "type": "custom",
+        "query": "BTCUSDT,ETHUSDT",
+        "current": {
+          "text": "BTCUSDT",
+          "value": "BTCUSDT"
+        },
+        "options": [
+          {
+            "text": "BTCUSDT",
+            "value": "BTCUSDT",
+            "selected": true
+          },
+          {
+            "text": "ETHUSDT",
+            "value": "ETHUSDT",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "name": "resolution",
+        "label": "Candle interval",
+        "type": "custom",
+        "query": "1s : 1 second,1m : 1 minute,5m : 5 minutes",
+        "current": {
+          "text": "1m",
+          "value": "1 minute"
+        },
+        "options": [
+          {
+            "text": "1s",
+            "value": "1 second",
+            "selected": false
+          },
+          {
+            "text": "1m",
+            "value": "1 minute",
+            "selected": true
+          },
+          {
+            "text": "5m",
+            "value": "5 minutes",
+            "selected": false
+          }
+        ]
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "English",
+      "type": "link",
+      "url": "/d/crypto-market",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "title": "简体中文",
+      "type": "link",
+      "url": "/d/crypto-market-zh",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "title": "Live · 15m",
+      "type": "link",
+      "url": "/d/crypto-market?from=now-15m&to=now&var-dataset=market",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false
+    },
+    {
+      "title": "History · 3d",
+      "type": "link",
+      "url": "/d/crypto-market?from=now-3d&to=now&var-dataset=market",
+      "includeVars": true,
+      "keepTime": false,
+      "targetBlank": false
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "title": "CRYPTO MARKET LAB / GreptimeDB",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Binance spot · real trades · UTC**  |  Dataset: **$dataset** · Symbol: **$symbol**\n\n**market** combines public archives and live capture; gaps stay visible. **replay-…** retains the original date, never masquerading as live. 1s candles query raw trades; 1m/5m candles use GreptimeDB Flow. CVD resets at the selected range start. Double-click or drag on a chart to inspect an interval."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Last price",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: USDT",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CAST(last_value(close ORDER BY bucket) AS DOUBLE) AS price FROM candles_1m WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(bucket)"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Trades · selected range",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT sum(trade_count) AS trades FROM candles_1m WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(bucket)"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Quote volume · selected range",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: USDT",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CAST(sum(quote_volume) AS DOUBLE) AS notional FROM candles_1m WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(bucket)"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Live data age",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "description": "Wall-clock age of the last live event, independent of the historical time range. A growing value indicates stale data.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT date_part('epoch',now()) - date_part('epoch',max(last_event_time)) AS age_seconds FROM ingestion WHERE dataset='market' AND symbol=${symbol:sqlstring} AND worker='live'"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Price · OHLC",
+      "type": "candlestick",
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 16,
+        "h": 10
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: USDT",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "candles",
+        "candleStyle": "candles",
+        "colorStrategy": "open-close",
+        "colors": {
+          "up": "green",
+          "down": "red"
+        },
+        "fields": {
+          "open": "open",
+          "high": "high",
+          "low": "low",
+          "close": "close",
+          "volume": "volume"
+        },
+        "legend": {
+          "displayMode": "hidden"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT time,open,high,low,close,volume FROM (SELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), event_time) AS time,\n CAST(first_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS open,\n CAST(max(price) AS DOUBLE) AS high, CAST(min(price) AS DOUBLE) AS low,\n CAST(last_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS close,\n CAST(sum(quantity) AS DOUBLE) AS volume,\n CAST(sum(notional) AS DOUBLE) AS quote_volume,\n count(*) AS trade_count,\n CAST(sum(CASE WHEN taker_buy THEN quantity ELSE 0 END) AS DOUBLE) AS buy_volume\nFROM trades WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(event_time) AND ${resolution:sqlstring} = '1 second'\nGROUP BY time\nUNION ALL\nSELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), bucket) AS time,\n CAST(first_value(open ORDER BY bucket) AS DOUBLE) AS open,\n CAST(max(high) AS DOUBLE) AS high, CAST(min(low) AS DOUBLE) AS low,\n CAST(last_value(close ORDER BY bucket) AS DOUBLE) AS close,\n CAST(sum(volume) AS DOUBLE) AS volume,\n CAST(sum(quote_volume) AS DOUBLE) AS quote_volume,\n sum(trade_count) AS trade_count,\n CAST(sum(buy_volume) AS DOUBLE) AS buy_volume\nFROM candles_1m WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(bucket) AND ${resolution:sqlstring} <> '1 second'\nGROUP BY time) ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Price versus VWAP",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 7,
+        "w": 8,
+        "h": 10
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: USDT",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT time,close,quote_volume/nullif(volume,0) AS vwap FROM (SELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), event_time) AS time,\n CAST(first_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS open,\n CAST(max(price) AS DOUBLE) AS high, CAST(min(price) AS DOUBLE) AS low,\n CAST(last_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS close,\n CAST(sum(quantity) AS DOUBLE) AS volume,\n CAST(sum(notional) AS DOUBLE) AS quote_volume,\n count(*) AS trade_count,\n CAST(sum(CASE WHEN taker_buy THEN quantity ELSE 0 END) AS DOUBLE) AS buy_volume\nFROM trades WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(event_time) AND ${resolution:sqlstring} = '1 second'\nGROUP BY time\nUNION ALL\nSELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), bucket) AS time,\n CAST(first_value(open ORDER BY bucket) AS DOUBLE) AS open,\n CAST(max(high) AS DOUBLE) AS high, CAST(min(low) AS DOUBLE) AS low,\n CAST(last_value(close ORDER BY bucket) AS DOUBLE) AS close,\n CAST(sum(volume) AS DOUBLE) AS volume,\n CAST(sum(quote_volume) AS DOUBLE) AS quote_volume,\n sum(trade_count) AS trade_count,\n CAST(sum(buy_volume) AS DOUBLE) AS buy_volume\nFROM candles_1m WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(bucket) AND ${resolution:sqlstring} <> '1 second'\nGROUP BY time) ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Taker buy / sell volume",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 12,
+        "h": 8
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 2,
+            "fillOpacity": 70,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT time,buy_volume,volume-buy_volume AS sell_volume FROM (SELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), event_time) AS time,\n CAST(first_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS open,\n CAST(max(price) AS DOUBLE) AS high, CAST(min(price) AS DOUBLE) AS low,\n CAST(last_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS close,\n CAST(sum(quantity) AS DOUBLE) AS volume,\n CAST(sum(notional) AS DOUBLE) AS quote_volume,\n count(*) AS trade_count,\n CAST(sum(CASE WHEN taker_buy THEN quantity ELSE 0 END) AS DOUBLE) AS buy_volume\nFROM trades WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(event_time) AND ${resolution:sqlstring} = '1 second'\nGROUP BY time\nUNION ALL\nSELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), bucket) AS time,\n CAST(first_value(open ORDER BY bucket) AS DOUBLE) AS open,\n CAST(max(high) AS DOUBLE) AS high, CAST(min(low) AS DOUBLE) AS low,\n CAST(last_value(close ORDER BY bucket) AS DOUBLE) AS close,\n CAST(sum(volume) AS DOUBLE) AS volume,\n CAST(sum(quote_volume) AS DOUBLE) AS quote_volume,\n sum(trade_count) AS trade_count,\n CAST(sum(buy_volume) AS DOUBLE) AS buy_volume\nFROM candles_1m WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(bucket) AND ${resolution:sqlstring} <> '1 second'\nGROUP BY time) ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Cumulative volume delta",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 17,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Taker buy quantity minus taker sell quantity, accumulated within the selected range. This is not net capital inflow.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT time,sum(2*buy_volume-volume) OVER (ORDER BY time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cvd FROM (SELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), event_time) AS time,\n CAST(first_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS open,\n CAST(max(price) AS DOUBLE) AS high, CAST(min(price) AS DOUBLE) AS low,\n CAST(last_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS close,\n CAST(sum(quantity) AS DOUBLE) AS volume,\n CAST(sum(notional) AS DOUBLE) AS quote_volume,\n count(*) AS trade_count,\n CAST(sum(CASE WHEN taker_buy THEN quantity ELSE 0 END) AS DOUBLE) AS buy_volume\nFROM trades WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(event_time) AND ${resolution:sqlstring} = '1 second'\nGROUP BY time\nUNION ALL\nSELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), bucket) AS time,\n CAST(first_value(open ORDER BY bucket) AS DOUBLE) AS open,\n CAST(max(high) AS DOUBLE) AS high, CAST(min(low) AS DOUBLE) AS low,\n CAST(last_value(close ORDER BY bucket) AS DOUBLE) AS close,\n CAST(sum(volume) AS DOUBLE) AS volume,\n CAST(sum(quote_volume) AS DOUBLE) AS quote_volume,\n sum(trade_count) AS trade_count,\n CAST(sum(buy_volume) AS DOUBLE) AS buy_volume\nFROM candles_1m WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(bucket) AND ${resolution:sqlstring} <> '1 second'\nGROUP BY time) ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Trade activity",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 12,
+        "h": 7
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT time,trade_count FROM (SELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), event_time) AS time,\n CAST(first_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS open,\n CAST(max(price) AS DOUBLE) AS high, CAST(min(price) AS DOUBLE) AS low,\n CAST(last_value(price ORDER BY event_time,trade_id) AS DOUBLE) AS close,\n CAST(sum(quantity) AS DOUBLE) AS volume,\n CAST(sum(notional) AS DOUBLE) AS quote_volume,\n count(*) AS trade_count,\n CAST(sum(CASE WHEN taker_buy THEN quantity ELSE 0 END) AS DOUBLE) AS buy_volume\nFROM trades WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(event_time) AND ${resolution:sqlstring} = '1 second'\nGROUP BY time\nUNION ALL\nSELECT date_bin(CAST(${resolution:sqlstring} AS INTERVAL), bucket) AS time,\n CAST(first_value(open ORDER BY bucket) AS DOUBLE) AS open,\n CAST(max(high) AS DOUBLE) AS high, CAST(min(low) AS DOUBLE) AS low,\n CAST(last_value(close ORDER BY bucket) AS DOUBLE) AS close,\n CAST(sum(volume) AS DOUBLE) AS volume,\n CAST(sum(quote_volume) AS DOUBLE) AS quote_volume,\n sum(trade_count) AS trade_count,\n CAST(sum(buy_volume) AS DOUBLE) AS buy_volume\nFROM candles_1m WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(bucket) AND ${resolution:sqlstring} <> '1 second'\nGROUP BY time) ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Trade size distribution",
+      "type": "barchart",
+      "gridPos": {
+        "x": 12,
+        "y": 25,
+        "w": 12,
+        "h": 7
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "xField": "size_usdt",
+        "showValue": "always",
+        "legend": {
+          "displayMode": "hidden"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN notional < 100 THEN '<100' WHEN notional < 1000 THEN '100–1k'\nWHEN notional < 10000 THEN '1k–10k' WHEN notional < 100000 THEN '10k–100k' ELSE '100k+' END AS size_usdt,\ncount(*) AS trades FROM trades WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(event_time) GROUP BY size_usdt ORDER BY min(notional)"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Largest trades · selected range",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 24,
+        "h": 8
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT event_time AS time,trade_id,CAST(price AS DOUBLE) AS price,\nCAST(quantity AS DOUBLE) AS quantity,CAST(notional AS DOUBLE) AS notional,\nCASE WHEN taker_buy THEN 'BUY' ELSE 'SELL' END AS taker_side\nFROM trades WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND $__timeFilter(event_time) ORDER BY notional DESC,event_time DESC LIMIT 50"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Submitted trades / second · last 15m",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 12,
+        "h": 7
+      },
+      "description": "Rows submitted successfully, including idempotent reimports. Raw trade counts are deduplicated.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT date_bin(INTERVAL '5 seconds',ts) AS time, worker,\nsum(rows_written)/5.0 AS rows_per_second FROM ingestion\nWHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND ts > now() - INTERVAL '15 minutes' GROUP BY time,worker ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Batch write time · last 15m",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 40,
+        "w": 12,
+        "h": 7
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT date_bin(INTERVAL '5 seconds',ts) AS time,worker,max(write_ms) AS write_ms\nFROM ingestion WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND ts > now() - INTERVAL '15 minutes' AND rows_written>0\nGROUP BY time,worker ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Collector status · latest",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 47,
+        "w": 24,
+        "h": 6
+      },
+      "description": "Replay speed and original date appear here. Compare last_update with wall-clock time; a stopped process cannot publish its own status.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT dataset,symbol,worker,max(ts) AS last_update,\nlast_value(state ORDER BY ts) AS state,last_value(status_text ORDER BY ts) AS status_text\nFROM ingestion GROUP BY dataset,symbol,worker ORDER BY dataset,symbol,worker"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Observed live trade ID gaps · last 24h",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 53,
+        "w": 24,
+        "h": 6
+      },
+      "description": "Discontinuities observed on the live feed; no automatic backfill. Historical imports may cover these IDs later. Empty means no gap has been observed, not proof of complete history.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crypto-pg"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "crypto-pg"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time,symbol,first_missing_id,last_missing_id,status_text\nFROM gaps WHERE ts > now() - INTERVAL '24 hours' ORDER BY ts DESC LIMIT 100"
+        }
+      ]
+    }
+  ]
+}
