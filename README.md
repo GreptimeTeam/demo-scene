@@ -16,7 +16,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ### Applications
 
-* [Crypto Market Lab](crypto-market-lab) — live market liquidity, trade replay, and SQL/Flow comparisons
+* [Crypto Market Lab](crypto-market-lab) — Binance trades and best quotes, trade replay, and SQL/Flow comparisons
 * [Vibration Lab](vibration-lab) — synthetic motor vibration, FFT, and condition features
 * [Keyboard Monitor](keyboard-monitor) ([✍️ blog](https://greptime.com/blogs/2024-03-19-keyboard-monitoring))
 * [Observability for Nginx on Logs & Metrics](nginx-log-metrics)
