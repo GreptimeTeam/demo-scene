@@ -58,7 +58,7 @@ Scripts and samples to support Greptime Demos and Talks. Might be rough around t
 
 ## Running the demos
 
-Docker-based demos use GreptimeDB v1.3.0 and require Docker Compose 2.24 or later. Most share ports; run one demo at a time. Follow each demo's README for credentials and additional requirements.
+Docker-based demos use GreptimeDB v1.3.1 and require Docker Compose 2.24 or later. Most share ports; run one demo at a time. Follow each demo's README for credentials and additional requirements.
 
 Open Grafana at its root URL to select the dashboard language from the browser's preferred language. Dashboard links switch between English and 简体中文, preserving time ranges and filters. The shared translation generator is documented in [grafana-common](grafana-common).
 

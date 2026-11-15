@@ -56,7 +56,7 @@ collapses the middle three into one GreptimeDB:
 │  (simulator in  │ ─────► │  ASP.NET Core, .NET 8│  gRPC   ┌────────────┐
 │   docker; Unity │ /api/  │                      │ ──────► │            │
 │   reference .cs │ events │  GreptimeDB .NET SDK │         │ GreptimeDB │
-│   in unity-     │        │  TableBuilder → write│         │   v1.3.0   │
+│   in unity-     │        │  TableBuilder → write│         │            │
 │   reference/)   │  OTLP  │                      │         │            │
 │                 │ ────────────────────────────────────────│            │
 └─────────────────┘ /v1/otlp/v1/metrics                     └─────┬──────┘

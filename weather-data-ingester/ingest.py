@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import time
 from pathlib import Path
 from urllib.parse import urlencode
@@ -160,8 +161,9 @@ def extract(dataset, instant, regions, cache):
 
 def init_database(regions):
     version = sql("SELECT version()", "public")[0]["records"]["rows"][0][0]
-    if version != "1.3.0":
-        raise ValueError(f"This demo requires GreptimeDB 1.3.0, got {version}")
+    release = re.match(r"(\d+)\.(\d+)\.(\d+)", version)
+    if not release or tuple(map(int, release.groups())) < (1, 3, 0):
+        raise ValueError(f"This demo requires GreptimeDB 1.3.0 or later, got {version}")
     sql("CREATE DATABASE IF NOT EXISTS weather", "public")
     for table, spec in DATASETS.items():
         sql(

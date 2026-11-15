@@ -14,7 +14,7 @@ x-ingest: &ingest
 
 services:
   greptimedb:
-    image: greptime/greptimedb:v1.3.0
+    image: greptime/greptimedb:v1.3.1
     command: standalone start --http-addr=0.0.0.0:4000 --postgres-addr=0.0.0.0:4003
     ports:
       - "127.0.0.1:${GREPTIME_HTTP_PORT:-25400}:4000"

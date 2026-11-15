@@ -1,6 +1,6 @@
 # Weather Observatory on GreptimeDB
 
-[PARDIG precipitation estimates](https://developers.google.cn/weathernext/guides/pardig) and [SatWeave satellite observations](https://developers.google.cn/weathernext/guides/satweave), stored in **GreptimeDB v1.3.0** and queried from Grafana through its built-in PostgreSQL datasource. Data enters through the InfluxDB Line Protocol endpoint.
+[PARDIG precipitation estimates](https://developers.google.cn/weathernext/guides/pardig) and [SatWeave satellite observations](https://developers.google.cn/weathernext/guides/satweave), stored in **GreptimeDB** and queried from Grafana through its built-in PostgreSQL datasource. Data enters through the InfluxDB Line Protocol endpoint.
 
 The default import contains **18,297,840 observations** from East Asia and the San Francisco Bay Area for September 1, 2026 (UTC). Source resolution is 0.1°; PARDIG samples every 15 minutes and SatWeave every hour. This demo imports SatWeave's 11.2 μm infrared band.
 

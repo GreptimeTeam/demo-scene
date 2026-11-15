@@ -329,7 +329,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "### 用 SQL 查看一天的降水与云层\n**PARDIG + SatWeave** · 0.1° 原始网格 · GreptimeDB **v1.3.0** · InfluxDB 写入 → PostgreSQL 查询 → Grafana\n\n选择**区域**、历史**时间范围**与**快照**。地图显示快照，曲线显示所选时段；**半径**只作用于中心点周边降水图。时间均为 UTC。"
+        "content": "### 用 SQL 查看一天的降水与云层\n**PARDIG + SatWeave** · 0.1° 原始网格 · GreptimeDB · InfluxDB 写入 → PostgreSQL 查询 → Grafana\n\n选择**区域**、历史**时间范围**与**快照**。地图显示快照，曲线显示所选时段；**半径**只作用于中心点周边降水图。时间均为 UTC。"
       }
     },
     {
