@@ -18,7 +18,7 @@ cd demo-scene/opentelemetry-playground
 python3 demo.py up
 ```
 
-首次运行会下载固定版本的镜像，并使用固定版本的源码及 `patches/cart-grpc-tracing.patch` 中的埋点补丁构建 cart。负载生成器自动产生购物流量，遥测数据需要一段时间写入。
+首次运行会下载固定版本的镜像。负载生成器自动产生购物流量，遥测数据需要一段时间写入。
 
 - [商店](http://localhost:18080)
 - [Grafana](http://localhost:13000) · [中文大盘](http://localhost:13000/d/astronomy-shop-greptimedb-zh)
@@ -44,7 +44,7 @@ python3 demo.py logs otel-collector init-flows
 python3 demo.py down
 ```
 
-验证脚本检查下单、遥测入库、cart 到 flagd 的 trace 配对和中英文共 80 个数据面板，失败时返回非零退出码，不验证浏览器交互。`down` 移除本项目容器，保留 GreptimeDB 数据卷。
+验证脚本检查下单、遥测入库和中英文共 80 个数据面板，失败时返回非零退出码，不验证浏览器交互。`down` 移除本项目容器，保留 GreptimeDB 数据卷。
 
 ## 运行说明
 

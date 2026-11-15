@@ -26,14 +26,6 @@ def render():
     revision = subprocess.check_output(['git', '-C', str(UPSTREAM), 'rev-parse', 'HEAD'], text=True).strip()
     if revision != REVISION:
         raise RuntimeError(f'{UPSTREAM} is at {revision}; expected {REVISION}. Existing checkout was not changed.')
-    patch = ROOT / 'patches' / 'cart-grpc-tracing.patch'
-    reverse_check = subprocess.run(
-        ['git', '-C', str(UPSTREAM), 'apply', '--reverse', '--check', str(patch)],
-        capture_output=True,
-    )
-    if reverse_check.returncode != 0:
-        subprocess.run(['git', '-C', str(UPSTREAM), 'apply', '--check', str(patch)], check=True)
-        subprocess.run(['git', '-C', str(UPSTREAM), 'apply', str(patch)], check=True)
     env = dict(
         os.environ,
         OTEL_COLLECTOR_CONFIG_EXTRAS=str(ROOT / 'otelcol-config-greptime.yml'),
@@ -61,8 +53,6 @@ def render():
                 prefix = UPSTREAM / 'greptime'
                 if source.is_relative_to(prefix):
                     volume['source'] = str(ROOT / source.relative_to(prefix))
-    config['services']['cart']['image'] = f'{PROJECT}-cart:local'
-    config['services']['cart']['pull_policy'] = 'never'
     for name, volume in config.get('volumes', {}).items():
         volume['name'] = f'{PROJECT}_{name}'
     CONFIG.write_text(json.dumps(config, indent=2) + '\n')
@@ -82,7 +72,6 @@ def main():
         return
     command = ['docker', 'compose', '-p', PROJECT, '-f', str(CONFIG)]
     if args.action == 'up':
-        subprocess.run([*command, 'build', 'cart'], check=True)
         command += ['up', '-d', '--no-build', '--wait', '--wait-timeout', '180']
     elif args.action == 'logs':
         command += ['logs', '--tail', '100', *args.services]
