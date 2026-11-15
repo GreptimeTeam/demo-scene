@@ -294,8 +294,9 @@ def live(db, symbols, batch_size, duration=None):
     last_ids = {}
     last_times = {}
     for symbol in symbols:
+        # No origin filter: an archive import rewrites `origin` on the live rows it overlaps.
         rows = db.rows(f"SELECT trade_id,event_time FROM trades WHERE dataset='market' AND symbol={literal(symbol)} "
-                       "AND origin='live' ORDER BY event_time DESC,trade_id DESC LIMIT 1")
+                       "ORDER BY event_time DESC,trade_id DESC LIMIT 1")
         if rows:
             last_ids[symbol], last_times[symbol] = rows[0]
     deadline = time.monotonic() + duration if duration else float('inf')
