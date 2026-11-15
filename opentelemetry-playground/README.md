@@ -18,7 +18,7 @@ cd demo-scene/opentelemetry-playground
 python3 demo.py up
 ```
 
-The first run downloads pinned images. The load generator starts shopping traffic automatically; allow time for telemetry to arrive.
+The first run downloads pinned images and builds cart from the pinned source with the tracing patch in `patches/cart-grpc-tracing.patch`. The load generator starts shopping traffic automatically; allow time for telemetry to arrive.
 
 - [Shop](http://localhost:18080)
 - [Grafana](http://localhost:13000) · [中文大盘](http://localhost:13000/d/astronomy-shop-greptimedb-zh)
@@ -44,7 +44,7 @@ python3 demo.py logs otel-collector init-flows
 python3 demo.py down
 ```
 
-Verification checks a checkout, telemetry ingestion, and all 80 data panels across both languages. It exits nonzero on failure; it does not test browser interactions. `down` removes this project's containers and retains the GreptimeDB data volume.
+Verification checks a checkout, telemetry ingestion, cart-to-flagd trace pairing, and all 80 data panels across both languages. It exits nonzero on failure; it does not test browser interactions. `down` removes this project's containers and retains the GreptimeDB data volume.
 
 ## Runtime details
 

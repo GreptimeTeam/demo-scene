@@ -63,6 +63,7 @@ def main():
         raise RuntimeError(f'Scrape targets are missing or down: {targets}')
     print('PASS scrape targets: node, greptimedb, ad')
 
+    checkout_started = int(time.time())
     checkout_trace = uuid.uuid4().hex
     trace_headers = {'traceparent': f'00-{checkout_trace}-{uuid.uuid4().hex[:16]}-01'}
     person = json.loads((root / '.runtime/opentelemetry-demo/src/load-generator/people.json').read_text())[0]
@@ -84,6 +85,29 @@ def main():
     if any(not isinstance(size, int) or size <= 0 or response_size is not None for size, response_size in quote_spans):
         raise RuntimeError(f'Quote HTTP body sizes were not normalized correctly: {quote_spans}')
     print(f'PASS checkout and quote span ingestion: {checkout_trace}')
+
+    deadline = time.monotonic() + 30
+    while True:
+        spans = sql(f"""SELECT service_name, scope_name, span_kind, trace_id, span_id, parent_span_id
+            FROM opentelemetry_traces
+            WHERE timestamp >= FROM_UNIXTIME({checkout_started})
+              AND service_name IN ('cart', 'flagd')""")
+        grpc_clients = {(trace, span) for service, scope, kind, trace, span, parent in spans
+                        if service == 'cart' and kind == 'SPAN_KIND_CLIENT'
+                        and scope == 'OpenTelemetry.Instrumentation.GrpcNetClient'}
+        nested_clients = [(trace, span) for service, scope, kind, trace, span, parent in spans
+                          if service == 'cart' and kind == 'SPAN_KIND_CLIENT'
+                          and (trace, parent) in grpc_clients]
+        if nested_clients:
+            raise RuntimeError(f'Cart exported duplicate client spans for gRPC calls: {nested_clients}')
+        server_parents = {(trace, parent) for service, scope, kind, trace, span, parent in spans
+                          if service == 'flagd' and kind == 'SPAN_KIND_SERVER'}
+        if grpc_clients and grpc_clients <= server_parents:
+            break
+        if time.monotonic() >= deadline:
+            raise RuntimeError('Expected cart gRPC client spans with matching flagd server spans')
+        time.sleep(1)
+    print(f'PASS cart gRPC trace pairing: {len(grpc_clients)} calls')
 
     namespace = '\"resource_attributes.service.namespace\" = \'opentelemetry-demo\''
     services = [row[0] for row in sql(f'SELECT DISTINCT service_name FROM opentelemetry_traces WHERE {namespace}')]
