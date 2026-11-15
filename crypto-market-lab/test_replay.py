@@ -2,8 +2,11 @@
 import threading
 import time
 import unittest
-from unittest.mock import patch
+from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
+import ingest
+from ingest import Trade
 from replay import Replay
 
 
@@ -92,6 +95,27 @@ class ReplayTest(unittest.TestCase):
             self.assertEqual(state['written'],before)
             self.assertLess(before,3)
 
+
+
+class ArchiveReplayTest(unittest.TestCase):
+    def test_archive_scan_before_start_is_not_playback_time(self):
+        clock = [0.0]
+        written = []
+
+        def sleep(seconds):
+            clock[0] += seconds
+
+        def archive(*args):
+            sleep(10)  # Rows before --start are read and discarded.
+            for second in range(3):
+                yield Trade('BTCUSDT', second, Decimal('100'), Decimal('1'), 1_000_000 * (second + 1), True)
+
+        db = MagicMock()
+        db.write.side_effect = lambda batch, *args, **kwargs: batch and written.append(clock[0])
+        with patch('ingest.download_archive'), patch('ingest.trades_from_archive', archive), \
+                patch('ingest.time.monotonic', lambda: clock[0]), patch('ingest.time.sleep', sleep):
+            ingest.replay(db, ['BTCUSDT'], None, None, 1, 1, 'replay-test')
+        self.assertEqual(written, [10, 11, 12])
 
 if __name__ == '__main__':
     unittest.main()

@@ -265,13 +265,15 @@ def replay(db, symbols, day, cache, batch_size, speed, dataset, start=None, end=
     import heapq
     paths = [download_archive(symbol, day, cache) for symbol in symbols]
     streams = [trades_from_archive(path, symbol, day, start, end) for path, symbol in zip(paths, symbols)]
-    started, first_us, last_flush, batch, count = time.monotonic(), None, time.monotonic(), [], 0
+    first_us, batch, count = None, [], 0
     for trade in heapq.merge(*streams, key=lambda t: (t.event_us, t.trade_id, t.symbol)):
         if first_us is None:
             first_us = trade.event_us
             LOG.info('Replay dataset=%s original_start=%s speed=%gx', dataset, timestamp(first_us), speed)
             for symbol in symbols:
                 db.status(dataset, symbol, 'replay', 'running', text=f'Original date {day}; speed {speed:g}x')
+            # The archive streams are lazy: skipping rows before --start must not count as playback time.
+            started = last_flush = time.monotonic()
         delay = started + (trade.event_us - first_us) / 1_000_000 / speed - time.monotonic()
         if delay > 0:
             time.sleep(delay)

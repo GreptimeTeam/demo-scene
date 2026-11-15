@@ -13,6 +13,33 @@ import uuid
 from pathlib import Path
 
 
+def wait_for_cart_grpc_pairing(sql, since, timeout=30):
+    deadline = time.monotonic() + timeout
+    expected = set()
+    while True:
+        spans = sql(f"""SELECT service_name, scope_name, span_kind, trace_id, span_id, parent_span_id
+            FROM opentelemetry_traces
+            WHERE timestamp >= FROM_UNIXTIME({since})
+              AND service_name IN ('cart', 'flagd')""")
+        grpc_clients = {(trace, span) for service, scope, kind, trace, span, parent in spans
+                        if service == 'cart' and kind == 'SPAN_KIND_CLIENT'
+                        and scope == 'OpenTelemetry.Instrumentation.GrpcNetClient'}
+        nested_clients = [(trace, span) for service, scope, kind, trace, span, parent in spans
+                          if service == 'cart' and kind == 'SPAN_KIND_CLIENT'
+                          and (trace, parent) in grpc_clients]
+        if nested_clients:
+            raise RuntimeError(f'Cart exported duplicate client spans for gRPC calls: {nested_clients}')
+        server_parents = {(trace, parent) for service, scope, kind, trace, span, parent in spans
+                          if service == 'flagd' and kind == 'SPAN_KIND_SERVER'}
+        # The load generator keeps adding calls; wait for the first observed set only.
+        expected = expected or grpc_clients
+        if expected and expected <= server_parents:
+            return expected
+        if time.monotonic() >= deadline:
+            raise RuntimeError(f'Cart gRPC client spans without matching flagd server spans: {expected - server_parents}')
+        time.sleep(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--greptime', default='http://localhost:24000')
@@ -86,28 +113,8 @@ def main():
         raise RuntimeError(f'Quote HTTP body sizes were not normalized correctly: {quote_spans}')
     print(f'PASS checkout and quote span ingestion: {checkout_trace}')
 
-    deadline = time.monotonic() + 30
-    while True:
-        spans = sql(f"""SELECT service_name, scope_name, span_kind, trace_id, span_id, parent_span_id
-            FROM opentelemetry_traces
-            WHERE timestamp >= FROM_UNIXTIME({checkout_started})
-              AND service_name IN ('cart', 'flagd')""")
-        grpc_clients = {(trace, span) for service, scope, kind, trace, span, parent in spans
-                        if service == 'cart' and kind == 'SPAN_KIND_CLIENT'
-                        and scope == 'OpenTelemetry.Instrumentation.GrpcNetClient'}
-        nested_clients = [(trace, span) for service, scope, kind, trace, span, parent in spans
-                          if service == 'cart' and kind == 'SPAN_KIND_CLIENT'
-                          and (trace, parent) in grpc_clients]
-        if nested_clients:
-            raise RuntimeError(f'Cart exported duplicate client spans for gRPC calls: {nested_clients}')
-        server_parents = {(trace, parent) for service, scope, kind, trace, span, parent in spans
-                          if service == 'flagd' and kind == 'SPAN_KIND_SERVER'}
-        if grpc_clients and grpc_clients <= server_parents:
-            break
-        if time.monotonic() >= deadline:
-            raise RuntimeError('Expected cart gRPC client spans with matching flagd server spans')
-        time.sleep(1)
-    print(f'PASS cart gRPC trace pairing: {len(grpc_clients)} calls')
+    paired = wait_for_cart_grpc_pairing(sql, checkout_started)
+    print(f'PASS cart gRPC trace pairing: {len(paired)} calls')
 
     namespace = '\"resource_attributes.service.namespace\" = \'opentelemetry-demo\''
     services = [row[0] for row in sql(f'SELECT DISTINCT service_name FROM opentelemetry_traces WHERE {namespace}')]
