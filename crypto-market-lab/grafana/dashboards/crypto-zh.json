@@ -137,7 +137,7 @@
         "x": 0,
         "y": 0,
         "w": 24,
-        "h": 3
+        "h": 4
       },
       "description": "",
       "fieldConfig": {
@@ -161,7 +161,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 3,
+        "y": 4,
         "w": 6,
         "h": 4
       },
@@ -172,7 +172,8 @@
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {}
+          "custom": {},
+          "decimals": 2
         },
         "overrides": []
       },
@@ -211,7 +212,7 @@
       "type": "stat",
       "gridPos": {
         "x": 6,
-        "y": 3,
+        "y": 4,
         "w": 6,
         "h": 4
       },
@@ -257,18 +258,18 @@
     },
     {
       "id": 4,
-      "title": "选定区间成交额",
+      "title": "选定区间成交额（USDT）",
       "type": "stat",
       "gridPos": {
         "x": 12,
-        "y": 3,
+        "y": 4,
         "w": 6,
         "h": 4
       },
       "description": "",
       "fieldConfig": {
         "defaults": {
-          "unit": "suffix: USDT",
+          "unit": "short",
           "color": {
             "mode": "palette-classic"
           },
@@ -311,7 +312,7 @@
       "type": "stat",
       "gridPos": {
         "x": 18,
-        "y": 3,
+        "y": 4,
         "w": 6,
         "h": 4
       },
@@ -378,7 +379,7 @@
       "type": "candlestick",
       "gridPos": {
         "x": 0,
-        "y": 7,
+        "y": 8,
         "w": 16,
         "h": 10
       },
@@ -439,7 +440,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 7,
+        "y": 8,
         "w": 8,
         "h": 10
       },
@@ -493,7 +494,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 17,
+        "y": 18,
         "w": 12,
         "h": 8
       },
@@ -516,7 +517,38 @@
             }
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "buy_volume"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "sell_volume"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "tooltip": {
@@ -551,7 +583,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 17,
+        "y": 18,
         "w": 12,
         "h": 8
       },
@@ -605,7 +637,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 25,
+        "y": 26,
         "w": 12,
         "h": 7
       },
@@ -659,7 +691,7 @@
       "type": "barchart",
       "gridPos": {
         "x": 12,
-        "y": 25,
+        "y": 26,
         "w": 12,
         "h": 7
       },
@@ -670,7 +702,11 @@
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {}
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "gradientMode": "none"
+          }
         },
         "overrides": []
       },
@@ -678,8 +714,16 @@
         "orientation": "horizontal",
         "xField": "size_usdt",
         "showValue": "always",
+        "stacking": "none",
+        "barWidth": 0.8,
+        "groupWidth": 0.7,
+        "xTickLabelRotation": 0,
         "legend": {
-          "displayMode": "hidden"
+          "displayMode": "hidden",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
         }
       },
       "datasource": {
@@ -706,7 +750,7 @@
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 32,
+        "y": 33,
         "w": 24,
         "h": 8
       },
@@ -719,7 +763,72 @@
           },
           "custom": {}
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trade_id"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "locale"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "quantity"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "locale"
+              },
+              {
+                "id": "decimals",
+                "value": 5
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "notional"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "locale"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
       },
       "options": {},
       "datasource": {
@@ -746,7 +855,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 40,
+        "y": 41,
         "w": 12,
         "h": 7
       },
@@ -792,7 +901,8 @@
           "rawQuery": true,
           "rawSql": "SELECT date_bin(INTERVAL '5 seconds',ts) AS time, worker,\nsum(rows_written)/5.0 AS rows_per_second FROM ingestion\nWHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND ts > now() - INTERVAL '15 minutes' GROUP BY time,worker ORDER BY time"
         }
-      ]
+      ],
+      "timeFrom": "15m"
     },
     {
       "id": 14,
@@ -800,7 +910,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 40,
+        "y": 41,
         "w": 12,
         "h": 7
       },
@@ -846,7 +956,8 @@
           "rawQuery": true,
           "rawSql": "SELECT date_bin(INTERVAL '5 seconds',ts) AS time,worker,max(write_ms) AS write_ms\nFROM ingestion WHERE dataset = ${dataset:sqlstring} AND symbol = ${symbol:sqlstring} AND ts > now() - INTERVAL '15 minutes' AND rows_written>0\nGROUP BY time,worker ORDER BY time"
         }
-      ]
+      ],
+      "timeFrom": "15m"
     },
     {
       "id": 15,
@@ -854,7 +965,7 @@
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 47,
+        "y": 48,
         "w": 24,
         "h": 6
       },
@@ -894,7 +1005,7 @@
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 53,
+        "y": 54,
         "w": 24,
         "h": 6
       },
@@ -907,7 +1018,40 @@
           },
           "custom": {}
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "first_missing_id"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "last_missing_id"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
       },
       "options": {},
       "datasource": {

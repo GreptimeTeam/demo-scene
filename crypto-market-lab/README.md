@@ -16,6 +16,10 @@ The SQL inspector comparing a full archive day of raw-event aggregation with the
 
 ![SQL inspector showing raw and Flow queries with matching results and their median query times](screenshots/sql-flow.png)
 
+The Grafana dashboard for the same archive hour, with candles, VWAP, taker volume, cumulative delta, trade activity, and trade size distribution.
+
+![Grafana dashboard showing BTC/USDT candles, VWAP, taker volume, cumulative delta, trade activity, and trade size distribution](screenshots/grafana.png)
+
 ## Run
 
 Before you start, make sure Docker Compose can reach the Binance public market-data endpoints. The frontend regression test also requires Node.js. You don't need an exchange account or an API key.
