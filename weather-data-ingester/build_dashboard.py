@@ -47,7 +47,7 @@ def panel(title, kind, x, y, w, h, query=None, unit="short", description=""):
 header = panel("WEATHER OBSERVATORY  /  GreptimeDB", "text", 0, 0, 24, 3)
 header["options"] = {
     "mode": "markdown",
-    "content": "### A day of rain and clouds, in SQL\n**PARDIG + SatWeave** · 0.1° source grid · GreptimeDB **v1.3.0** · InfluxDB writes → PostgreSQL queries → Grafana\n\nChoose a **region**, a historical **time range**, and a **snapshot**. Maps show the snapshot; charts follow the time range. **Radius** applies to the local rainfall chart. All times are UTC.",
+    "content": "### A day of rain and clouds, in SQL\n**PARDIG + SatWeave** · 0.1° source grid · GreptimeDB · InfluxDB writes → PostgreSQL queries → Grafana\n\nChoose a **region**, a historical **time range**, and a **snapshot**. Maps show the snapshot; charts follow the time range. **Radius** applies to the local rainfall chart. All times are UTC.",
 }
 region = "region_id = ${region:sqlstring}"
 window = f"{region} AND $__timeFilter(ts)"
@@ -378,7 +378,7 @@ for item in translated["panels"]:
     if item["type"] in kind_descriptions:
         item["description"] = kind_descriptions[item["type"]]
 translated["panels"][0]["options"]["content"] = (
-    "### 用 SQL 查看一天的降水与云层\n**PARDIG + SatWeave** · 0.1° 原始网格 · GreptimeDB **v1.3.0** · InfluxDB 写入 → PostgreSQL 查询 → Grafana\n\n选择**区域**、历史**时间范围**与**快照**。地图显示快照，曲线显示所选时段；**半径**只作用于中心点周边降水图。时间均为 UTC。"
+    "### 用 SQL 查看一天的降水与云层\n**PARDIG + SatWeave** · 0.1° 原始网格 · GreptimeDB · InfluxDB 写入 → PostgreSQL 查询 → Grafana\n\n选择**区域**、历史**时间范围**与**快照**。地图显示快照，曲线显示所选时段；**半径**只作用于中心点周边降水图。时间均为 UTC。"
 )
 translated["panels"][7]["description"] = (
     "瞬时降水率，不是累计降水量。平均值为网格点算术平均，未做面积加权。"

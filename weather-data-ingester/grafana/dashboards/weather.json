@@ -160,7 +160,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "### A day of rain and clouds, in SQL\n**PARDIG + SatWeave** · 0.1° source grid · GreptimeDB **v1.3.0** · InfluxDB writes → PostgreSQL queries → Grafana\n\nChoose a **region**, a historical **time range**, and a **snapshot**. Maps show the snapshot; charts follow the time range. **Radius** applies to the local rainfall chart. All times are UTC."
+        "content": "### A day of rain and clouds, in SQL\n**PARDIG + SatWeave** · 0.1° source grid · GreptimeDB · InfluxDB writes → PostgreSQL queries → Grafana\n\nChoose a **region**, a historical **time range**, and a **snapshot**. Maps show the snapshot; charts follow the time range. **Radius** applies to the local rainfall chart. All times are UTC."
       }
     },
     {

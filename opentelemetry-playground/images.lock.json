@@ -10,7 +10,7 @@
   "frontend": "ghcr.io/open-telemetry/demo@sha256:99e54803e46735b117e0d25c55d31d9986c4fcb3f5f5cee23aa8b8406860674d",
   "frontend-proxy": "ghcr.io/open-telemetry/demo@sha256:41dfd7bcb27767c802fbd0ff25ff573cd950bb000bdb6d6ee749a482c534ffb3",
   "grafana": "greptime/grafana-greptimedb@sha256:7cce656cdd395ca6a4fa5769f8479b766a7024a093136129f953596b7bebc3b2",
-  "greptimedb": "greptime/greptimedb@sha256:d8a199398da2b105e6cb3a168f249ecbbc078893abff5ea668bd59e05f1027df",
+  "greptimedb": "greptime/greptimedb@sha256:a10181273b9400a30fbad6f5043b3d08e388c7d4ee30a7570e5f0241496e9ee1",
   "image-provider": "ghcr.io/open-telemetry/demo@sha256:355b17b982d0551ddac8c6b8b94afcc3bbab8dd32ff4f85f8ec21baff0ebebd2",
   "init-flows": "curlimages/curl@sha256:d9b4541e214bcd85196d6e92e2753ac6d0ea699f0af5741f8c6cccbfcf00ef4b",
   "load-generator": "ghcr.io/open-telemetry/demo@sha256:b4109d0f05df4e7d9b618307e31acf32f4e0db4cd93fcc37a16bf2bf41b86c38",

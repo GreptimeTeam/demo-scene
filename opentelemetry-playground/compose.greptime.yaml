@@ -10,7 +10,7 @@ services:
       DASHBOARD_UID: astronomy-shop-greptimedb
 
   greptimedb:
-    image: greptime/greptimedb:v1.3.0
+    image: greptime/greptimedb:v1.3.1
     container_name: greptimedb
     command:
       - standalone
